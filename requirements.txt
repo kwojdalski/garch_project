@@ -6,4 +6,6 @@ matplotlib>=3.4.0
 scikit-learn>=0.24.0
 yfinance>=0.1.70
 arch>=5.0.0
-plotnine>=0.8.0 
+plotnine>=0.8.0
+pre-commit>=3.3.3
+easy-commit>=0.1.0 

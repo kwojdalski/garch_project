@@ -1,0 +1,74 @@
+/* Custom CSS for GARCH presentation */
+
+/* Title slide */
+.title-slide {
+  background-color: #3366CC;
+  color: white;
+}
+
+.title-slide h1 {
+  color: white;
+  font-size: 2.5em;
+}
+
+.title-slide h2 {
+  color: #FFE5B4;
+  font-size: 1.5em;
+}
+
+/* Section slides */
+.section-slide {
+  background-color: #F5F5F5;
+}
+
+.section-slide h1 {
+  color: #3366CC;
+  font-size: 2.2em;
+}
+
+/* Regular slides */
+.slide {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.slide h2 {
+  color: #3366CC;
+  font-size: 1.8em;
+  border-bottom: 2px solid #3366CC;
+  padding-bottom: 0.2em;
+}
+
+/* Code blocks */
+pre {
+  background-color: #F8F8F8;
+  border: 1px solid #E0E0E0;
+  border-radius: 4px;
+  padding: 0.5em;
+}
+
+code {
+  font-family: 'Courier New', monospace;
+  color: #333;
+}
+
+/* Lists */
+ul, ol {
+  margin-left: 1.5em;
+}
+
+li {
+  margin-bottom: 0.5em;
+}
+
+/* Notes */
+.notes {
+  font-size: 0.8em;
+  color: #666;
+  font-style: italic;
+}
+
+/* Footer */
+.footer {
+  font-size: 0.8em;
+  color: #666;
+} 
