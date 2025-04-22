@@ -35,7 +35,6 @@ data/*.feather
 */.ipynb_checkpoints/*
 
 # VS Code
-.vscode/
 *.code-workspace
 
 # PyCharm
@@ -105,4 +104,4 @@ Desktop.ini
 
 # Project specific
 volatility_plot.png
-*.log 
+*.log

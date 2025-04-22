@@ -31,10 +31,12 @@
 import logging
 from datetime import datetime
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from plotnine import (
     aes,
+    element_blank,
     element_text,
     facet_wrap,
     geom_line,
@@ -46,7 +48,13 @@ from plotnine import (
 )
 from scipy import stats
 
-from src.utils import calculate_returns, fetch_stock_data, fit_garch, plot_volatility
+from src.utils import (
+    calculate_portfolio_stats,
+    calculate_returns,
+    fetch_stock_data,
+    fit_garch,
+    plot_volatility,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -54,8 +62,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-# Import our GARCH implementation functions
 
 # %% [markdown]
 # # Data Preparation
@@ -102,9 +108,11 @@ prices.tail()
 
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
 prices = prices.drop(columns=["^DJI"])
+prices = prices.drop(columns=["^TNX"])
 # ... we have to take it from somewhere else
 # found it here: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data
-
+# For RATE which looks we'll use
+# https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02
 # %%
 djia_prices = pd.read_csv(
     "data/dja-performance-report-daily.csv",
@@ -113,6 +121,16 @@ djia_prices = pd.read_csv(
 )
 djia_prices = djia_prices.rename(columns={"Close Value": "^DJI"})
 prices = prices.join(djia_prices["^DJI"])
+# %%
+tnote_yield = pd.read_csv(
+    "data/DGS10.csv",
+    index_col="observation_date",
+    parse_dates=True,
+)
+tnote_yield = tnote_yield.rename(columns={"DGS10": "^TNX"})
+
+# tnote yield is not exactly the price, but we merge it anyway
+prices = prices.join(tnote_yield["^TNX"])
 
 # %% [markdown]
 # ## Calculating Returns
@@ -124,20 +142,36 @@ prices = prices.join(djia_prices["^DJI"])
 # Calculate log returns using our implementation
 returns = calculate_returns(prices)
 
-# Display the first few rows
-returns.head()
-
 portfolio_prices = pd.Series(0, index=prices.index, dtype=float)
 
 # Apply weights to each component
 for symbol, weight in weights.items():
     # Use pandas multiplication and addition
-    portfolio_prices = portfolio_prices.add(returns[symbol].multiply(weight))
+    portfolio_returns = portfolio_prices.add(returns[symbol].multiply(weight))
 
 # Add portfolio returns to the returns DataFrame
-returns["portfolio"] = portfolio_prices
+returns["portfolio"] = portfolio_returns
 
-# Display the updated returns DataFrame
+
+# Table 1: Portfolio Data
+portfolio_stats = calculate_portfolio_stats(returns)
+
+# Display the table with proper formatting
+print("\nTable 1")
+print("Portfolio Data")
+print("=" * 80)
+print(portfolio_stats.to_string())
+print("\nSample: March 23, 1990 to March 23, 2000")
+
+# %% [markdown]
+# The table above shows the summary statistics for our portfolio components and the overall portfolio.
+# The statistics include mean returns, standard deviation, skewness, and kurtosis for each component.
+#
+# It differs marginally from Table 1 in Engle (2001):,
+# * by 1-2 bps for each stat for Nasdaq (^IXIC) and Dow Jones (^DJI)
+# * slightly more for Rate (the article is inadequately precise in terms what exactly has been used)
+#     + especially for skewness and kurtosis (0.38 vs -0.20, and 4.96 vs 5.96, respectively)
+# * Rate is the root cause of slight difference between Portfolio and our replicated portfolio
 
 # %% [markdown]
 # ## Visualizing Price and Returns
@@ -149,7 +183,6 @@ returns["portfolio"] = portfolio_prices
 # | fig-cap: S&P 500 Price and Log Returns
 
 # Create dataframes for plotting
-price_df = pd.DataFrame({"Date": prices.index, "Price": prices.values})
 
 
 # Create dataframe for returns plotting
@@ -171,9 +204,8 @@ returns_plot = (
     )
 )
 
-# Display plots
 
-print(returns_plot)
+returns_plot
 
 # %% [markdown]
 # # GARCH Model Estimation

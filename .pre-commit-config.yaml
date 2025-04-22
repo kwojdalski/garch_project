@@ -11,6 +11,17 @@ repos:
     -   id: check-merge-conflict
     -   id: detect-private-key
 
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: '0.27.3'
+  hooks:
+    - id: check-jsonschema
+      # not necessary, but can be useful for `pre-commit run` if you have other `check-jsonschema` hooks
+      alias: check-jsonschema-meta
+      name: Validate meta files
+      args: ["--schemafile", "schemas/my_schema.json"]
+      types_or: []  # reset to default
+      files: ^data/.*\.meta$
+
 -   repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
@@ -23,21 +34,15 @@ repos:
     -   id: isort
         args: ["--profile", "black"]
 
--   repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-    -   id: flake8
-        additional_dependencies: [flake8-docstrings]
-
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.3.0
     hooks:
     -   id: mypy
-        additional_dependencies: [types-all]
+#        additional_dependencies: [types-all]
 
 -   repo: https://github.com/PyCQA/bandit
     rev: 1.7.4
     hooks:
     -   id: bandit
         args: ["-c", "pyproject.toml"]
-        additional_dependencies: ["bandit[toml]"] 
+        additional_dependencies: ["bandit[toml]"]

@@ -1,0 +1,3 @@
+"""
+GARCH model implementation package.
+"""

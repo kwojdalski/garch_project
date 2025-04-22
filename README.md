@@ -7,33 +7,39 @@ This project implements GARCH (Generalized Autoregressive Conditional Heterosked
 ```
 .
 ├── src/
-│   └── garch_implementation.py    # Main GARCH implementation script
+│   ├── __init__.py            # Package initialization
+│   ├── garch.py        # Main GARCH implementation and analysis
+│   └── utils.py               # Utility functions for data processing
 ├── notebooks/
-│   ├── garch_analysis.ipynb      # Jupyter notebook with detailed analysis
-│   ├── garch_quarto.qmd          # Quarto document with interactive analysis
-│   ├── garch_presentation.qmd    # Quarto presentation on GARCH models
-│   └── custom.css                # Custom CSS for the presentation
+│   ├── garch.qmd       # Quarto document with interactive analysis
+│   ├── garch.ipynb     # Jupyter notebook version of the analysis
+│   ├── garch_presentation.qmd # Quarto presentation on GARCH models
+│   ├── garch_presentation.html # Rendered presentation
+│   └── custom.css             # Custom CSS for the presentation
+├── data/                      # Directory for storing financial data
 ├── papers/
 │   └── Engle-GARCH101Use-2001.pdf # The original research paper
-├── requirements.txt              # Project dependencies
-├── .pre-commit-config.yaml       # Pre-commit hooks configuration
-├── pyproject.toml                # Tool configuration
-└── README.md                     # This file
+├── requirements.txt           # Project dependencies
+├── .pre-commit-config.yaml    # Pre-commit hooks configuration
+├── pyproject.toml            # Tool configuration
+├── .python-version           # Python version specification
+└── README.md                 # This file
 ```
 
 ## Features
 
-- GARCH(1,1) model implementation
+- GARCH(1,1) model implementation using the ARCH package
 - Financial data fetching using Yahoo Finance
-- Volatility forecasting
-- Model diagnostics and visualization
+- Volatility forecasting and analysis
 - Interactive analysis through Jupyter notebook and Quarto document
+- Educational presentation on GARCH models
 - Code quality enforcement with pre-commit hooks
-- Quarto presentation for educational purposes
+- Comprehensive data processing utilities
+- Type hints and static type checking with mypy
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.10+ (specified in .python-version)
 - Required packages listed in requirements.txt
 - Quarto (for rendering the Quarto document)
 - pre-commit (for code quality checks)
@@ -61,34 +67,24 @@ This project implements GARCH (Generalized Autoregressive Conditional Heterosked
 
 ## Usage
 
-### Running the Main Script
+### Running the Analysis
 
-```bash
-python src/garch_implementation.py
-```
+The main analysis can be run in several ways:
 
-This will:
-- Fetch S&P 500 data
-- Fit a GARCH(1,1) model
-- Generate volatility forecasts
-- Save a volatility plot
-
-### Using the Jupyter Notebook
-
-1. Start Jupyter:
+1. Using the Python script:
    ```bash
-   jupyter notebook
+   python src/garch_quarto.py
    ```
-2. Open `notebooks/garch_analysis.ipynb`
-3. Run the cells to see detailed analysis and visualizations
 
-### Using the Quarto Document
+2. Using the Jupyter Notebook:
+   ```bash
+   jupyter notebook notebooks/garch_quarto.ipynb
+   ```
 
-1. Render the Quarto document:
+3. Using the Quarto document:
    ```bash
    quarto render notebooks/garch_quarto.qmd
    ```
-2. Open the generated HTML file in your browser
 
 ### Using the Quarto Presentation
 
@@ -123,6 +119,17 @@ For quick commits with automatic formatting, you can use [easy-commit](https://p
 easy-commit "Your commit message"
 ```
 
+### VS Code Tasks
+
+This project includes VS Code tasks for common development workflows. To use them:
+
+1. Open the project in VS Code
+2. Press `Cmd+Shift+P` (macOS) or `Ctrl+Shift+P` (Windows/Linux)
+3. Type "Tasks: Run Task" and select from:
+   - `Jupytext Sync`: Sync `.py`, `.qmd`, and `.ipynb` files
+
+You can also use the keyboard shortcut `Cmd+Shift+B` (macOS) or `Ctrl+Shift+B` (Windows/Linux) to run the default build task.
+
 ## Model Description
 
 The GARCH(1,1) model is specified as:
@@ -139,4 +146,4 @@ where:
 ## References
 
 - Engle, R. F. (2001). GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics
-- Bollerslev, T. (1986). Generalized Autoregressive Conditional Heteroskedasticity 
+- Bollerslev, T. (1986). Generalized Autoregressive Conditional Heteroskedasticity

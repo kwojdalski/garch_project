@@ -2,8 +2,10 @@ import logging
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import yfinance as yf
 from arch import arch_model
+from scipy import stats
 
 # Configure logging
 logging.basicConfig(
@@ -12,7 +14,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def fetch_stock_data(symbols, start_date, end_date):
+def fetch_stock_data(
+    symbols: str | list, start_date: pd.Timestamp, end_date: pd.Timestamp
+) -> pd.Series | pd.DataFrame:
     """
     Fetch stock data from Yahoo Finance
 
@@ -39,14 +43,14 @@ def fetch_stock_data(symbols, start_date, end_date):
         return df["Close"]
 
 
-def calculate_returns(prices):
+def calculate_returns(prices: pd.Series | pd.DataFrame) -> pd.Series | pd.DataFrame:
     """
     Calculate log returns from price series
     """
     return np.log(prices / prices.shift(1)).dropna()
 
 
-def fit_garch(returns, p=1, q=1):
+def fit_garch(returns: pd.Series, p: int = 1, q: int = 1) -> arch_model.ARCHModelResult:
     """
     Fit GARCH(p,q) model to returns
     """
@@ -55,7 +59,9 @@ def fit_garch(returns, p=1, q=1):
     return results
 
 
-def plot_volatility(results, returns):
+def plot_volatility(
+    results: arch_model.ARCHModelResult, returns: pd.Series
+) -> plt.Figure:
     """
     Plot the conditional volatility
     """
@@ -66,3 +72,21 @@ def plot_volatility(results, returns):
     ax.set_ylabel("Volatility")
     plt.tight_layout()
     return fig
+
+
+# Calculate portfolio statistics
+def calculate_portfolio_stats(returns_data: pd.DataFrame) -> pd.DataFrame:
+    stats_dict = {}
+    for column in returns_data.columns:
+        series = returns_data[column]
+        stats_dict[column] = {
+            "Mean": series.mean(),
+            "Std. Dev.": series.std(),
+            "Skewness": stats.skew(series.dropna()),
+            "Kurtosis": stats.kurtosis(series.dropna())
+            + 3,  # Adding 3 to get regular kurtosis instead of excess kurtosis
+        }
+
+    # Convert to DataFrame
+    stats_df = pd.DataFrame(stats_dict).round(4)
+    return stats_df
