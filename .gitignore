@@ -19,6 +19,15 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+# Data files
+data/*.csv
+data/*.xls
+data/*.xlsx
+data/*.xlsm
+data/*.xlsb
+data/*.json
+data/*.parquet
+data/*.feather
 
 # Jupyter Notebook
 .ipynb_checkpoints

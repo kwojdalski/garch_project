@@ -12,13 +12,31 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def fetch_stock_data(symbol, start_date, end_date):
+def fetch_stock_data(symbols, start_date, end_date):
     """
     Fetch stock data from Yahoo Finance
+
+    Parameters:
+    -----------
+    symbols : str or list
+        Single stock symbol or list of stock symbols
+    start_date : datetime
+        Start date for data retrieval
+    end_date : datetime
+        End date for data retrieval
+
+    Returns:
+    --------
+    pandas.Series or pandas.DataFrame
+        Close prices for the requested symbol(s)
     """
-    stock = yf.Ticker(symbol)
-    df = stock.history(start=start_date, end=end_date)
-    return df["Close"]
+    if isinstance(symbols, list):
+        data = yf.download(symbols, start=start_date, end=end_date, progress=False)
+        return data["Close"]
+    else:
+        stock = yf.Ticker(symbols)
+        df = stock.history(start=start_date, end=end_date)
+        return df["Close"]
 
 
 def calculate_returns(prices):

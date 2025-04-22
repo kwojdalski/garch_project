@@ -29,12 +29,21 @@
 # %%
 # | label: setup
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
-from plotnine import *
+from plotnine import (
+    aes,
+    element_text,
+    facet_wrap,
+    geom_line,
+    ggplot,
+    labs,
+    scale_color_manual,
+    theme,
+    theme_minimal,
+)
 from scipy import stats
 
 from src.utils import calculate_returns, fetch_stock_data, fit_garch, plot_volatility
@@ -51,31 +60,59 @@ logger = logging.getLogger(__name__)
 # %% [markdown]
 # # Data Preparation
 #
+# ## Portfolio Composition
+#
+# This portfolio consists of:
+# - 50% Nasdaq (^IXIC)
+# - 30% Dow Jones Industrial Average (^DJI)
+# - 20% 10-year Treasury Constant Maturity Rate (^TNX)
+#
 # ## Fetching Stock Data
 #
-# We'll fetch S&P 500 data using our implementation function:
+# We'll fetch the portfolio components data using our implementation function:
 
 # %%
 # | label: fetch-data
 # Parameters
-symbol = "^GSPC"  # S&P 500 index
-end_date = datetime.now()
+symbols = ["^IXIC", "^DJI", "^TNX"]  # Nasdaq, Dow Jones, and 10-year Treasury
+# Define the date range from Robert Engle's paper (2001)
+# Sample period from Table 2 and Table 3: March 23, 1990 to March 23, 2000
+start_date = datetime(1990, 3, 22)
+end_date = datetime(2000, 3, 24)
 
-start_date = end_date - timedelta(days=365 * 2)  # 2 years of data
 
-yf.download(
-    symbol,
-    start=start_date,
-    end=end_date,
-    progress=True,
-)
+# start_date = end_date - timedelta(days=365 * 2)  # 2 years of data
+# end_date = datetime.now()
+
+
+# Portfolio weights
+weights = {
+    "^IXIC": 0.50,  # Nasdaq
+    "^DJI": 0.30,  # Dow Jones
+    "^TNX": 0.20,  # 10-year Treasury
+}
+
 
 # Fetch data using our implementation
 logger.info("Fetching data...")
-prices = fetch_stock_data(symbol, start_date, end_date)
+prices = fetch_stock_data(symbols, start_date, end_date)
 
 # Display the first few rows
-prices.head()
+prices.tail()
+
+# Apparently, DJIA data is missing for 1990-1992, so we'll drop it
+prices = prices.drop(columns=["^DJI"])
+# ... we have to take it from somewhere else
+# found it here: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data
+
+# %%
+djia_prices = pd.read_csv(
+    "data/dja-performance-report-daily.csv",
+    index_col="Effective Date",
+    parse_dates=True,
+)
+djia_prices = djia_prices.rename(columns={"Close Value": "^DJI"})
+prices = prices.join(djia_prices["^DJI"])
 
 # %% [markdown]
 # ## Calculating Returns
@@ -90,6 +127,18 @@ returns = calculate_returns(prices)
 # Display the first few rows
 returns.head()
 
+portfolio_prices = pd.Series(0, index=prices.index, dtype=float)
+
+# Apply weights to each component
+for symbol, weight in weights.items():
+    # Use pandas multiplication and addition
+    portfolio_prices = portfolio_prices.add(returns[symbol].multiply(weight))
+
+# Add portfolio returns to the returns DataFrame
+returns["portfolio"] = portfolio_prices
+
+# Display the updated returns DataFrame
+
 # %% [markdown]
 # ## Visualizing Price and Returns
 #
@@ -102,27 +151,19 @@ returns.head()
 # Create dataframes for plotting
 price_df = pd.DataFrame({"Date": prices.index, "Price": prices.values})
 
-returns_df = pd.DataFrame({"Date": returns.index, "Return": returns.values})
 
-# Create price plot
-price_plot = (
-    ggplot(price_df, aes(x="Date", y="Price"))
-    + geom_line(color="#3366CC")
-    + labs(title="S&P 500 Price", x="Date", y="Price")
-    + theme_minimal()
-    + theme(
-        plot_title=element_text(size=14, face="bold"),
-        axis_title=element_text(size=12),
-        axis_text=element_text(size=10),
-    )
+# Create dataframe for returns plotting
+returns_df = pd.DataFrame(returns).reset_index()
+returns_df = pd.melt(
+    returns_df, id_vars=["Date"], var_name="Symbol", value_name="Return"
 )
-
+# %%
 # Create returns plot
 returns_plot = (
-    ggplot(returns_df, aes(x="Date", y="Return"))
+    ggplot(returns_df, aes(x="Date", y="Return", color="Symbol"))
+    + facet_wrap("Symbol", scales="free_y")
     + geom_line(color="#FF9900")
     + labs(title="Log Returns", x="Date", y="Log Return")
-    + theme_minimal()
     + theme(
         plot_title=element_text(size=14, face="bold"),
         axis_title=element_text(size=12),
@@ -131,7 +172,7 @@ returns_plot = (
 )
 
 # Display plots
-print(price_plot)
+
 print(returns_plot)
 
 # %% [markdown]
@@ -174,7 +215,7 @@ logger.info(results.summary())
 params = results.params
 print("Model Parameters:")
 for param, value in params.items():
-    print(f"{param}: {value:.6f}")
+    logger.info(f"{param}: {value:.6f}")
 
 # %% [markdown]
 # # Volatility Analysis
@@ -189,7 +230,6 @@ for param, value in params.items():
 
 # Create volatility plot using our implementation
 volatility_plot = plot_volatility(results, returns)
-plt.show()
 
 # %% [markdown]
 # ## Model Diagnostics
@@ -306,5 +346,4 @@ print(forecast_plot)
 # 4. Model diagnostics
 # 5. Volatility forecasting
 #
-# The GARCH model provides a powerful framework for modeling and forecasting financial volatility, which is essential for risk management and asset pricing.
 # The GARCH model provides a powerful framework for modeling and forecasting financial volatility, which is essential for risk management and asset pricing.
