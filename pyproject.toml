@@ -27,3 +27,8 @@ disallow_incomplete_defs = true
 [tool.bandit]
 exclude_dirs = ["tests"]
 skips = ["B101"] 
+
+[tool.jupytext]
+formats = "qmd,ipynb,py:percent"
+notebook_metadata_filter = "-all"
+cell_metadata_filter = "-all"

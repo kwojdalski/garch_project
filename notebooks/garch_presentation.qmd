@@ -75,7 +75,6 @@ The sum of alpha and beta is typically close to 1, indicating high persistence i
 # Implementation
 
 ## Data Preparation
-
 ```{python}
 #| echo: true
 #| eval: false
