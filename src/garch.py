@@ -1,4 +1,3 @@
-# %% [markdown]
 # ---
 # title: GARCH Model Implementation
 # author: Based on Engle (2001)
@@ -12,23 +11,12 @@
 # execute:
 #   echo: true
 #   warning: false
-# jupyter:
-#   jupytext:
-#     text_representation:
-#       extension: .qmd
-#       format_name: quarto
-#       format_version: '1.0'
-#       jupytext_version: 1.17.0
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-#     path: /usr/local/share/jupyter/kernels/python3
 # ---
 
 # %%
 # | label: setup
 import logging
+import os
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -48,7 +36,11 @@ from plotnine import (
 )
 from scipy import stats
 
+if os.getcwd().endswith("src"):
+    os.chdir("..")
+
 from src.utils import (
+    calculate_acf_table,
     calculate_portfolio_stats,
     calculate_returns,
     fetch_stock_data,
@@ -62,16 +54,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 # %% [markdown]
 # # Data Preparation
 #
 # ## Portfolio Composition
 #
 # This portfolio consists of:
+#
 # - 50% Nasdaq (^IXIC)
 # - 30% Dow Jones Industrial Average (^DJI)
-# - 20% 10-year Treasury Constant Maturity Rate (^TNX)
+# - 20% 10-year Treasury Constant Maturity Rate [^1]
+#
+# [^1]: Potentially ^TNX, this needs to be checked further on.
 #
 # ## Fetching Stock Data
 #
@@ -80,18 +74,14 @@ logger = logging.getLogger(__name__)
 # %%
 # | label: fetch-data
 # Parameters
-symbols = ["^IXIC", "^DJI", "^TNX"]  # Nasdaq, Dow Jones, and 10-year Treasury
-# Define the date range from Robert Engle's paper (2001)
-# Sample period from Table 2 and Table 3: March 23, 1990 to March 23, 2000
+# Nasdaq, Dow Jones, and 10-year Treasury
+symbols = ["^IXIC", "^DJI", "^TNX"]  #
+# Define the date range, based on the paper
+# Sample period
 start_date = datetime(1990, 3, 22)
 end_date = datetime(2000, 3, 24)
 
-
-# start_date = end_date - timedelta(days=365 * 2)  # 2 years of data
-# end_date = datetime.now()
-
-
-# Portfolio weights
+# Portfolio weights, taken from the article
 weights = {
     "^IXIC": 0.50,  # Nasdaq
     "^DJI": 0.30,  # Dow Jones
@@ -108,10 +98,17 @@ prices.tail()
 
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
 prices = prices.drop(columns=["^DJI", "^TNX"])
-# ... we have to take it from somewhere else
-# found it here: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data
-# For RATE which looks we'll use
-# https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02
+
+# %% [markdown]
+# ### TNX and DJIA
+#
+# As the data was missing for 1990-1992, we had to take it from somewhere else.
+# We found Dow Jones Industrial Average (^DJI) data [here](https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data).
+#
+# For RATE we used a good proxy which we found here looks like a good proxy for TNX, we'll data we found[here](https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02)
+#
+# ####  DJIA data retrieval
+
 # %%
 djia_prices = pd.read_csv(
     "data/dja-performance-report-daily.csv",
@@ -120,6 +117,12 @@ djia_prices = pd.read_csv(
 )
 djia_prices = djia_prices.rename(columns={"Close Value": "^DJI"})
 prices = prices.join(djia_prices["^DJI"])
+
+# %% [markdown]
+# ####  RATE data retrieval
+#
+# Data has been obtained from the hyperlink
+
 # %%
 tnote_yield = pd.read_csv(
     "data/DGS10.csv",
@@ -138,7 +141,6 @@ prices = prices.join(tnote_yield["^TNX"])
 
 # %%
 # | label: calculate-returns
-# Calculate log returns using our implementation
 returns = calculate_returns(prices)
 
 portfolio_prices = pd.Series(0, index=prices.index, dtype=float)
@@ -151,49 +153,22 @@ for symbol, weight in weights.items():
 # Add portfolio returns to the returns DataFrame
 returns["portfolio"] = portfolio_returns
 
-
-# Table 1: Portfolio Data
-portfolio_stats = calculate_portfolio_stats(returns)
-from tabulate import tabulate
-
-print("Portfolio Statistics")
-print(tabulate(portfolio_stats, headers="keys", tablefmt="grid"))
-# Display the table with proper formatting
-print("\nTable 1")
-print("Portfolio Data")
-print("=" * 80)
-print(portfolio_stats.to_string())
-print("\nSample: March 23, 1990 to March 23, 2000")
-
-# %% [markdown]
-# The table above shows the summary statistics for our portfolio components and the overall portfolio.
-# The statistics include mean returns, standard deviation, skewness, and kurtosis for each component.
-#
-# It differs marginally from Table 1 in Engle (2001):,
-# * by 1-2 bps for each stat for Nasdaq (^IXIC) and Dow Jones (^DJI)
-# * slightly more for Rate (the article is inadequately precise in terms what exactly has been used)
-#     + especially for skewness and kurtosis (0.38 vs -0.20, and 4.96 vs 5.96, respectively)
-# * Rate is the root cause of slight difference between Portfolio and our replicated portfolio
-
 # %% [markdown]
 # ## Visualizing Price and Returns
 #
-# Let's visualize both the price series and returns using plotnine:
+# Let's visualize returns for all data series and compare with the plot from the article
 
 # %%
 # | label: visualize-data
-# | fig-cap: S&P 500 Price and Log Returns
-
-# Create dataframes for plotting
-
-
-# Create dataframe for returns plotting
+# | fig-cap: Nasdaq, Dow Jones and Bond Returns
+# | fig-subcap:
+# |   - Nasdaq
+# |   - Dow Jones
+# |   - Bond
 returns_df = pd.DataFrame(returns).reset_index()
 returns_df = pd.melt(
     returns_df, id_vars=["Date"], var_name="Symbol", value_name="Return"
 )
-# %%
-# Create returns plot
 returns_plot = (
     ggplot(returns_df, aes(x="Date", y="Return", color="Symbol"))
     + facet_wrap("Symbol", scales="free_y")
@@ -210,6 +185,38 @@ returns_plot = (
 returns_plot
 
 # %% [markdown]
+# ## Portfolio Statistics
+
+# %%
+# | label: tbl-portfolio-stats
+# | tbl-cap: Portfolio Statistics
+# | tbl-cap-location: top
+portfolio_stats = calculate_portfolio_stats(returns)
+portfolio_stats
+
+# %% [markdown]
+# The table above shows the summary statistics for our portfolio components and the overall portfolio.
+# The statistics include mean returns, standard deviation, skewness, and kurtosis for each component.
+#
+# Our results show minor differences compared to Table 1 in Engle (2001):
+#
+# * The statistics for Nasdaq (^IXIC) and Dow Jones (^DJI) differ by only 1-2 basis points
+# * Larger discrepancies appear for the Rate component, likely because the article lacks specificity about the exact data source used
+#     + The most notable differences are in skewness (0.38 vs -0.20) and kurtosis (4.96 vs 5.96)
+# * These differences in the Rate component are the primary reason for the slight variation between our replicated portfolio and the one presented in the paper
+#
+# ## ACF of Residuals
+
+# %%
+# | label: acf-residuals
+# | fig-cap: ACF of Residuals
+# | fig-subcap:
+# |   - Portfolio Returns
+# |   - Portfolio Residuals
+acf_plot = calculate_acf_table(returns["portfolio"])
+acf_plot
+
+# %% [markdown]
 # # GARCH Model Estimation
 #
 # ## Fitting the GARCH(1,1) Model
@@ -220,11 +227,12 @@ returns_plot
 # | label: fit-garch
 # Fit GARCH(1,1) model using our implementation
 logger.info("Fitting GARCH(1,1) model...")
-results = fit_garch(returns)
+results = fit_garch(returns["portfolio"])
 
 # Display model summary
 logger.info("\nModel Summary:")
 logger.info(results.summary())
+
 
 # %% [markdown]
 # ## Model Parameters
@@ -253,7 +261,11 @@ for param, value in params.items():
 
 
 # %%
-
+# | label: tbl-squared-residuals
+# | tbl-cap: Autocorrelations of Squared Standardized Residuals
+# | tbl-cap-location: top
+acf_plot = calculate_acf_table(results.resid / np.sqrt(results.conditional_volatility))
+acf_plot
 
 # %% [markdown]
 # # Volatility Analysis
@@ -371,17 +383,4 @@ forecast_plot = (
 )
 
 # Display plot
-print(forecast_plot)
-
-# %% [markdown]
-# # Conclusion
-#
-# This implementation demonstrates the key components of GARCH modeling:
-#
-# 1. Data preparation and log returns calculation
-# 2. GARCH(1,1) model estimation
-# 3. Volatility analysis and visualization
-# 4. Model diagnostics
-# 5. Volatility forecasting
-#
-# The GARCH model provides a powerful framework for modeling and forecasting financial volatility, which is essential for risk management and asset pricing.
+forecast_plot

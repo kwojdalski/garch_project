@@ -1,13 +1,12 @@
 import logging
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yfinance as yf
 from arch import arch_model
+from plotnine import aes, element_text, geom_line, ggplot, labs, theme, theme_minimal
 from scipy import stats
 from statsmodels.tsa.stattools import acf as acf_stats
-from tabulate import tabulate
 
 # Configure logging
 logging.basicConfig(
@@ -63,15 +62,27 @@ def fit_garch(returns: pd.Series, p: int = 1, q: int = 1):
 
 def plot_volatility(results, returns: pd.Series):
     """
-    Plot the conditional volatility
+    Plot the conditional volatility using plotnine
     """
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(returns.index, np.sqrt(results.conditional_volatility))
-    ax.set_title("Conditional Volatility")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Volatility")
-    plt.tight_layout()
-    return fig
+    # Create a DataFrame for plotting
+    volatility_df = pd.DataFrame(
+        {"Date": returns.index, "Volatility": np.sqrt(results.conditional_volatility)}
+    )
+
+    # Create the plot using plotnine
+    volatility_plot = (
+        ggplot(volatility_df, aes(x="Date", y="Volatility"))
+        + geom_line()
+        + labs(title="Conditional Volatility", x="Date", y="Volatility")
+        + theme_minimal()
+        + theme(
+            plot_title=element_text(size=14, face="bold"),
+            axis_title=element_text(size=12),
+            axis_text=element_text(size=10),
+        )
+    )
+
+    return volatility_plot
 
 
 # Calculate portfolio statistics
@@ -92,9 +103,9 @@ def calculate_portfolio_stats(returns_data: pd.DataFrame):
     return stats_df
 
 
-def calculate_acf_table(returns: pd.Series, nlags: int = 15):
+def calculate_acf_table(series: pd.Series, nlags: int = 15):
     """
-    Calculate autocorrelations of squared portfolio returns, Q-statistics, and p-values.
+    Calculate autocorrelations of squared series, Q-statistics, and p-values.
 
     Parameters
     ----------
@@ -109,15 +120,15 @@ def calculate_acf_table(returns: pd.Series, nlags: int = 15):
         Table with autocorrelations, Q-statistics, and p-values
     """
     # Calculate squared returns
-    squared_returns = returns**2
+    squared_series = series**2
 
     # Calculate autocorrelations
-    ac = acf_stats(squared_returns, nlags=nlags, qstat=True)
+    ac = acf_stats(squared_series, nlags=nlags, qstat=True)
 
     # Create DataFrame
     results = pd.DataFrame(
         {
-            "AC": ac[0],  # autocorrelations
+            "AC": ac[0][1:],  # autocorrelations
             "Q-Stat": ac[1],  # Q-statistics
             "Prob": ac[2],  # p-values
         }
@@ -130,35 +141,3 @@ def calculate_acf_table(returns: pd.Series, nlags: int = 15):
     results = results.round(3)
 
     return results
-
-
-def display_acf_table(returns: pd.Series, nlags: int = 15):
-    """
-    Display the autocorrelation table in a formatted way.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Time series of portfolio returns
-    nlags : int, optional
-        Number of lags to calculate, by default 15
-    """
-
-    table = calculate_acf_table(returns, nlags)
-
-    # Add lag column to the table
-    display_table = table.copy()
-    display_table.insert(0, "Lag", range(1, nlags + 1))
-
-    print("Autocorrelations of Squared Portfolio Returns")
-    print(
-        tabulate(
-            display_table,
-            headers=["Lag", "AC", "Q-Stat", "Prob"],
-            floatfmt=(".0f", ".3f", ".2f", ".3f"),
-            tablefmt="simple",
-        )
-    )
-    print(
-        f"Sample: {returns.index[0].strftime('%B %d, %Y')} to {returns.index[-1].strftime('%B %d, %Y')}."
-    )

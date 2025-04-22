@@ -13,16 +13,15 @@ execute:
   warning: false
 jupyter: python3
 ---
-
 ```{python}
 #| label: setup
 import logging
+import os
 from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import os
 from plotnine import (
     aes,
     element_blank,
@@ -37,7 +36,9 @@ from plotnine import (
 )
 from scipy import stats
 
-os.chdir("..")
+if os.getcwd().endswith("src") or os.getcwd().endswith("notebooks"):
+    os.chdir("..")
+
 from src.utils import (
     calculate_acf_table,
     calculate_portfolio_stats,
@@ -46,7 +47,6 @@ from src.utils import (
     fit_garch,
     plot_volatility,
 )
-
 
 # Configure logging
 logging.basicConfig(
@@ -69,7 +69,12 @@ This portfolio consists of:
 
 ## Fetching Stock Data
 
-We'll fetch the portfolio components data using our implementation function:
+We'll fetch the portfolio components data using the implemented function:
+
+- The function is implemented in `src/utils.py`
+- it uses `yfinance` - a Python package for downloading stock data from Yahoo Finance
+- start and end dates are taken from the article
+- weights for portfolio components are taken from the article
 
 ```{python}
 #| label: fetch-data
@@ -98,17 +103,17 @@ prices.tail()
 
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
 prices = prices.drop(columns=["^DJI", "^TNX"])
-
 ```
 
-### TNX and DJIA
+### RATE and Dow Jones Industrial Average (^DJI)
 
-As the data was missing for 1990-1992, we had to take it from somewhere else.
+As the data for `^DJI` was missing for 1990-1992, we had to take it from somewhere else.
 We found Dow Jones Industrial Average (^DJI) data [here](https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data).
 
-For RATE we used a good proxy which we found here looks like a good proxy for TNX, we'll data we found[here](https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02)
+For RATE we used a good proxy which we found here looks like a good proxy for TNX, we'll use data we found [here](https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02)
 
 ####  DJIA data retrieval
+
 ```{python}
 djia_prices = pd.read_csv(
     "data/dja-performance-report-daily.csv",
@@ -122,6 +127,7 @@ prices = prices.join(djia_prices["^DJI"])
 ####  RATE data retrieval
 
 Data has been obtained from the hyperlink
+
 ```{python}
 tnote_yield = pd.read_csv(
     "data/DGS10.csv",
@@ -136,7 +142,13 @@ prices = prices.join(tnote_yield["^TNX"])
 
 ## Calculating Returns
 
-Next, we calculate the log returns using our implementation function:
+This function uses log returns, which are calculated as follows:
+
+$$r_t = \ln \left( \frac{P_t}{P_{t-1}} \right)$$
+
+where $P_t$ is the price at time $t$.
+
+
 
 ```{python}
 #| label: calculate-returns
@@ -151,17 +163,17 @@ for symbol, weight in weights.items():
 
 # Add portfolio returns to the returns DataFrame
 returns["portfolio"] = portfolio_returns
-
 ```
-
 
 ## Visualizing Price and Returns
 
 Let's visualize returns for all data series and compare with the plot from the article
 
 ```{python}
-#| label: visualize-data
-#| fig-cap: S&P 500 Price and Log Returns
+#| label: fig-returns
+#| fig-cap: Nasdaq, Dow Jones and Bond Returns
+#| fig-subcap:
+#|   - "Sample: March 23, 1990 to March 23, 2000."
 returns_df = pd.DataFrame(returns).reset_index()
 returns_df = pd.melt(
     returns_df, id_vars=["Date"], var_name="Symbol", value_name="Return"
@@ -170,7 +182,7 @@ returns_plot = (
     ggplot(returns_df, aes(x="Date", y="Return", color="Symbol"))
     + facet_wrap("Symbol", scales="free_y")
     + geom_line(color="#FF9900")
-    + labs(title="Log Returns", x="Date", y="Log Return")
+    + labs(title="", x="Date", y="Log Return")
     + theme(
         plot_title=element_text(size=14, face="bold"),
         axis_title=element_text(size=12),
@@ -182,21 +194,15 @@ returns_plot = (
 returns_plot
 ```
 
-
 ## Portfolio Statistics
+
 ```{python}
 #| label: tbl-portfolio-stats
 #| tbl-cap: Portfolio Statistics
 #| tbl-cap-location: top
-#| tbl-subcap-location: bottom
-#| tbl-subcap:
-#|   - "Sample period from March 23, 1990 to March 23, 2000"
 portfolio_stats = calculate_portfolio_stats(returns)
 portfolio_stats
-
 ```
-
-
 
 The table above shows the summary statistics for our portfolio components and the overall portfolio.
 The statistics include mean returns, standard deviation, skewness, and kurtosis for each component.
@@ -208,15 +214,14 @@ Our results show minor differences compared to Table 1 in Engle (2001):
     + The most notable differences are in skewness (0.38 vs -0.20) and kurtosis (4.96 vs 5.96)
 * These differences in the Rate component are the primary reason for the slight variation between our replicated portfolio and the one presented in the paper
 
-## ACF of Residuals
+## ACF of Squared Portfolio Returns
 
 ```{python}
-#| label: acf-residuals
-#| fig-cap: ACF of Residuals
-#| fig-subcap:
-#|   - "Portfolio Returns"
-#|   - "Portfolio Residuals"
-acf_plot = calculate_acf_table(returns['portfolio'])
+#| label: tbl-portfolio-returns
+#| tbl-cap: Autocorrelations of Squared Portfolio Returns
+#| tbl-subcap:
+#|   - "Sample: March 23, 1990 to March 23, 2000."
+acf_plot = calculate_acf_table(returns["portfolio"])
 acf_plot
 ```
 
@@ -230,7 +235,7 @@ Now we'll fit a GARCH(1,1) model to the returns data using our implementation:
 #| label: fit-garch
 # Fit GARCH(1,1) model using our implementation
 logger.info("Fitting GARCH(1,1) model...")
-results = fit_garch(returns['portfolio'])
+results = fit_garch(returns["portfolio"])
 
 # Display model summary
 logger.info("\nModel Summary:")
@@ -262,6 +267,16 @@ for param, value in params.items():
     logger.info(f"{param}: {value:.6f}")
 ```
 
+## ACF of Squared Standardized Residuals
+
+```{python}
+#| label: tbl-squared-residuals
+#| tbl-cap: Autocorrelations of Squared Standardized Residuals
+#| tbl-subcap:
+#|   - "Sample: March 23, 1990 to March 23, 2000."
+acf_plot = calculate_acf_table(results.resid / np.sqrt(results.conditional_volatility))
+acf_plot
+```
 
 # Volatility Analysis
 
@@ -270,11 +285,11 @@ for param, value in params.items():
 Let's plot the conditional volatility using our implementation:
 
 ```{python}
-#| label: plot-volatility
+#| label: fig-conditional-volatility
 #| fig-cap: Conditional Volatility
 
-# Create volatility plot using our implementation
 volatility_plot = plot_volatility(results, returns)
+volatility_plot
 ```
 
 ## Model Diagnostics
@@ -283,7 +298,7 @@ Let's examine the model residuals using plotnine:
 
 ```{python}
 #| label: model-diagnostics
-#| fig-cap: Standardized Residuals and Q-Q Plot
+#| fig-cap: Standardized Residuals
 
 # Get standardized residuals
 std_resid = results.resid / np.sqrt(results.conditional_volatility)
@@ -304,18 +319,7 @@ resid_plot = (
     )
 )
 
-# For Q-Q plot, we need to use matplotlib as plotnine doesn't have a direct Q-Q plot
-# Create a figure with two subplots
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
-
-# Plot residuals using plotnine
-print(resid_plot)
-
-# Q-Q plot using matplotlib
-stats.probplot(std_resid, dist="norm", plot=ax2)
-ax2.set_title("Q-Q Plot of Standardized Residuals")
-plt.tight_layout()
-plt.show()
+resid_plot
 ```
 
 # Volatility Forecasting
@@ -338,7 +342,7 @@ logger.info(forecast.variance.iloc[-1])
 Let's visualize the forecast using plotnine:
 
 ```{python}
-#| label: plot-forecast
+#| label: fig-forecast
 #| fig-cap: Volatility Forecast
 
 # Create dataframes for historical and forecast data
