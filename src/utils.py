@@ -6,6 +6,8 @@ import pandas as pd
 import yfinance as yf
 from arch import arch_model
 from scipy import stats
+from statsmodels.tsa.stattools import acf as acf_stats
+from tabulate import tabulate
 
 # Configure logging
 logging.basicConfig(
@@ -43,14 +45,14 @@ def fetch_stock_data(
         return df["Close"]
 
 
-def calculate_returns(prices: pd.Series | pd.DataFrame) -> pd.Series | pd.DataFrame:
+def calculate_returns(prices: pd.Series | pd.DataFrame):
     """
     Calculate log returns from price series
     """
     return np.log(prices / prices.shift(1)).dropna()
 
 
-def fit_garch(returns: pd.Series, p: int = 1, q: int = 1) -> arch_model.ARCHModelResult:
+def fit_garch(returns: pd.Series, p: int = 1, q: int = 1):
     """
     Fit GARCH(p,q) model to returns
     """
@@ -59,9 +61,7 @@ def fit_garch(returns: pd.Series, p: int = 1, q: int = 1) -> arch_model.ARCHMode
     return results
 
 
-def plot_volatility(
-    results: arch_model.ARCHModelResult, returns: pd.Series
-) -> plt.Figure:
+def plot_volatility(results, returns: pd.Series):
     """
     Plot the conditional volatility
     """
@@ -75,7 +75,7 @@ def plot_volatility(
 
 
 # Calculate portfolio statistics
-def calculate_portfolio_stats(returns_data: pd.DataFrame) -> pd.DataFrame:
+def calculate_portfolio_stats(returns_data: pd.DataFrame):
     stats_dict = {}
     for column in returns_data.columns:
         series = returns_data[column]
@@ -90,3 +90,75 @@ def calculate_portfolio_stats(returns_data: pd.DataFrame) -> pd.DataFrame:
     # Convert to DataFrame
     stats_df = pd.DataFrame(stats_dict).round(4)
     return stats_df
+
+
+def calculate_acf_table(returns: pd.Series, nlags: int = 15):
+    """
+    Calculate autocorrelations of squared portfolio returns, Q-statistics, and p-values.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Time series of portfolio returns
+    nlags : int, optional
+        Number of lags to calculate, by default 15
+
+    Returns
+    -------
+    pd.DataFrame
+        Table with autocorrelations, Q-statistics, and p-values
+    """
+    # Calculate squared returns
+    squared_returns = returns**2
+
+    # Calculate autocorrelations
+    ac = acf_stats(squared_returns, nlags=nlags, qstat=True)
+
+    # Create DataFrame
+    results = pd.DataFrame(
+        {
+            "AC": ac[0],  # autocorrelations
+            "Q-Stat": ac[1],  # Q-statistics
+            "Prob": ac[2],  # p-values
+        }
+    )
+
+    # Format the index starting from 1
+    results.index = range(1, nlags + 1)
+
+    # Round the values
+    results = results.round(3)
+
+    return results
+
+
+def display_acf_table(returns: pd.Series, nlags: int = 15):
+    """
+    Display the autocorrelation table in a formatted way.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Time series of portfolio returns
+    nlags : int, optional
+        Number of lags to calculate, by default 15
+    """
+
+    table = calculate_acf_table(returns, nlags)
+
+    # Add lag column to the table
+    display_table = table.copy()
+    display_table.insert(0, "Lag", range(1, nlags + 1))
+
+    print("Autocorrelations of Squared Portfolio Returns")
+    print(
+        tabulate(
+            display_table,
+            headers=["Lag", "AC", "Q-Stat", "Prob"],
+            floatfmt=(".0f", ".3f", ".2f", ".3f"),
+            tablefmt="simple",
+        )
+    )
+    print(
+        f"Sample: {returns.index[0].strftime('%B %d, %Y')} to {returns.index[-1].strftime('%B %d, %Y')}."
+    )

@@ -107,8 +107,7 @@ prices = fetch_stock_data(symbols, start_date, end_date)
 prices.tail()
 
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
-prices = prices.drop(columns=["^DJI"])
-prices = prices.drop(columns=["^TNX"])
+prices = prices.drop(columns=["^DJI", "^TNX"])
 # ... we have to take it from somewhere else
 # found it here: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data
 # For RATE which looks we'll use
@@ -155,7 +154,10 @@ returns["portfolio"] = portfolio_returns
 
 # Table 1: Portfolio Data
 portfolio_stats = calculate_portfolio_stats(returns)
+from tabulate import tabulate
 
+print("Portfolio Statistics")
+print(tabulate(portfolio_stats, headers="keys", tablefmt="grid"))
 # Display the table with proper formatting
 print("\nTable 1")
 print("Portfolio Data")
@@ -248,6 +250,10 @@ params = results.params
 print("Model Parameters:")
 for param, value in params.items():
     logger.info(f"{param}: {value:.6f}")
+
+
+# %%
+
 
 # %% [markdown]
 # # Volatility Analysis
