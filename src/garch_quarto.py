@@ -1,30 +1,43 @@
----
-title: GARCH Model Implementation
-author: Based on Engle (2001)
-format:
-  html:
-    toc: true
-    toc-depth: 3
-    code-fold: true
-    theme: cosmo
-    highlight-style: github
-execute:
-  echo: true
-  warning: false
-jupyter: python3
----
+# %% [markdown]
+# ---
+# title: GARCH Model Implementation
+# author: Based on Engle (2001)
+# format:
+#   html:
+#     toc: true
+#     toc-depth: 3
+#     code-fold: true
+#     theme: cosmo
+#     highlight-style: github
+# execute:
+#   echo: true
+#   warning: false
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .qmd
+#       format_name: quarto
+#       format_version: '1.0'
+#       jupytext_version: 1.17.0
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+#     path: /usr/local/share/jupyter/kernels/python3
+# ---
 
-```{python}
-#| label: setup
+# %%
+# | label: setup
 import logging
-import os
-import sys
 from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
+import yfinance as yf
 from plotnine import *
 from scipy import stats
+
+from src.utils import calculate_returns, fetch_stock_data, fit_garch, plot_volatility
 
 # Configure logging
 logging.basicConfig(
@@ -32,25 +45,30 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Add the src directory to the Python path
-sys.path.append(os.path.join(os.path.dirname(os.getcwd()), "src"))
 
 # Import our GARCH implementation functions
-from utils import calculate_returns, fetch_stock_data, fit_garch, plot_volatility
-```
 
-# Data Preparation
+# %% [markdown]
+# # Data Preparation
+#
+# ## Fetching Stock Data
+#
+# We'll fetch S&P 500 data using our implementation function:
 
-## Fetching Stock Data
-
-We'll fetch S&P 500 data using our implementation function:
-
-```{python}
-#| label: fetch-data
+# %%
+# | label: fetch-data
 # Parameters
 symbol = "^GSPC"  # S&P 500 index
 end_date = datetime.now()
+
 start_date = end_date - timedelta(days=365 * 2)  # 2 years of data
+
+yf.download(
+    symbol,
+    start=start_date,
+    end=end_date,
+    progress=True,
+)
 
 # Fetch data using our implementation
 logger.info("Fetching data...")
@@ -58,28 +76,28 @@ prices = fetch_stock_data(symbol, start_date, end_date)
 
 # Display the first few rows
 prices.head()
-```
 
-## Calculating Returns
+# %% [markdown]
+# ## Calculating Returns
+#
+# Next, we calculate the log returns using our implementation function:
 
-Next, we calculate the log returns using our implementation function:
-
-```{python}
-#| label: calculate-returns
+# %%
+# | label: calculate-returns
 # Calculate log returns using our implementation
 returns = calculate_returns(prices)
 
 # Display the first few rows
 returns.head()
-```
 
-## Visualizing Price and Returns
+# %% [markdown]
+# ## Visualizing Price and Returns
+#
+# Let's visualize both the price series and returns using plotnine:
 
-Let's visualize both the price series and returns using plotnine:
-
-```{python}
-#| label: visualize-data
-#| fig-cap: S&P 500 Price and Log Returns
+# %%
+# | label: visualize-data
+# | fig-cap: S&P 500 Price and Log Returns
 
 # Create dataframes for plotting
 price_df = pd.DataFrame({"Date": prices.index, "Price": prices.values})
@@ -115,16 +133,16 @@ returns_plot = (
 # Display plots
 print(price_plot)
 print(returns_plot)
-```
 
-# GARCH Model Estimation
+# %% [markdown]
+# # GARCH Model Estimation
+#
+# ## Fitting the GARCH(1,1) Model
+#
+# Now we'll fit a GARCH(1,1) model to the returns data using our implementation:
 
-## Fitting the GARCH(1,1) Model
-
-Now we'll fit a GARCH(1,1) model to the returns data using our implementation:
-
-```{python}
-#| label: fit-garch
+# %%
+# | label: fit-garch
 # Fit GARCH(1,1) model using our implementation
 logger.info("Fitting GARCH(1,1) model...")
 results = fit_garch(returns)
@@ -132,55 +150,55 @@ results = fit_garch(returns)
 # Display model summary
 logger.info("\nModel Summary:")
 logger.info(results.summary())
-```
 
-## Model Parameters
+# %% [markdown]
+# ## Model Parameters
+#
+# The GARCH(1,1) model is specified as:
+#
+# $$\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
+#
+# where:
+# - $\sigma_t^2$ is the conditional variance
+# - $\omega$ is the constant term
+# - $\alpha_1$ is the ARCH effect
+# - $\beta_1$ is the GARCH effect
+# - $\varepsilon_{t-1}^2$ is the squared lagged returns
+# - $\sigma_{t-1}^2$ is the lagged conditional variance
+#
+# Let's extract and display the model parameters:
 
-The GARCH(1,1) model is specified as:
-
-$$\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
-
-where:
-- $\sigma_t^2$ is the conditional variance
-- $\omega$ is the constant term
-- $\alpha_1$ is the ARCH effect
-- $\beta_1$ is the GARCH effect
-- $\varepsilon_{t-1}^2$ is the squared lagged returns
-- $\sigma_{t-1}^2$ is the lagged conditional variance
-
-Let's extract and display the model parameters:
-
-```{python}
-#| label: model-parameters
+# %%
+# | label: model-parameters
 # Extract parameters
 params = results.params
 print("Model Parameters:")
 for param, value in params.items():
     print(f"{param}: {value:.6f}")
-```
 
-# Volatility Analysis
+# %% [markdown]
+# # Volatility Analysis
+#
+# ## Conditional Volatility
+#
+# Let's plot the conditional volatility using our implementation:
 
-## Conditional Volatility
-
-Let's plot the conditional volatility using our implementation:
-
-```{python}
-#| label: plot-volatility
-#| fig-cap: Conditional Volatility
+# %%
+# | label: plot-volatility
+# | fig-cap: Conditional Volatility
 
 # Create volatility plot using our implementation
 volatility_plot = plot_volatility(results, returns)
 plt.show()
-```
 
-## Model Diagnostics
+# %% [markdown]
+# ## Model Diagnostics
+#
+# Let's examine the model residuals using plotnine:
 
-Let's examine the model residuals using plotnine:
-
-```{python}
-#| label: model-diagnostics
-#| fig-cap: Standardized Residuals and Q-Q Plot
+# %%
+# | label: model-diagnostics
+# | fig-cap: Standardized Residuals and Q-Q Plot
 
 # Get standardized residuals
 std_resid = results.resid / np.sqrt(results.conditional_volatility)
@@ -213,30 +231,30 @@ stats.probplot(std_resid, dist="norm", plot=ax2)
 ax2.set_title("Q-Q Plot of Standardized Residuals")
 plt.tight_layout()
 plt.show()
-```
 
-# Volatility Forecasting
+# %% [markdown]
+# # Volatility Forecasting
+#
+# ## Generating Forecasts
+#
+# Let's generate volatility forecasts:
 
-## Generating Forecasts
-
-Let's generate volatility forecasts:
-
-```{python}
-#| label: forecast
+# %%
+# | label: forecast
 # Generate forecasts
 logger.info("Generating volatility forecast...")
 forecast = results.forecast(horizon=5)
 logger.info("\nVolatility Forecast:")
 logger.info(forecast.variance.iloc[-1])
-```
 
-## Visualizing Forecasts
+# %% [markdown]
+# ## Visualizing Forecasts
+#
+# Let's visualize the forecast using plotnine:
 
-Let's visualize the forecast using plotnine:
-
-```{python}
-#| label: plot-forecast
-#| fig-cap: Volatility Forecast
+# %%
+# | label: plot-forecast
+# | fig-cap: Volatility Forecast
 
 # Create dataframes for historical and forecast data
 historical_df = pd.DataFrame(
@@ -276,16 +294,17 @@ forecast_plot = (
 
 # Display plot
 print(forecast_plot)
-```
 
-# Conclusion
-
-This implementation demonstrates the key components of GARCH modeling:
-
-1. Data preparation and log returns calculation
-2. GARCH(1,1) model estimation
-3. Volatility analysis and visualization
-4. Model diagnostics
-5. Volatility forecasting
-
-The GARCH model provides a powerful framework for modeling and forecasting financial volatility, which is essential for risk management and asset pricing.
+# %% [markdown]
+# # Conclusion
+#
+# This implementation demonstrates the key components of GARCH modeling:
+#
+# 1. Data preparation and log returns calculation
+# 2. GARCH(1,1) model estimation
+# 3. Volatility analysis and visualization
+# 4. Model diagnostics
+# 5. Volatility forecasting
+#
+# The GARCH model provides a powerful framework for modeling and forecasting financial volatility, which is essential for risk management and asset pricing.
+# The GARCH model provides a powerful framework for modeling and forecasting financial volatility, which is essential for risk management and asset pricing.
