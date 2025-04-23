@@ -2,30 +2,6 @@
 
 This project implements GARCH (Generalized Autoregressive Conditional Heteroskedasticity) models based on the paper "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics" by Robert F. Engle.
 
-## Project Structure
-
-```
-.
-├── src/
-│   ├── __init__.py            # Package initialization
-│   ├── garch.py        # Main GARCH implementation and analysis
-│   └── utils.py               # Utility functions for data processing
-├── notebooks/
-│   ├── garch.qmd       # Quarto document with interactive analysis
-│   ├── garch.ipynb     # Jupyter notebook version of the analysis
-│   ├── garch_presentation.qmd # Quarto presentation on GARCH models
-│   ├── garch_presentation.html # Rendered presentation
-│   └── custom.css             # Custom CSS for the presentation
-├── data/                      # Directory for storing financial data
-├── papers/
-│   └── Engle-GARCH101Use-2001.pdf # The original research paper
-├── requirements.txt           # Project dependencies
-├── .pre-commit-config.yaml    # Pre-commit hooks configuration
-├── pyproject.toml            # Tool configuration
-├── .python-version           # Python version specification
-└── README.md                 # This file
-```
-
 ## Features
 
 - GARCH(1,1) model implementation using the ARCH package
@@ -40,29 +16,31 @@ This project implements GARCH (Generalized Autoregressive Conditional Heterosked
 ## Requirements
 
 - Python 3.10+ (specified in .python-version)
-- Required packages listed in requirements.txt
+- Poetry (for dependency management)
 - Quarto (for rendering the Quarto document)
 - pre-commit (for code quality checks)
+- easy-commit (optional, for writing more meaningful and easier commits)
+- vscode / jupyter notebook / jupyterlab (optional, for features such as syncing up .qmd / .md / .ipynb / .py files)
 
 ## Installation
 
 1. Clone this repository
-2. Create a virtual environment (recommended):
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Unix/macOS
-   # or
-   .\venv\Scripts\activate  # On Windows
+   git clone https://github.com/kwojdalski/garch_project/
+   ```
+2. Install Poetry if you haven't already:
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
    ```
 3. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   poetry install
    ```
 4. Install Quarto (optional, for rendering the Quarto document):
    - Download from [Quarto website](https://quarto.org/docs/get-started/)
 5. Set up pre-commit hooks:
    ```bash
-   pre-commit install
+   poetry run pre-commit install
    ```
 
 ## Usage
@@ -73,24 +51,24 @@ The main analysis can be run in several ways:
 
 1. Using the Python script:
    ```bash
-   python src/garch_quarto.py
+   poetry run python src/garch.py
    ```
 
 2. Using the Jupyter Notebook:
    ```bash
-   jupyter notebook notebooks/garch_quarto.ipynb
+   poetry run jupyter notebook notebooks/garch.ipynb
    ```
 
 3. Using the Quarto document:
    ```bash
-   quarto render notebooks/garch_quarto.qmd
+   poetry run quarto render notebooks/garch.qmd
    ```
 
 ### Using the Quarto Presentation
 
 1. Render the Quarto presentation:
    ```bash
-   quarto render notebooks/garch_presentation.qmd
+   poetry run quarto render notebooks/garch_presentation.qmd
    ```
 2. Open the generated HTML file in your browser
 3. Use arrow keys or space to navigate through the slides
@@ -100,7 +78,7 @@ The main analysis can be run in several ways:
 This project uses pre-commit hooks to ensure code quality. The hooks are automatically run when you commit changes, but you can also run them manually:
 
 ```bash
-pre-commit run --all-files
+poetry run pre-commit run --all-files
 ```
 
 The following hooks are configured:
@@ -116,7 +94,7 @@ The following hooks are configured:
 For quick commits with automatic formatting, you can use [easy-commit](https://pypi.org/project/easy-commit/):
 
 ```bash
-easy-commit "Your commit message"
+poetry run easy-commit "Your commit message"
 ```
 
 ### VS Code Tasks
