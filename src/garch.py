@@ -53,6 +53,24 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # %% [markdown]
+# # Introduction
+#
+# ## Background
+#
+# This project aims to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility.
+#
+# The replication focuses on the following:
+#
+# 1. Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle's paper
+# 2. Calculating and analyzing portfolio returns
+# 3. Fitting a GARCH(1,1) model to the portfolio returns
+# 4. Examining the model's performance in capturing volatility clustering
+# 5. Generating volatility forecasts in the same manner as Engle did
+#
+# By following Engle's methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.
+#
+#
+#
 # # Data Preparation
 #
 # ## Portfolio Composition
@@ -65,6 +83,20 @@ logger = logging.getLogger(__name__)
 #
 # [^1]: Potentially ^TNX, this needs to be checked further on.
 #
+# #### Problems with the data
+#
+# Engle described the data set as follows:
+#
+# > Let's use the GARCH(1,1) tools to estimate the 1 percent
+#  value at risk of a $1,000,000 portfolio on March 23, 2000. This portfolio consists of
+#  50 percent Nasdaq, 30 percent DowJones and 20 percent long bonds. The long
+#  bond is a ten-year constant maturity Treasury. The portfolio has constant proportions of wealth
+#  in each asset that would entail some rebalancing over time.
+#
+# Due to vagueness of the claim above, we'll try to reverse engineer the portfolio, but it's not
+# a perfect solution. When we calculate return on the portfolio, we implictly assume daily rebalancing, i.e.,
+# weights are constant.
+#
 # ## Fetching Stock Data
 #
 # We'll fetch the portfolio components data using the implemented function:
@@ -72,7 +104,7 @@ logger = logging.getLogger(__name__)
 # - The function is implemented in `src/utils.py`
 # - it uses `yfinance` - a Python package for downloading stock data from Yahoo Finance
 # - start and end dates are taken from the article
-# - weights for portfolio components are taken from the article
+# - weights for portfolio components are taken from the article, i.e. 50% Nasdaq, 30% Dow Jones, and 20% 10-year Treasury.
 
 # %%
 # | label: fetch-data
@@ -145,7 +177,6 @@ prices = prices.join(tnote_yield["^TNX"])
 # $$r_t = \ln \left( \frac{P_t}{P_{t-1}} \right)$$
 #
 # where $P_t$ is the price at time $t$.
-#
 
 # %%
 # | label: calculate-returns
@@ -164,13 +195,41 @@ returns["portfolio"] = portfolio_returns
 # %% [markdown]
 # ## Visualizing Price and Returns
 #
-# Let's visualize returns for all data series and compare with the plot from the article
+# Let's visualize prices (excl. portfolio) and returns for all data series and compare with the plot from the article.
+#
+# Visual inspection of the plot below shows that the data is very similar to the one in the article. The only difference is `^TNX` which doesn't overlap perfectly with plots from the article (could be easily spotted by looking at the outliers.)
+#
+# Possible explanation:
+#  The 10-year Treasury Constant Maturity Rate (^TNX) is a model-derived value rather than an actual market price. Since new 10-year Treasury bonds aren't issued daily, the constant maturity yield represents a theoretical value of what a 10-year Treasury security would yield if issued at current market conditions. This value is calculated through interpolation of yields from Treasury securities with similar credit quality but different maturities. While this approximation closely tracks what an actual new 10-year bond would yield, small discrepancies can exist. Nevertheless, the constant maturity rate provides valuable insights into market expectations regarding inflation, economic growth, and future interest rates.
+#
+# Hence, it's likely that Engle's methodology and / or selection of the securities with the same level of credit riskiness is different than the one used by Federal Reserve Bank of St. Louis in 2025.
+#
+
+# %%
+# | label: fig-prices
+# | fig-cap: Nasdaq, Dow Jones and Bond Prices
+# | fig-subcap:
+# |   - 'Sample: March 23, 1990 to March 23, 2000.'
+prices_df = pd.DataFrame(prices).reset_index()
+prices_df = pd.melt(prices_df, id_vars=["Date"], var_name="Symbol", value_name="Price")
+prices_plot = (
+    ggplot(prices_df, aes(x="Date", y="Price", color="Symbol"))
+    + facet_wrap("Symbol", scales="free_y", ncol=1)
+    + geom_line(color="#FF9900")
+    + labs(title="", x="Date", y="Price")
+)
+prices_plot
+
+# %% [markdown]
+# #### Returns from the original paper (for reference)
+# ![Returns from the original paper](../data/screenshots/returns.png)
+#
 
 # %%
 # | label: fig-returns
 # | fig-cap: Nasdaq, Dow Jones and Bond Returns
 # | fig-subcap:
-# |   - "Sample: March 23, 1990 to March 23, 2000."
+# |   - 'Sample: March 23, 1990 to March 23, 2000.'
 returns_df = pd.DataFrame(returns).reset_index()
 returns_df = pd.melt(
     returns_df, id_vars=["Date"], var_name="Symbol", value_name="Return"
@@ -192,6 +251,9 @@ returns_plot
 
 # %% [markdown]
 # ## Portfolio Statistics
+#
+# #### Article Portfolio Statistics (for reference)
+# ![Portfolio Statistics](../data/screenshots/portfolio_statistics.png)
 
 # %%
 # | label: tbl-portfolio-stats
@@ -212,6 +274,9 @@ portfolio_stats
 # * These differences in the Rate component are the primary reason for the slight variation between our replicated portfolio and the one presented in the paper
 #
 # ## ACF of Squared Portfolio Returns
+#
+# #### Article ACF of Squared Portfolio Returns (for reference)
+# ![ACF of Squared Portfolio Returns](../data/screenshots/squared_returns.png)
 
 # %%
 # | label: tbl-portfolio-returns
@@ -236,24 +301,20 @@ acf_plot
 # - $\beta_1$ is the GARCH effect
 # - $\varepsilon_{t-1}^2$ is the squared lagged returns
 # - $\sigma_{t-1}^2$ is the lagged conditional variance
-
-
-# %% [markdown]
+#
 # ## GARCH Model Estimation
 #
 # ### Fitting the GARCH(1,1) Model
 #
 # Now we'll fit a GARCH(1,1) model to the returns
+#
+# #### Article GARCH(1,1) Model (for reference)
+# ![GARCH(1,1) Model](../data/screenshots/garch_one_one.png)
 
 # %%
 # | label: tbl-garch-one-one
 # | tbl-cap: GARCH(1,1)
 # | tbl-cap-location: top
-# | tbl-subcap:
-# |   - "Notes: Dependent Variable: PORT."
-# |   - "Sample (adjusted): March 23, 1990 to March 23, 2000."
-# |   - "Convergence achieved after 16 iterations."
-# |   - "Bollerslev-Woodridge robust standard errors and covariance."
 
 logger.info("Fitting GARCH(1,1) model...")
 results = fit_garch(returns["portfolio"])
@@ -276,9 +337,12 @@ model_results = pd.DataFrame(
 )
 model_results
 
-
 # %% [markdown]
 # ## ACF of Squared Standardized Residuals
+#
+#
+# #### Article ACF of Squared Standardized Residuals (for reference)
+# ![ACF of Squared Standardized Residuals](../data/screenshots/squared_standardized_residuals.png)
 
 # %%
 # | label: tbl-squared-residuals
@@ -392,3 +456,12 @@ forecast_plot = (
 
 # Display plot
 forecast_plot
+
+# %% [markdown]
+# # References
+#
+# * Engle, R. F. (2001). GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics. Journal of Economic Perspectives, 15(4), 157-168.
+# * Kaggle. (2023). Dow Jones Industrial Average (^DJI) Data. [Dataset]. Available at: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data
+# * St. Louis Fed. (2023). 10-Year Treasury Constant Maturity Rate [^TNX]. [Dataset]. Available at: https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02
+# * Yahoo Finance. (2023). [Dataset]. Available at: https://finance.yahoo.com/quote/%5EIXIC/history?period1=631152000&period2=1713878400&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true
+# * GenAI used for proof checking and type hinting
