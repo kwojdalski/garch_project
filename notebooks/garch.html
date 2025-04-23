@@ -137,7 +137,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#garch-model" id="toc-garch-model" class="nav-link" data-scroll-target="#garch-model">GARCH Model</a>
   <ul class="collapse">
-  <li><a href="#model-parameters" id="toc-model-parameters" class="nav-link" data-scroll-target="#model-parameters">Model Parameters</a></li>
+  <li><a href="#model-specification" id="toc-model-specification" class="nav-link" data-scroll-target="#model-specification">Model Specification</a></li>
   <li><a href="#garch-model-estimation" id="toc-garch-model-estimation" class="nav-link" data-scroll-target="#garch-model-estimation">GARCH Model Estimation</a>
   <ul class="collapse">
   <li><a href="#fitting-the-garch11-model" id="toc-fitting-the-garch11-model" class="nav-link" data-scroll-target="#fitting-the-garch11-model">Fitting the GARCH(1,1) Model</a></li>
@@ -315,6 +315,9 @@ window.Quarto = {
 <span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Apparently, DJIA data is missing for 1990-1992, so we'll drop it</span></span>
 <span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.drop(columns<span class="op">=</span>[<span class="st">"^DJI"</span>, <span class="st">"^TNX"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stdout">
+<pre><code>YF.download() has changed argument auto_adjust default to True</code></pre>
+</div>
 </div>
 <section id="rate-and-dow-jones-industrial-average-dji" class="level3">
 <h3 class="anchored" data-anchor-id="rate-and-dow-jones-industrial-average-dji">RATE and Dow Jones Industrial Average (^DJI)</h3>
@@ -322,34 +325,34 @@ window.Quarto = {
 <p>For RATE we used a good proxy which we found here looks like a good proxy for TNX, we’ll use data we found <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&amp;chart_type=line&amp;drp=0&amp;fo=open%20sans&amp;graph_bgcolor=%23ffffff&amp;height=450&amp;mode=fred&amp;recession_bars=on&amp;txtcolor=%23444444&amp;ts=12&amp;tts=12&amp;width=1320&amp;nt=0&amp;thu=0&amp;trc=0&amp;show_legend=yes&amp;show_axis_titles=yes&amp;show_tooltip=yes&amp;id=DGS10&amp;scale=left&amp;cosd=2020-04-17&amp;coed=2025-04-17&amp;line_color=%230073e6&amp;link_values=false&amp;line_style=solid&amp;mark_type=none&amp;mw=3&amp;lw=3&amp;ost=-99999&amp;oet=99999&amp;mma=0&amp;fml=a&amp;fq=Daily&amp;fam=avg&amp;fgst=liin&amp;fgsnd=2020-02-01&amp;line_index=1&amp;transformation=lin&amp;vintage_date=2025-04-22&amp;revision_date=2025-04-22&amp;nd=1962-01-02">here</a></p>
 <section id="djia-data-retrieval" class="level4">
 <h4 class="anchored" data-anchor-id="djia-data-retrieval">DJIA data retrieval</h4>
-<div id="be4be257" class="cell" data-execution_count="3">
+<div id="47b568a1" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>djia_prices <span class="op">=</span> pd.read_csv(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data/dja-performance-report-daily.csv"</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    index_col<span class="op">=</span><span class="st">"Effective Date"</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    parse_dates<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>djia_prices <span class="op">=</span> djia_prices.rename(columns<span class="op">=</span>{<span class="st">"Close Value"</span>: <span class="st">"^DJI"</span>})</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.join(djia_prices[<span class="st">"^DJI"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>djia_prices <span class="op">=</span> pd.read_csv(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data/dja-performance-report-daily.csv"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    index_col<span class="op">=</span><span class="st">"Effective Date"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    parse_dates<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>djia_prices <span class="op">=</span> djia_prices.rename(columns<span class="op">=</span>{<span class="st">"Close Value"</span>: <span class="st">"^DJI"</span>})</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.join(djia_prices[<span class="st">"^DJI"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="rate-data-retrieval" class="level4">
 <h4 class="anchored" data-anchor-id="rate-data-retrieval">RATE data retrieval</h4>
 <p>Data has been obtained from the hyperlink</p>
-<div id="808ec007" class="cell" data-execution_count="4">
+<div id="a2467a28" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tnote_yield <span class="op">=</span> pd.read_csv(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data/DGS10.csv"</span>,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    index_col<span class="op">=</span><span class="st">"observation_date"</span>,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    parse_dates<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>tnote_yield <span class="op">=</span> tnote_yield.rename(columns<span class="op">=</span>{<span class="st">"DGS10"</span>: <span class="st">"^TNX"</span>})</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># tnote yield is not exactly the price, but we merge it anyway</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.join(tnote_yield[<span class="st">"^TNX"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tnote_yield <span class="op">=</span> pd.read_csv(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data/DGS10.csv"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    index_col<span class="op">=</span><span class="st">"observation_date"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    parse_dates<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>tnote_yield <span class="op">=</span> tnote_yield.rename(columns<span class="op">=</span>{<span class="st">"DGS10"</span>: <span class="st">"^TNX"</span>})</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># tnote yield is not exactly the price, but we merge it anyway</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.join(tnote_yield[<span class="st">"^TNX"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -363,17 +366,17 @@ window.Quarto = {
 <div id="calculate-returns" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>returns <span class="op">=</span> calculate_returns(prices)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>portfolio_prices <span class="op">=</span> pd.Series(<span class="dv">0</span>, index<span class="op">=</span>prices.index, dtype<span class="op">=</span><span class="bu">float</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply weights to each component</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> symbol, weight <span class="kw">in</span> weights.items():</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use pandas multiplication and addition</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    portfolio_returns <span class="op">=</span> portfolio_prices.add(returns[symbol].multiply(weight))</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Add portfolio returns to the returns DataFrame</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>returns[<span class="st">"portfolio"</span>] <span class="op">=</span> portfolio_returns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>returns <span class="op">=</span> calculate_returns(prices)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>portfolio_prices <span class="op">=</span> pd.Series(<span class="dv">0</span>, index<span class="op">=</span>prices.index, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply weights to each component</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> symbol, weight <span class="kw">in</span> weights.items():</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use pandas multiplication and addition</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    portfolio_returns <span class="op">=</span> portfolio_prices.add(returns[symbol].multiply(weight))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Add portfolio returns to the returns DataFrame</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>returns[<span class="st">"portfolio"</span>] <span class="op">=</span> portfolio_returns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -386,17 +389,17 @@ window.Quarto = {
 <div id="cell-fig-prices" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>prices_df <span class="op">=</span> pd.DataFrame(prices).reset_index()</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>prices_df <span class="op">=</span> pd.melt(</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    prices_df, id_vars<span class="op">=</span>[<span class="st">"Date"</span>], var_name<span class="op">=</span><span class="st">"Symbol"</span>, value_name<span class="op">=</span><span class="st">"Price"</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>prices_plot <span class="op">=</span> (</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    ggplot(prices_df, aes(x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Price"</span>, color<span class="op">=</span><span class="st">"Symbol"</span>))</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> facet_wrap(<span class="st">"Symbol"</span>, scales<span class="op">=</span><span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line(color<span class="op">=</span><span class="st">"#FF9900"</span>)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span><span class="st">""</span>, x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Price"</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>prices_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>prices_df <span class="op">=</span> pd.DataFrame(prices).reset_index()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>prices_df <span class="op">=</span> pd.melt(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    prices_df, id_vars<span class="op">=</span>[<span class="st">"Date"</span>], var_name<span class="op">=</span><span class="st">"Symbol"</span>, value_name<span class="op">=</span><span class="st">"Price"</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>prices_plot <span class="op">=</span> (</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ggplot(prices_df, aes(x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Price"</span>, color<span class="op">=</span><span class="st">"Symbol"</span>))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> facet_wrap(<span class="st">"Symbol"</span>, scales<span class="op">=</span><span class="st">"free_y"</span>, ncol<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line(color<span class="op">=</span><span class="st">"#FF9900"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span><span class="st">""</span>, x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Price"</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>prices_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-prices" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -423,24 +426,24 @@ Figure&nbsp;1: Sample: March 23, 1990 to March 23, 2000.
 <div id="cell-fig-returns" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>returns_df <span class="op">=</span> pd.DataFrame(returns).reset_index()</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>returns_df <span class="op">=</span> pd.melt(</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    returns_df, id_vars<span class="op">=</span>[<span class="st">"Date"</span>], var_name<span class="op">=</span><span class="st">"Symbol"</span>, value_name<span class="op">=</span><span class="st">"Return"</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>returns_plot <span class="op">=</span> (</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ggplot(returns_df, aes(x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Return"</span>, color<span class="op">=</span><span class="st">"Symbol"</span>))</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> facet_wrap(<span class="st">"Symbol"</span>, scales<span class="op">=</span><span class="st">"free_y"</span>)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line(color<span class="op">=</span><span class="st">"#FF9900"</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span><span class="st">""</span>, x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Log Return"</span>)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">14</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        axis_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">12</span>),</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        axis_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">10</span>),</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>returns_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>returns_df <span class="op">=</span> pd.DataFrame(returns).reset_index()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>returns_df <span class="op">=</span> pd.melt(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    returns_df, id_vars<span class="op">=</span>[<span class="st">"Date"</span>], var_name<span class="op">=</span><span class="st">"Symbol"</span>, value_name<span class="op">=</span><span class="st">"Return"</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>returns_plot <span class="op">=</span> (</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    ggplot(returns_df, aes(x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Return"</span>, color<span class="op">=</span><span class="st">"Symbol"</span>))</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> facet_wrap(<span class="st">"Symbol"</span>, scales<span class="op">=</span><span class="st">"free_y"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line(color<span class="op">=</span><span class="st">"#FF9900"</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span><span class="st">""</span>, x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Log Return"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">14</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        axis_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">12</span>),</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        axis_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">10</span>),</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>returns_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-returns" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -460,6 +463,7 @@ Figure&nbsp;2: Sample: March 23, 1990 to March 23, 2000.
 </section>
 <section id="portfolio-statistics" class="level2">
 <h2 class="anchored" data-anchor-id="portfolio-statistics">Portfolio Statistics</h2>
+<p>It must be stated that as the input for the data is slightly different (inadequate information), all data further on is going to be different than the one in the article. We will attempt to compare it, though.</p>
 <section id="article-portfolio-statistics-for-reference" class="level4">
 <h4 class="anchored" data-anchor-id="article-portfolio-statistics-for-reference">Article Portfolio Statistics (for reference)</h4>
 <div class="quarto-figure quarto-figure-center">
@@ -471,8 +475,8 @@ Figure&nbsp;2: Sample: March 23, 1990 to March 23, 2000.
 <div class="cell" data-execution_count="8" data-tbl-cap-location="top">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>portfolio_stats <span class="op">=</span> calculate_portfolio_stats(returns)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>portfolio_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>portfolio_stats <span class="op">=</span> calculate_portfolio_stats(returns)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>portfolio_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-portfolio-stats" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-execution_count="8">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -480,7 +484,7 @@ Figure&nbsp;2: Sample: March 23, 1990 to March 23, 2000.
 Table&nbsp;1: Portfolio Statistics
 </figcaption>
 <div aria-describedby="tbl-portfolio-stats-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="38">
+<div class="cell-output cell-output-display" data-execution_count="8">
 <div>
 
 
@@ -546,6 +550,7 @@ Table&nbsp;1: Portfolio Statistics
 </section>
 <section id="acf-of-squared-portfolio-returns" class="level2">
 <h2 class="anchored" data-anchor-id="acf-of-squared-portfolio-returns">ACF of Squared Portfolio Returns</h2>
+<p>The goal of running the autocorrelation function (ACF) for squared returns is to detect volatility clustering. Significance in autocorrelations in squared returns indicate that large changes tend to be followed by large changes (of either sign) and small changes tend to be followed by small changes, which is a key characteristic of GARCH models.</p>
 <section id="article-acf-of-squared-portfolio-returns-for-reference" class="level4">
 <h4 class="anchored" data-anchor-id="article-acf-of-squared-portfolio-returns-for-reference">Article ACF of Squared Portfolio Returns (for reference)</h4>
 <div class="quarto-figure quarto-figure-center">
@@ -557,8 +562,8 @@ Table&nbsp;1: Portfolio Statistics
 <div class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>acf_plot <span class="op">=</span> calculate_acf_table(returns[<span class="st">"portfolio"</span>])</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>acf_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>acf_plot <span class="op">=</span> calculate_acf_table(returns[<span class="st">"portfolio"</span>])</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>acf_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-portfolio-returns" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="9">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -566,7 +571,7 @@ Table&nbsp;1: Portfolio Statistics
 Table&nbsp;2: Autocorrelations of Squared Portfolio Returns
 </figcaption>
 <div aria-describedby="tbl-portfolio-returns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="39">
+<div class="cell-output cell-output-display" data-execution_count="9">
 <div>
 
 
@@ -684,9 +689,9 @@ Table&nbsp;2: Autocorrelations of Squared Portfolio Returns
 </section>
 <section id="garch-model" class="level1">
 <h1>GARCH Model</h1>
-<section id="model-parameters" class="level2">
-<h2 class="anchored" data-anchor-id="model-parameters">Model Parameters</h2>
-<p>The GARCH(1,1) model is specified as:</p>
+<section id="model-specification" class="level2">
+<h2 class="anchored" data-anchor-id="model-specification">Model Specification</h2>
+<p>The GARCH(1,1) model is given as:</p>
 <p><span class="math display">\[\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2\]</span></p>
 <p>where:</p>
 <ul>
@@ -702,7 +707,8 @@ Table&nbsp;2: Autocorrelations of Squared Portfolio Returns
 <h2 class="anchored" data-anchor-id="garch-model-estimation">GARCH Model Estimation</h2>
 <section id="fitting-the-garch11-model" class="level3">
 <h3 class="anchored" data-anchor-id="fitting-the-garch11-model">Fitting the GARCH(1,1) Model</h3>
-<p>Now we’ll fit a GARCH(1,1) model to the returns</p>
+<p>Now we’ll fit a GARCH(1,1) model to the returns and retrieve values of the coefficients with their standard errors, z-statistics, and p-values.</p>
+<p>As we can see, the output from the article is similar to the one we got.</p>
 <section id="article-garch11-model-for-reference" class="level4">
 <h4 class="anchored" data-anchor-id="article-garch11-model-for-reference">Article GARCH(1,1) Model (for reference)</h4>
 <div class="quarto-figure quarto-figure-center">
@@ -714,26 +720,26 @@ Table&nbsp;2: Autocorrelations of Squared Portfolio Returns
 <div class="cell" data-execution_count="10" data-tbl-cap-location="top">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"Fitting GARCH(1,1) model..."</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> fit_garch(returns[<span class="st">"portfolio"</span>])</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>logger.info(results.summary())</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract coefficients, standard errors, z-statistics, and p-values</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>coef <span class="op">=</span> results.params</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>std_err <span class="op">=</span> results.std_err</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>z_stat <span class="op">=</span> coef <span class="op">/</span> std_err</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>p_values <span class="op">=</span> results.pvalues</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a DataFrame to display the results</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>model_results <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Coef"</span>: coef,</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"St. Err"</span>: std_err,</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Z-Stat"</span>: z_stat,</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"P-Value"</span>: p_values,</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>model_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"Fitting GARCH(1,1) model..."</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> fit_garch(returns[<span class="st">"portfolio"</span>])</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>logger.info(results.summary())</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract coefficients, standard errors, z-statistics, and p-values</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>coef <span class="op">=</span> results.params</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>std_err <span class="op">=</span> results.std_err</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>z_stat <span class="op">=</span> coef <span class="op">/</span> std_err</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>p_values <span class="op">=</span> results.pvalues</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a DataFrame to display the results</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>model_results <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Coef"</span>: coef,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"St. Err"</span>: std_err,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Z-Stat"</span>: z_stat,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"P-Value"</span>: p_values,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>model_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-garch-one-one" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-execution_count="10">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -741,7 +747,7 @@ Table&nbsp;2: Autocorrelations of Squared Portfolio Returns
 Table&nbsp;3: GARCH(1,1)
 </figcaption>
 <div aria-describedby="tbl-garch-one-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="40">
+<div class="cell-output cell-output-display" data-execution_count="10">
 <div>
 
 
@@ -798,6 +804,8 @@ Table&nbsp;3: GARCH(1,1)
 </section>
 <section id="acf-of-squared-standardized-residuals" class="level2">
 <h2 class="anchored" data-anchor-id="acf-of-squared-standardized-residuals">ACF of Squared Standardized Residuals</h2>
+<p>Section examines the autocorrelation function (ACF) of squared standardized residuals from the model. ACF helps us check if our model has successfully captured volatility clustering in the data.</p>
+<p>If the model is well-specified, these squared standardized residuals should show no significant autocorrelation, indicating that no predictable volatility patterns remain unexplained by the model.</p>
 <section id="article-acf-of-squared-standardized-residuals-for-reference" class="level4">
 <h4 class="anchored" data-anchor-id="article-acf-of-squared-standardized-residuals-for-reference">Article ACF of Squared Standardized Residuals (for reference)</h4>
 <div class="quarto-figure quarto-figure-center">
@@ -809,8 +817,8 @@ Table&nbsp;3: GARCH(1,1)
 <div class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>acf_plot <span class="op">=</span> calculate_acf_table(results.resid <span class="op">/</span> np.sqrt(results.conditional_volatility))</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>acf_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>acf_plot <span class="op">=</span> calculate_acf_table(results.resid <span class="op">/</span> np.sqrt(results.conditional_volatility))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>acf_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div id="tbl-squared-residuals" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="11">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -818,7 +826,7 @@ Table&nbsp;3: GARCH(1,1)
 Table&nbsp;4: Autocorrelations of Squared Standardized Residuals
 </figcaption>
 <div aria-describedby="tbl-squared-residuals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="41">
+<div class="cell-output cell-output-display" data-execution_count="11">
 <div>
 
 
@@ -942,8 +950,8 @@ Table&nbsp;4: Autocorrelations of Squared Standardized Residuals
 <div id="cell-fig-conditional-volatility" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>volatility_plot <span class="op">=</span> plot_volatility(results, returns)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>volatility_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>volatility_plot <span class="op">=</span> plot_volatility(results, returns)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>volatility_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-conditional-volatility" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -965,25 +973,25 @@ Figure&nbsp;3: Conditional Volatility
 <div id="cell-model-diagnostics" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get standardized residuals</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>std_resid <span class="op">=</span> results.resid <span class="op">/</span> np.sqrt(results.conditional_volatility)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dataframe for residuals</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>resid_df <span class="op">=</span> pd.DataFrame({<span class="st">"Date"</span>: std_resid.index, <span class="st">"Residual"</span>: std_resid.values})</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create residuals plot</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>resid_plot <span class="op">=</span> (</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    ggplot(resid_df, aes(x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Residual"</span>))</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line(color<span class="op">=</span><span class="st">"#FF9900"</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span><span class="st">"Standardized Residuals"</span>, x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Standardized Residual"</span>)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">14</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        axis_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">12</span>),</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        axis_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">10</span>),</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>resid_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get standardized residuals</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>std_resid <span class="op">=</span> results.resid <span class="op">/</span> np.sqrt(results.conditional_volatility)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dataframe for residuals</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>resid_df <span class="op">=</span> pd.DataFrame({<span class="st">"Date"</span>: std_resid.index, <span class="st">"Residual"</span>: std_resid.values})</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create residuals plot</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>resid_plot <span class="op">=</span> (</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    ggplot(resid_df, aes(x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Residual"</span>))</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line(color<span class="op">=</span><span class="st">"#FF9900"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span><span class="st">"Standardized Residuals"</span>, x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Standardized Residual"</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">14</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        axis_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">12</span>),</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        axis_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">10</span>),</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>resid_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="model-diagnostics" class="quarto-figure quarto-figure-center anchored">
@@ -1004,11 +1012,11 @@ Figure&nbsp;3: Conditional Volatility
 <div id="forecast" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate forecasts</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"Generating volatility forecast..."</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>forecast <span class="op">=</span> results.forecast(horizon<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"</span><span class="ch">\n</span><span class="st">Volatility Forecast:"</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>logger.info(forecast.variance.iloc[<span class="op">-</span><span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate forecasts</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"Generating volatility forecast..."</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>forecast <span class="op">=</span> results.forecast(horizon<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"</span><span class="ch">\n</span><span class="st">Volatility Forecast:"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>logger.info(forecast.variance.iloc[<span class="op">-</span><span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -1018,43 +1026,43 @@ Figure&nbsp;3: Conditional Volatility
 <div id="cell-fig-forecast" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dataframes for historical and forecast data</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>historical_df <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Date"</span>: returns.index[<span class="op">-</span><span class="dv">100</span>:],</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Volatility"</span>: np.sqrt(results.conditional_volatility[<span class="op">-</span><span class="dv">100</span>:]),</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Type"</span>: <span class="st">"Historical"</span>,</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>forecast_dates <span class="op">=</span> pd.date_range(returns.index[<span class="op">-</span><span class="dv">1</span>], periods<span class="op">=</span><span class="dv">6</span>)[<span class="dv">1</span>:]</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>forecast_df <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Date"</span>: forecast_dates,</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Volatility"</span>: np.sqrt(forecast.variance.iloc[<span class="op">-</span><span class="dv">1</span>]),</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Type"</span>: <span class="st">"Forecast"</span>,</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine dataframes</span></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>combined_df <span class="op">=</span> pd.concat([historical_df, forecast_df])</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create forecast plot</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>forecast_plot <span class="op">=</span> (</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    ggplot(combined_df, aes(x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Volatility"</span>, color<span class="op">=</span><span class="st">"Type"</span>))</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line()</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span><span class="st">"Volatility Forecast"</span>, x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Volatility"</span>)</span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_color_manual(values<span class="op">=</span>[<span class="st">"#3366CC"</span>, <span class="st">"#FF9900"</span>])</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">14</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>        axis_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">12</span>),</span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>        axis_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">10</span>),</span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>        legend_title<span class="op">=</span>element_blank(),</span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Display plot</span></span>
-<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>forecast_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dataframes for historical and forecast data</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>historical_df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Date"</span>: returns.index[<span class="op">-</span><span class="dv">100</span>:],</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Volatility"</span>: np.sqrt(results.conditional_volatility[<span class="op">-</span><span class="dv">100</span>:]),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Type"</span>: <span class="st">"Historical"</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>forecast_dates <span class="op">=</span> pd.date_range(returns.index[<span class="op">-</span><span class="dv">1</span>], periods<span class="op">=</span><span class="dv">6</span>)[<span class="dv">1</span>:]</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>forecast_df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Date"</span>: forecast_dates,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Volatility"</span>: np.sqrt(forecast.variance.iloc[<span class="op">-</span><span class="dv">1</span>]),</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Type"</span>: <span class="st">"Forecast"</span>,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine dataframes</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>combined_df <span class="op">=</span> pd.concat([historical_df, forecast_df])</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create forecast plot</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>forecast_plot <span class="op">=</span> (</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    ggplot(combined_df, aes(x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Volatility"</span>, color<span class="op">=</span><span class="st">"Type"</span>))</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_line()</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(title<span class="op">=</span><span class="st">"Volatility Forecast"</span>, x<span class="op">=</span><span class="st">"Date"</span>, y<span class="op">=</span><span class="st">"Volatility"</span>)</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> scale_color_manual(values<span class="op">=</span>[<span class="st">"#3366CC"</span>, <span class="st">"#FF9900"</span>])</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme(</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">14</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>        axis_title<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">12</span>),</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>        axis_text<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">10</span>),</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>        legend_title<span class="op">=</span>element_blank(),</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Display plot</span></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>forecast_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-forecast" class="quarto-float quarto-figure quarto-figure-center anchored">

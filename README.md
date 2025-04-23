@@ -21,7 +21,7 @@ This project implements GARCH (Generalized Autoregressive Conditional Heterosked
 - pre-commit (for code quality checks)
 - easy-commit (optional, for writing more meaningful and easier commits)
 - vscode / jupyter notebook / jupyterlab (optional, for features such as syncing up .qmd / .md / .ipynb / .py files)
-
+- [makedown](https://github.com/tzador/makedown) - for running this file as a script (`pip install --upgrade makedown`)
 ## Installation
 
 1. Clone this repository
@@ -42,6 +42,37 @@ This project implements GARCH (Generalized Autoregressive Conditional Heterosked
    ```bash
    poetry run pre-commit install
    ```
+## Makedown
+
+This project uses [makedown](https://github.com/tzador/makedown) to run commands directly from the README.md file. This allows you to execute the installation and usage commands directly from this documentation.
+
+### Automated Installation with Makedown
+
+To install automatically, run `makedown function`. For instance:
+```bash
+makedown install
+```
+
+If you have makedown installed, you can run the following commands directly from this README:
+## [install]() Installation of the project
+
+It might take a while (few minutes) to install the whole project...
+
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install -v
+poetry run pre-commit install --all-files
+pipx install quarto-cli
+```
+
+## [render_html]() Render HTML page
+
+Moreover it opens the rendered page.
+
+```bash
+quarto render notebooks/garch.qmd &&  open notebooks/garch.html
+```
+
 
 ## Usage
 

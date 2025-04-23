@@ -291,6 +291,10 @@ Nasdaq, Dow Jones and Bond Returns
 
 ## Portfolio Statistics
 
+It must be stated that as the input for the data is slightly different
+(inadequate information), all data further on is going to be different
+than the one in the article. We will attempt to compare it, though.
+
 #### Article Portfolio Statistics (for reference)
 
 ![Portfolio Statistics](../data/screenshots/portfolio_statistics.png)
@@ -304,7 +308,7 @@ portfolio_stats
 
 Table 1: Portfolio Statistics
 
-<div class="cell-output cell-output-display" execution_count="53">
+<div class="cell-output cell-output-display" execution_count="23">
 
 <div>
 <style scoped>
@@ -350,6 +354,13 @@ Our results show minor differences compared to Table 1 in Engle (2001):
 
 ## ACF of Squared Portfolio Returns
 
+The goal of running the autocorrelation function (ACF) for squared
+returns is to detect volatility clustering. Significance in
+autocorrelations in squared returns indicate that large changes tend to
+be followed by large changes (of either sign) and small changes tend to
+be followed by small changes, which is a key characteristic of GARCH
+models.
+
 #### Article ACF of Squared Portfolio Returns (for reference)
 
 ![ACF of Squared Portfolio
@@ -364,7 +375,7 @@ acf_plot
 
 Table 2: Autocorrelations of Squared Portfolio Returns
 
-<div class="cell-output cell-output-display" execution_count="54">
+<div class="cell-output cell-output-display" execution_count="24">
 
 <div>
 <style scoped>
@@ -405,9 +416,9 @@ Table 2: Autocorrelations of Squared Portfolio Returns
 
 # GARCH Model
 
-## Model Parameters
+## Model Specification
 
-The GARCH(1,1) model is specified as:
+The GARCH(1,1) model is given as:
 
 $$\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
 
@@ -424,7 +435,10 @@ where:
 
 ### Fitting the GARCH(1,1) Model
 
-Now we’ll fit a GARCH(1,1) model to the returns
+Now we’ll fit a GARCH(1,1) model to the returns and retrieve values of
+the coefficients with their standard errors, z-statistics, and p-values.
+
+As we can see, the output from the article is similar to the one we got.
 
 #### Article GARCH(1,1) Model (for reference)
 
@@ -457,7 +471,7 @@ model_results
 
 Table 3: GARCH(1,1)
 
-<div class="cell-output cell-output-display" execution_count="55">
+<div class="cell-output cell-output-display" execution_count="25">
 
 <div>
 <style scoped>
@@ -487,6 +501,14 @@ Table 3: GARCH(1,1)
 
 ## ACF of Squared Standardized Residuals
 
+Section examines the autocorrelation function (ACF) of squared
+standardized residuals from the model. ACF helps us check if our model
+has successfully captured volatility clustering in the data.
+
+If the model is well-specified, these squared standardized residuals
+should show no significant autocorrelation, indicating that no
+predictable volatility patterns remain unexplained by the model.
+
 #### Article ACF of Squared Standardized Residuals (for reference)
 
 ![ACF of Squared Standardized
@@ -501,7 +523,7 @@ acf_plot
 
 Table 4: Autocorrelations of Squared Standardized Residuals
 
-<div class="cell-output cell-output-display" execution_count="56">
+<div class="cell-output cell-output-display" execution_count="26">
 
 <div>
 <style scoped>
