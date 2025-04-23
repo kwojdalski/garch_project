@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 from arch import arch_model
-from plotnine import aes, element_text, geom_line, ggplot, labs, theme, theme_minimal
+from plotnine import aes, element_text, geom_line, ggplot, labs, theme
 from scipy import stats
 from statsmodels.tsa.stattools import acf as acf_stats
 
@@ -74,7 +74,6 @@ def plot_volatility(results, returns: pd.Series):
         ggplot(volatility_df, aes(x="Date", y="Volatility"))
         + geom_line()
         + labs(title="Conditional Volatility", x="Date", y="Volatility")
-        + theme_minimal()
         + theme(
             plot_title=element_text(size=14, face="bold"),
             axis_title=element_text(size=12),

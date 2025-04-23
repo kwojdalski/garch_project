@@ -1,8 +1,8 @@
 ---
-title: "GARCH Models in Financial Econometrics"
-subtitle: "Based on Engle (2001)"
-author: "GARCH Project"
-format: 
+title: GARCH Models in Financial Econometrics
+subtitle: Based on Engle (2001)
+author: GARCH Project
+format:
   revealjs:
     theme: default
     transition: slide
@@ -16,11 +16,12 @@ format:
     show-slide-number: all
     show-notes: true
     slide-level: 2
-    footer: "GARCH Model Implementation"
+    footer: GARCH Model Implementation
     css: custom.css
 execute:
   echo: false
   warning: false
+jupyter: python3
 ---
 
 # Introduction
@@ -74,8 +75,7 @@ The sum of alpha and beta is typically close to 1, indicating high persistence i
 
 # Implementation
 
-## Data Preparation
-```{python}
+## Data Preparation```{python}
 #| echo: true
 #| eval: false
 
@@ -136,16 +136,16 @@ price_plot = (ggplot(price_df, aes(x='Date', y='Price')) +
               geom_line(color='#3366CC') +
               labs(title='S&P 500 Price',
                    x='Date',
-                   y='Price') +
-              theme_minimal())
+                   y='Price')
+              )
 
 # Create returns plot
 returns_plot = (ggplot(returns_df, aes(x='Date', y='Return')) +
                 geom_line(color='#FF9900') +
                 labs(title='Log Returns',
                      x='Date',
-                     y='Log Return') +
-                theme_minimal())
+                     y='Log Return')
+                )
 ```
 
 ## Conditional Volatility
@@ -165,8 +165,8 @@ volatility_plot = (ggplot(volatility_df, aes(x='Date', y='Volatility')) +
                    geom_line(color='#3366CC') +
                    labs(title='Conditional Volatility',
                         x='Date',
-                        y='Volatility') +
-                   theme_minimal())
+                        y='Volatility')
+                   )
 ```
 
 # Applications
@@ -220,4 +220,4 @@ print(np.sqrt(forecast.variance.iloc[-1]))
 
 - Engle, R. F. (2001). GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics
 - Bollerslev, T. (1986). Generalized Autoregressive Conditional Heteroskedasticity
-- Tsay, R. S. (2010). Analysis of Financial Time Series 
+- Tsay, R. S. (2010). Analysis of Financial Time Series

@@ -1,6 +1,10 @@
+# %% [markdown]
 # ---
 # title: GARCH Model Implementation
-# author: Based on Engle (2001)
+# author:
+#   - name: "Krzysztof Wojdalski"
+#   - name: "Piotr"
+#   - name: "Shah"
 # format:
 #   html:
 #     toc: true
@@ -11,7 +15,37 @@
 # execute:
 #   echo: true
 #   warning: false
+# jupyter: python3
 # ---
+#
+#
+# # Introduction
+#
+# ## Background
+#
+# This project aims to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility.
+#
+# ### Rationale behind the Study
+#
+# 1) From the initial inspection of the article, easy to obtain data
+# 2) Well-known author so we asssumed that the methodology is sound and well-explained
+# 3) The author's research has had significant influence and impact in the field of time series analysis
+# 4) Research could be easily extended for different datasets / portfolios
+#
+#
+# ### Steps in the Research
+# The replication focuses on the following:
+#
+# 1. Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle's paper
+# 2. Calculating and analyzing portfolio returns
+# 3. Fitting a GARCH(1,1) model to the portfolio returns
+# 4. Examining the model's performance in capturing volatility clustering
+# 5. Generating volatility forecasts in the same manner as Engle did
+#
+# By following Engle's methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.
+#
+#
+# # Imports and Setup
 
 # %%
 # | label: setup
@@ -53,24 +87,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # %% [markdown]
-# # Introduction
-#
-# ## Background
-#
-# This project aims to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility.
-#
-# The replication focuses on the following:
-#
-# 1. Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle's paper
-# 2. Calculating and analyzing portfolio returns
-# 3. Fitting a GARCH(1,1) model to the portfolio returns
-# 4. Examining the model's performance in capturing volatility clustering
-# 5. Generating volatility forecasts in the same manner as Engle did
-#
-# By following Engle's methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.
-#
-#
-#
 # # Data Preparation
 #
 # ## Portfolio Composition
@@ -203,7 +219,6 @@ returns["portfolio"] = portfolio_returns
 #  The 10-year Treasury Constant Maturity Rate (^TNX) is a model-derived value rather than an actual market price. Since new 10-year Treasury bonds aren't issued daily, the constant maturity yield represents a theoretical value of what a 10-year Treasury security would yield if issued at current market conditions. This value is calculated through interpolation of yields from Treasury securities with similar credit quality but different maturities. While this approximation closely tracks what an actual new 10-year bond would yield, small discrepancies can exist. Nevertheless, the constant maturity rate provides valuable insights into market expectations regarding inflation, economic growth, and future interest rates.
 #
 # Hence, it's likely that Engle's methodology and / or selection of the securities with the same level of credit riskiness is different than the one used by Federal Reserve Bank of St. Louis in 2025.
-#
 
 # %%
 # | label: fig-prices
@@ -223,7 +238,6 @@ prices_plot
 # %% [markdown]
 # #### Returns from the original paper (for reference)
 # ![Returns from the original paper](../data/screenshots/returns.png)
-#
 
 # %%
 # | label: fig-returns

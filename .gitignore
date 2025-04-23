@@ -83,7 +83,7 @@ coverage.xml
 .hypothesis/
 
 # Plotly
-*.html
+#*.html
 
 # R
 .Rproj.user

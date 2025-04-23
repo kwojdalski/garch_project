@@ -1,6 +1,9 @@
 ---
 title: GARCH Model Implementation
-author: Based on Engle (2001)
+author:
+  - name: Krzysztof Wojdalski
+  - name: Piotr
+  - name: Shah
 format:
   html:
     toc: true
@@ -8,11 +11,42 @@ format:
     code-fold: true
     theme: cosmo
     highlight-style: github
+  gfm:
+    preview-mode: raw
 execute:
   echo: true
   warning: false
 jupyter: python3
 ---
+
+
+# Introduction
+
+## Background
+
+This project aims to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility.
+
+### Rationale behind the Study
+
+1) From the initial inspection of the article, easy to obtain data
+2) Well-known author so we asssumed that the methodology is sound and well-explained
+3) The author's research has had significant influence and impact in the field of time series analysis
+4) Research could be easily extended for different datasets / portfolios
+
+
+### Steps in the Research
+The replication focuses on the following:
+
+1. Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle's paper
+2. Calculating and analyzing portfolio returns
+3. Fitting a GARCH(1,1) model to the portfolio returns
+4. Examining the model's performance in capturing volatility clustering
+5. Generating volatility forecasts in the same manner as Engle did
+
+By following Engle's methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.
+
+
+# Imports and Setup
 ```{python}
 #| label: setup
 import logging
@@ -31,7 +65,6 @@ from plotnine import (
     labs,
     scale_color_manual,
     theme,
-    theme_minimal,
 )
 
 if os.getcwd().endswith("src") or os.getcwd().endswith("notebooks"):
@@ -52,24 +85,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 ```
-
-# Introduction
-
-## Background
-
-This project aims to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility.
-
-The replication focuses on the following:
-
-1. Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle's paper
-2. Calculating and analyzing portfolio returns
-3. Fitting a GARCH(1,1) model to the portfolio returns
-4. Examining the model's performance in capturing volatility clustering
-5. Generating volatility forecasts in the same manner as Engle did
-
-By following Engle's methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.
-
-
 
 # Data Preparation
 
@@ -384,7 +399,6 @@ resid_plot = (
     ggplot(resid_df, aes(x="Date", y="Residual"))
     + geom_line(color="#FF9900")
     + labs(title="Standardized Residuals", x="Date", y="Standardized Residual")
-    + theme_minimal()
     + theme(
         plot_title=element_text(size=14, face="bold"),
         axis_title=element_text(size=12),
@@ -445,7 +459,6 @@ forecast_plot = (
     + geom_line()
     + labs(title="Volatility Forecast", x="Date", y="Volatility")
     + scale_color_manual(values=["#3366CC", "#FF9900"])
-    + theme_minimal()
     + theme(
         plot_title=element_text(size=14, face="bold"),
         axis_title=element_text(size=12),
