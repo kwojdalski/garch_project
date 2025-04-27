@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import pandas as pd
 import yfinance as yf
+from scipy import stats
 from arch import arch_model
 from scipy import stats
 from statsmodels.tsa.stattools import acf as acf_stats
