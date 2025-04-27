@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from arch import arch_model
 from scipy import stats
+from arch import arch_model
+from arch.univariate.base import ARCHModelResult
+
 
 # Configure logging
 logging.basicConfig(
@@ -50,7 +52,7 @@ def calculate_returns(prices: pd.Series | pd.DataFrame) -> pd.Series | pd.DataFr
     return np.log(prices / prices.shift(1)).dropna()
 
 
-def fit_garch(returns: pd.Series, p: int = 1, q: int = 1) -> arch_model.ARCHModelResult:
+def fit_garch(returns: pd.Series, p: int = 1, q: int = 1) -> ARCHModelResult:
     """
     Fit GARCH(p,q) model to returns
     """
@@ -60,7 +62,7 @@ def fit_garch(returns: pd.Series, p: int = 1, q: int = 1) -> arch_model.ARCHMode
 
 
 def plot_volatility(
-    results: arch_model.ARCHModelResult, returns: pd.Series
+    results: ARCHModelResult, returns: pd.Series
 ) -> plt.Figure:
     """
     Plot the conditional volatility
@@ -90,3 +92,8 @@ def calculate_portfolio_stats(returns_data: pd.DataFrame) -> pd.DataFrame:
     # Convert to DataFrame
     stats_df = pd.DataFrame(stats_dict).round(4)
     return stats_df
+
+######## Extentions #######
+# %% [markdown]
+
+# %%

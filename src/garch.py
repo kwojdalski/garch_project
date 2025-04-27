@@ -30,7 +30,15 @@
 # | label: setup
 import logging
 from datetime import datetime
+import os, sys
 
+#for mac
+root = os.path.abspath(os.path.join(os.getcwd(), ".."))
+if root not in sys.path:
+    sys.path.insert(0, root)
+
+print("Import paths:", sys.path[:3])
+#####
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -83,8 +91,8 @@ logger = logging.getLogger(__name__)
 symbols = ["^IXIC", "^DJI", "^TNX"]  # Nasdaq, Dow Jones, and 10-year Treasury
 # Define the date range from Robert Engle's paper (2001)
 # Sample period from Table 2 and Table 3: March 23, 1990 to March 23, 2000
-start_date = datetime(1990, 3, 22)
-end_date = datetime(2000, 3, 24)
+start_date = datetime(2004, 3, 22)
+end_date = datetime(2024, 3, 24)
 
 
 # start_date = end_date - timedelta(days=365 * 2)  # 2 years of data
@@ -107,13 +115,18 @@ prices = fetch_stock_data(symbols, start_date, end_date)
 prices.tail()
 
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
-prices = prices.drop(columns=["^DJI"])
-prices = prices.drop(columns=["^TNX"])
+## prices = prices.drop(columns=["^DJI"])
+## prices = prices.drop(columns=["^TNX"])
 # ... we have to take it from somewhere else
 # found it here: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data
 # For RATE which looks we'll use
 # https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02
 # %%
+prices.index
+
+#%%
+# %%
+"""
 djia_prices = pd.read_csv(
     "data/dja-performance-report-daily.csv",
     index_col="Effective Date",
@@ -121,7 +134,10 @@ djia_prices = pd.read_csv(
 )
 djia_prices = djia_prices.rename(columns={"Close Value": "^DJI"})
 prices = prices.join(djia_prices["^DJI"])
+
+"""
 # %%
+"""
 tnote_yield = pd.read_csv(
     "data/DGS10.csv",
     index_col="observation_date",
@@ -132,6 +148,7 @@ tnote_yield = tnote_yield.rename(columns={"DGS10": "^TNX"})
 # tnote yield is not exactly the price, but we merge it anyway
 prices = prices.join(tnote_yield["^TNX"])
 
+"""
 # %% [markdown]
 # ## Calculating Returns
 #
@@ -148,9 +165,12 @@ portfolio_prices = pd.Series(0, index=prices.index, dtype=float)
 for symbol, weight in weights.items():
     # Use pandas multiplication and addition
     portfolio_returns = portfolio_prices.add(returns[symbol].multiply(weight))
-
+portfolio_returns.head()
 # Add portfolio returns to the returns DataFrame
 returns["portfolio"] = portfolio_returns
+returns["portfolio"]
+returns.head()
+
 
 
 # Table 1: Portfolio Data
@@ -218,7 +238,9 @@ returns_plot
 # | label: fit-garch
 # Fit GARCH(1,1) model using our implementation
 logger.info("Fitting GARCH(1,1) model...")
-results = fit_garch(returns)
+results = fit_garch(returns['portfolio'].ravel()*100)
+
+
 
 # Display model summary
 logger.info("\nModel Summary:")
@@ -273,11 +295,14 @@ volatility_plot = plot_volatility(results, returns)
 # | fig-cap: Standardized Residuals and Q-Q Plot
 
 # Get standardized residuals
-std_resid = results.resid / np.sqrt(results.conditional_volatility)
+std_resid = pd.Series(
+    results.resid / np.sqrt(results.conditional_volatility),
+    index=returns.index,
+    name="Residual"
+)
 
 # Create dataframe for residuals
 resid_df = pd.DataFrame({"Date": std_resid.index, "Residual": std_resid.values})
-
 # Create residuals plot
 resid_plot = (
     ggplot(resid_df, aes(x="Date", y="Residual"))
@@ -379,3 +404,79 @@ print(forecast_plot)
 # 5. Volatility forecasting
 #
 # The GARCH model provides a powerful framework for modeling and forecasting financial volatility, which is essential for risk management and asset pricing.
+
+# %%
+# %% [markdown]
+# ## Extension: Alternative Volatility Specifications
+# We fit three additional conditional‐variance models—EGARCH(1,1), GJR‐GARCH(1,1) and TARCH(1,1)—on the portfolio returns, extract their parameters side by side and plot their implied volatilities.
+
+# %%
+# | label: fit‐variants
+import arch
+
+logger.info("Fitting alternative GARCH variants…")
+
+models = {
+    'GARCH(1,1)': arch.arch_model(returns['portfolio'] * 100, vol='GARCH', p=1, q=1, dist='normal'),
+    'EGARCH(1,1)': arch.arch_model(returns['portfolio'] * 100, vol='EGARCH', p=1, q=1, dist='t'),
+    'GJR‐GARCH(1,1)': arch.arch_model(returns['portfolio'] * 100, vol='GARCH', p=1, o=1, q=1, power=2.0, dist='normal'),
+}
+fitted = {'GARCH(1,1)': results}
+param_frames = []
+for name, res in fitted.items():
+    df = res.params.rename(name).to_frame().T
+    param_frames.append(df)
+comparison = pd.concat(param_frames)
+print(comparison.round(4))
+
+for name, model in models.items():
+    fitted[name] = model.fit(disp='off')
+    logger.info(f"{name} fitted; AIC={fitted[name].aic:.2f}")
+
+# %% [markdown]
+# ### Parameter Comparison Table
+# The table below lines up the ω, ARCH and GARCH coefficients (and leverage term for GJR) for each model.
+
+# %%
+# | label: compare‐variant‐params
+param_frames = []
+for name, res in fitted.items():
+    df = res.params.rename(name).to_frame().T
+    param_frames.append(df)
+comparison = pd.concat(param_frames)
+print(comparison.round(4))
+
+# %% [markdown]
+# ## Overlay of Conditional Volatilities
+# We compute the in‐sample conditional standard deviations for each model and plot them together to see how the different dynamics evolve over time.
+
+# %%
+# | label: plot‐variant‐vols
+vol_series = {}
+for name, res in fitted.items():
+    vol_series[name] = np.sqrt(res.conditional_volatility) / 100  # back to decimal returns
+
+vol_df = pd.DataFrame(vol_series, index=returns.index).reset_index().melt(
+    id_vars='Date', var_name='Model', value_name='Volatility'
+)
+
+from plotnine import geom_line
+
+variant_vol_plot = (
+    ggplot(vol_df, aes(x='Date', y='Volatility', color='Model'))
+    + geom_line()
+    + labs(title='Conditional Volatility: GARCH vs. EGARCH vs. GJR', x='Date', y='σₜ')
+    + theme_minimal()
+    + theme(
+        plot_title=element_text(size=14, face='bold'),
+        axis_title=element_text(size=12),
+        axis_text=element_text(size=10),
+    )
+)
+
+print(variant_vol_plot)
+
+# %% [markdown]
+# ## Next Steps
+
+# %%
