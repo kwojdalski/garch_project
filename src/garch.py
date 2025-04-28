@@ -56,7 +56,7 @@ import os
 from datetime import datetime
 import os, sys
 
-#for mac
+#for mac 
 root = os.path.abspath(os.path.join(os.getcwd(), ".."))
 if root not in sys.path:
     sys.path.insert(0, root)
@@ -545,7 +545,7 @@ plt.show()
 # | label: forecast
 # Generate forecasts
 logger.info("Generating volatility forecast...")
-forecast = results.forecast(horizon=5)
+forecast = garch_results.forecast(horizon=5)
 logger.info("\nVolatility Forecast:")
 logger.info(np.sqrt(forecast.variance.iloc[-1])/1000)
 
