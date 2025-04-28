@@ -8,20 +8,21 @@ This project implements GARCH (Generalized Autoregressive Conditional Heterosked
 - Financial data fetching using Yahoo Finance
 - Volatility forecasting and analysis
 - Interactive analysis through Jupyter notebook and Quarto document
-- Educational presentation on GARCH models
+- Presentation on GARCH models
 - Code quality enforcement with pre-commit hooks
-- Comprehensive data processing utilities
-- Type hints and static type checking with mypy
+- Data processing utilities
+- Type hints and static type checking (with mypy)
 
 ## Requirements
 
 - Python 3.10+ (specified in .python-version)
-- Poetry (for dependency management)
-- Quarto (for rendering the Quarto document)
+- Poetry (for dependency management / setting up the environment)
+- Quarto (for rendering / converting the Quarto document)
 - pre-commit (for code quality checks)
 - easy-commit (optional, for writing more meaningful and easier commits)
-- vscode / jupyter notebook / jupyterlab (optional, for features such as syncing up .qmd / .md / .ipynb / .py files)
-- [makedown](https://github.com/tzador/makedown) - for running this file as a script (`pip install --upgrade makedown`)
+- vscode / jupyter notebook / jupyterlab (optional) - for features such as syncing up `.qmd` / `.md` / `.ipynb` / `.py` files)
+- [makedown](https://github.com/tzador/makedown) (optional) - for running this file as a script (`pip install --upgrade makedown`)
+
 ## Installation
 
 1. Clone this repository
@@ -120,7 +121,7 @@ The following hooks are configured:
 - **isort**: Sorts Python imports
 - **flake8**: Lints Python code
 - **mypy**: Type checks Python code
-- **bandit**: Checks for security issues
+- ~~**bandit**: Checks for security issues~~
 
 For quick commits with automatic formatting, you can use [easy-commit](https://pypi.org/project/easy-commit/):
 
@@ -141,7 +142,8 @@ You can also use the keyboard shortcut `Cmd+Shift+B` (macOS) or `Ctrl+Shift+B` (
 
 ## Model Description
 
-The GARCH(1,1) model is specified as:
+The **GARCH(1,1)** model is specified as:
+
 $$\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
 
 where:
@@ -156,3 +158,12 @@ where:
 
 - Engle, R. F. (2001). GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics
 - Bollerslev, T. (1986). Generalized Autoregressive Conditional Heteroskedasticity
+
+## TODO
+
+- Implement more models to be checked against GARCH
+- Implement VaR framework in the same way as in the paper
+- Implement GARCH from scratch (at the moment it's based on `arch` package)
+- Extend the research for more recent data
+- Analysis of robustness of coefficients for the model
+- Restructure the repo so that rendered files are in sub-repo and don't collide with the main code
