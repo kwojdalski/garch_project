@@ -50,7 +50,7 @@
 # # Imports and Setup
 
 # %%
-# | label: setup
+# | label: setup for vscode/mac
 import logging
 import os
 from datetime import datetime
@@ -63,6 +63,7 @@ if root not in sys.path:
 
 print("Import paths:", sys.path[:3])
 #####
+#%%
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-v0_8-darkgrid')
 plt.rcParams['axes.grid'] = True
@@ -142,8 +143,10 @@ logger.info("Fetching data...")
 prices = fetch_stock_data(symbols, start_date, end_date)
 
 # Display the first few rows
-prices.tail()
+prices.dtypes
 
+file_path = "/Users/shah/garch_project/src/prices.pkl"
+prices.to_pickle(file_path)
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
 prices = prices.drop(columns=["^DJI", "^TNX"])
 
