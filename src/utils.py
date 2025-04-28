@@ -52,7 +52,17 @@ def calculate_returns(prices: pd.Series | pd.DataFrame) -> pd.Series | pd.DataFr
     return np.log(prices / prices.shift(1)).dropna()
 
 
-def fit_garch(returns: pd.Series, p: int = 1, q: int = 1) -> ARCHModelResult:
+def fit_arch(returns: pd.Series, p: int = 1) -> ARCHModelResult:
+    """
+    Fit ARCH(p) model to returns
+    """
+    # q is forced to 0 for a pure ARCH
+    model = arch_model(returns, vol="ARCH", p=p, q=0, dist="normal")
+    results = model.fit(disp="off")
+    return results
+
+
+def fit_garch(returns: pd.Series, p: int = 1, q: int = 0) -> ARCHModelResult:
     """
     Fit GARCH(p,q) model to returns
     """
