@@ -94,6 +94,93 @@ def calculate_portfolio_stats(returns_data: pd.DataFrame) -> pd.DataFrame:
     return stats_df
 
 ######## Extentions #######
-# %% [markdown]
+# ---- New utility functions extracted from garch.py ----
+
+def get_portfolio_prices(symbols, start_date, end_date) -> pd.DataFrame:
+    """Fetch adjusted prices for portfolio symbols"""
+    return fetch_stock_data(symbols, start_date, end_date)
+
+
+def compute_portfolio_returns(prices: pd.DataFrame, weights: dict) -> pd.DataFrame:
+    """Compute weighted portfolio log returns and append 'portfolio' column"""
+    returns = calculate_returns(prices)
+    portfolio = sum(returns[symbol] * weight for symbol, weight in weights.items())
+    returns["portfolio"] = portfolio
+    return returns
+
+def plot_log_returns(returns_df: pd.DataFrame):
+    """Plot log returns for each symbol including portfolio using plotnine"""
+    from plotnine import ggplot, aes, geom_line, facet_wrap, labs, theme, element_text
+
+    df = returns_df.reset_index().melt(
+        id_vars=[prices.index.name or "index"], var_name="Symbol", value_name="Return")
+    p = (
+        ggplot(df, aes(x=df.columns[0], y="Return", color="Symbol"))
+        + facet_wrap('Symbol', scales='free_y')
+        + geom_line()
+        + labs(title='Log Returns', x='Date', y='Log Return')
+        + theme(
+            plot_title=element_text(size=14, face='bold'),
+            axis_title=element_text(size=12),
+            axis_text=element_text(size=10)
+        )
+    )
+    return p
+
+
+# %%
+
+def fit_and_summarize_garch(returns_series: pd.Series, p=1, q=1):
+    """Fit GARCH model, log summary, and return result object"""
+    results = fit_garch(returns_series * 100, p=p, q=q)
+    logger.info(results.summary())
+    return results
+
+
+def diagnostics_plots(results: ARCHModelResult, returns_idx):
+    """Generate standardized residuals plot and Q-Q plot"""
+    std_resid = pd.Series(
+        results.resid / np.sqrt(results.conditional_volatility), index=returns_idx
+    )
+    # Residuals plot
+    resid_fig, resid_ax = plt.subplots(figsize=(12, 4))
+    resid_ax.plot(returns_idx, std_resid)
+    resid_ax.set_title("Standardized Residuals")
+    resid_ax.set_xlabel("Date")
+    resid_ax.set_ylabel("Residual")
+    plt.tight_layout()
+
+    # Q-Q plot
+    qq_fig, qq_ax = plt.subplots(figsize=(6, 4))
+    stats.probplot(std_resid, dist="norm", plot=qq_ax)
+    qq_ax.set_title("Q-Q Plot of Standardized Residuals")
+    plt.tight_layout()
+
+    return resid_fig, qq_fig
+
+# %%
+def volatility_forecast(results: ARCHModelResult, returns_idx, horizon=5) -> pd.DataFrame:
+    """Generate horizon-step volatility forecasts"""
+    variance = results.forecast(horizon=horizon).variance.iloc[-1]
+    dates = pd.date_range(returns_idx[-1], periods=horizon + 1)[1:]
+    return pd.DataFrame({"Date": dates, "Volatility": np.sqrt(variance)})
+
+
+def plot_volatility_history_and_forecast(results: ARCHModelResult, returns_series: pd.Series, horizon=5):
+    """Plot last 100 days of volatility history and future forecasts"""
+    hist = pd.Series(np.sqrt(results.conditional_volatility[-100:]), index=returns_series.index[-100:])
+    hist_df = pd.DataFrame({"Date": hist.index, "Volatility": hist.values, "Type": "Historical"})
+    fc_df = volatility_forecast(results, returns_series.index, horizon)
+    fc_df["Type"] = "Forecast"
+    combined = pd.concat([hist_df, fc_df])
+    fig, ax = plt.subplots(figsize=(12, 6))
+    for label, grp in combined.groupby('Type'):
+        ax.plot(grp['Date'], grp['Volatility'], label=label)
+    ax.set_title("Volatility: History vs Forecast")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Volatility")
+    ax.legend()
+    plt.tight_layout()
+    return fig
 
 # %%
