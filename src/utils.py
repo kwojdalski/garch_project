@@ -184,3 +184,51 @@ def plot_volatility_history_and_forecast(results: ARCHModelResult, returns_serie
     return fig
 
 # %%
+import numpy as np
+from scipy.stats import norm
+
+def compute_var(cond_vol: np.ndarray, alpha: float = 0.01) -> np.ndarray:
+    """
+    Compute one‐period VaR series at level alpha from conditional volatilities.
+
+    Parameters
+    ----------
+    cond_vol : array of conditional standard deviations (in return units)
+    alpha    : significance level (default 1%)
+
+    Returns
+    -------
+    var      : array of positive VaR values (i.e. loss levels)
+    """
+    z = norm.ppf(alpha)            # e.g. norm.ppf(0.01) ≈ -2.326
+    return -cond_vol * z           # flip sign -> positive loss
+
+def backtest_var(returns: np.ndarray, var_series: np.ndarray, alpha: float = 0.01) -> dict:
+    """
+    Compare actual returns to VaR to count exceedances.
+
+    Parameters
+    ----------
+    returns    : array of realized returns (decimal form)
+    var_series : array of VaR thresholds (positive)
+    alpha      : significance level used to compute VaR
+
+    Returns
+    -------
+    dict with keys
+      - n_exceed         : count of returns < -VaR
+      - expected_exceed  : len(returns) * alpha
+      - hit_rate         : n_exceed / len(returns)
+      - exceptions_index : boolean mask where exceptions occurred
+    """
+    exceptions = returns < -var_series
+    n_exceed = int(exceptions.sum())
+    expected = len(returns) * alpha
+    return {
+        "n_exceed": n_exceed,
+        "expected_exceed": expected,
+        "hit_rate": n_exceed / len(returns),
+        "exceptions_index": exceptions
+    }
+
+# %%

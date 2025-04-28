@@ -27,7 +27,7 @@
 # ---
 
 # %%
-# | label: setup
+# | label: setup for vscode/mac
 import logging
 from datetime import datetime
 import os, sys
@@ -39,6 +39,7 @@ if root not in sys.path:
 
 print("Import paths:", sys.path[:3])
 #####
+#%%
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -112,8 +113,10 @@ logger.info("Fetching data...")
 prices = fetch_stock_data(symbols, start_date, end_date)
 
 # Display the first few rows
-prices.tail()
+prices.dtypes
 
+file_path = "/Users/shah/garch_project/src/prices.pkl"
+prices.to_pickle(file_path)
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
 ## prices = prices.drop(columns=["^DJI"])
 ## prices = prices.drop(columns=["^TNX"])
@@ -122,7 +125,7 @@ prices.tail()
 # For RATE which looks we'll use
 # https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02
 # %%
-prices.index
+prices.columns
 
 #%%
 # %%
@@ -136,6 +139,14 @@ djia_prices = djia_prices.rename(columns={"Close Value": "^DJI"})
 prices = prices.join(djia_prices["^DJI"])
 
 """
+# %%
+djia_prices = pd.read_pickle("/Users/shah/garch_project/src/prices.pkl")[['^DJI']]
+djia_prices.index = pd.to_datetime(djia_prices.index)
+print(djia_prices.head(5))
+
+prices = pd.read_pickle("/Users/shah/garch_project/src/prices.pkl")
+print(prices.head(5))
+
 # %%
 """
 tnote_yield = pd.read_csv(
@@ -480,3 +491,39 @@ print(variant_vol_plot)
 # ## Next Steps
 
 # %%
+
+import numpy as np
+import pandas as pd
+from utils import compute_var, backtest_var
+
+
+# significance
+alpha = 0.01
+
+# container for results
+bt_summary = []
+
+# assume `fitted` is your dict of fitted models, and `returns` holds your portfolio returns
+for name, res in fitted.items():
+    # 1) extract conditional volatility (decimal returns)
+    cond_vol = np.sqrt(res.conditional_volatility) / 100  
+
+    # 2) compute 1% VaR series
+    var_ser = compute_var(cond_vol, alpha=alpha)
+
+    # 3) backtest: count exceptions
+    ret = returns["portfolio"].values  # decimal returns
+    bt = backtest_var(ret, var_ser, alpha=alpha)
+
+    # 4) collect summary
+    bt_summary.append({
+        "Model": name,
+        "Exceedances": bt["n_exceed"],
+        "Expected": bt["expected_exceed"],
+        "Hit Rate": bt["hit_rate"]
+    })
+
+# 5) display as DataFrame
+bt_df = pd.DataFrame(bt_summary)
+print(bt_df.to_string(index=False))
+#%%
