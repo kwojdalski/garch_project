@@ -141,7 +141,6 @@ weights = {
 # Fetch data using our implementation
 logger.info("Fetching data...")
 prices = fetch_stock_data(symbols, start_date, end_date)
-
 # Display the first few rows
 prices.dtypes
 
@@ -972,19 +971,3 @@ print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 # * St. Louis Fed. (2023). 10-Year Treasury Constant Maturity Rate [^TNX]. [Dataset]. Available at: https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02
 # * Yahoo Finance. (2023). [Dataset]. Available at: https://finance.yahoo.com/quote/%5EIXIC/history?period1=631152000&period2=1713878400&interval=1d&filter=history&frequency=1d&includeAdjustedClose=true
 # * GenAI used for proof checking and type hinting
-
-# %% [markdown]
-# ### Parameter Comparison Table
-# The table below lines up the ω, ARCH and GARCH coefficients (and leverage term for GJR) for each model.
-
-# %%
-param_frames = []
-for name, res in fitted.items():
-    df = res.params.rename(name).to_frame().T
-    param_frames.append(df)
-comparison = pd.concat(param_frames)
-print(comparison.round(4))
-
-# %% [markdown]
-# ## Overlay of Conditional Volatilities
-# We compute the in‐sample conditional standard deviations for each model and plot them together to see how the different dynamics evolve over time.
