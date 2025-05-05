@@ -89,6 +89,8 @@ logger = logging.getLogger(__name__)
 # %%
 # | label: fetch-data
 # Parameters
+# we skip fetching, since data is already downloaded
+"""
 symbols = ["^IXIC", "^DJI", "^TNX"]  # Nasdaq, Dow Jones, and 10-year Treasury
 # Define the date range from Robert Engle's paper (2001)
 # Sample period from Table 2 and Table 3: March 23, 1990 to March 23, 2000
@@ -111,12 +113,12 @@ weights = {
 # Fetch data using our implementation
 logger.info("Fetching data...")
 prices = fetch_stock_data(symbols, start_date, end_date)
-
 # Display the first few rows
 prices.dtypes
 
 file_path = "/Users/shah/garch_project/src/prices.pkl"
 prices.to_pickle(file_path)
+"""
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
 ## prices = prices.drop(columns=["^DJI"])
 ## prices = prices.drop(columns=["^TNX"])
@@ -247,7 +249,7 @@ returns_plot
 # | label: fit-garch
 # Fit GARCH(1,1) model using our implementation
 logger.info("Fitting GARCH(1,1) model...")
-garch_results = fit_garch(returns['portfolio'].ravel()*1000)
+garch_results = fit_garch(returns['portfolio'].*1000)
 
 
 # Display model summary
@@ -258,7 +260,7 @@ logger.info(garch_results.summary())
 # Fit ARCH(1,1) model using our implementation
 from src.utils import (fit_arch)
 logger.info("Fitting ARCH(1) model...")
-arch_results = fit_arch(returns['portfolio'].ravel() * 1000, p=1)
+arch_results = fit_arch(returns['portfolio']* 1000, p=1)
 
 # Display model summary
 logger.info("\nARCH Model Summary:")
@@ -461,7 +463,107 @@ print(forecast_plot)
 
 # %%
 # %% [markdown]
-# ## Extension: Alternative Volatility Specifications
+# ## Extensions 
+# ## Alternative error-distribution specifications
+# GARCH(1,1) model estimation (Normal, Student-t, Skew-t, GED)
+# Volatility analysis and visualization
+# Model diagnostics
+# Volatility forecasting
+
+# %%
+# %% [markdown]
+# ## 6  Alternative Error-Distribution Specifications
+# Fit the same GARCH(1,1) under Normal, Student-t, Skew-t, and GED errors,
+# compare information criteria, and overlay the conditional-volatility paths.
+
+# %% 
+import arch
+import pandas as pd
+import numpy as np
+from plotnine import (
+    ggplot, aes, geom_line, labs, theme_minimal, theme, element_text, scale_color_brewer
+)
+# %%
+# 6.1   Estimate GARCH(1,1) with four innovation distributions
+distros = {
+    "Normal"   : "normal",
+    "Student-t": "t",
+    "Skew-t"   : "skewt",
+    "GED"      : "ged",
+}
+
+alt_models = {}
+for name, dist in distros.items():
+    logger.info(f"Fitting GARCH(1,1) with {name} errors …")
+    am = arch.arch_model(
+        returns["portfolio"] * 1000,
+        vol="GARCH",
+        p=1,
+        q=1,
+        dist=dist,
+        rescale=False,
+    )
+    res = am.fit(disp="off")
+    alt_models[name] = res
+# %%
+# 6.2   Information-criterion comparison table
+comp = pd.DataFrame(
+    {
+        "Distribution": list(alt_models.keys()),
+        "LogLik"      : [m.loglikelihood for m in alt_models.values()],
+        "AIC"         : [m.aic            for m in alt_models.values()],
+        "BIC"         : [m.bic            for m in alt_models.values()],
+    }
+).sort_values("AIC")
+logger.info("\nError-Distribution Comparison:\n%s", comp.to_string(index=False))
+
+# %%
+# 6.3  Overlay conditional-volatility paths
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+for name, res in alt_models.items():
+    ax.plot(
+        res.conditional_volatility.index,
+        np.sqrt(res.conditional_volatility),
+        label=name,
+        linewidth=1,
+    )
+
+ax.set_title("Conditional Volatility – Alternative Error Distributions")
+ax.set_xlabel("Date")
+ax.set_ylabel("Volatility")
+ax.legend(frameon=False)
+fig.tight_layout()
+plt.show()
+
+# %%
+# 6.4   Q-Q plots of standardized residuals
+import matplotlib.pyplot as plt
+from scipy import stats
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+axes = axes.flatten()
+
+for ax, (name, res) in zip(axes, alt_models.items()):
+    std_resid = res.resid / np.sqrt(res.conditional_volatility)
+    if name == "Student-t":
+        nu = res.params["nu"]
+        stats.probplot(std_resid, dist="t", sparams=(nu,), plot=ax)
+    else:  # Normal, Skew-t, GED → compare to N(0,1)
+        stats.probplot(std_resid, dist="norm", plot=ax)
+    ax.set_title(f"{name} errors")
+
+fig.tight_layout()
+plt.show()
+
+
+# %%
+# ## Alternative Volatility Specifications
+
 # We fit three additional conditional‐variance models—EGARCH(1,1), GJR‐GARCH(1,1) and TARCH(1,1)—on the portfolio returns, extract their parameters side by side and plot their implied volatilities.
 
 # %%
