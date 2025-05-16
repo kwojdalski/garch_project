@@ -127,9 +127,15 @@ prices.to_pickle(file_path)
 # For RATE which looks we'll use
 # https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02
 # %%
-prices.columns
+# Portfolio weights
+weights = {
+    "^IXIC": 0.50,  # Nasdaq
+    "^DJI": 0.30,  # Dow Jones
+    "^TNX": 0.20,  # 10-year Treasury
+}
 
 #%%
+
 # %%
 """
 djia_prices = pd.read_csv(
