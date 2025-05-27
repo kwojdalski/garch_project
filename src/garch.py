@@ -130,7 +130,7 @@ symbols = ["^IXIC", "^DJI", "^TNX"]  #
 # Define the date range, based on the paper
 # Sample period
 start_date = datetime(1990, 3, 22)
-end_date = datetime(2000, 3, 24)
+end_date = datetime(2001, 6, 1)
 
 # Portfolio weights, taken from the article
 weights = {
@@ -162,12 +162,13 @@ prices = prices.drop(columns=["^DJI", "^TNX"])
 
 # %%
 djia_prices = pd.read_csv(
-    "data/dja-performance-report-daily.csv",
-    index_col="Effective Date",
+    "../data/dja-performance-report-daily.csv",
+    index_col="dt",
     parse_dates=True,
 )
 djia_prices = djia_prices.rename(columns={"Close Value": "^DJI"})
-prices = prices.join(djia_prices["^DJI"])
+prices = prices.join(djia_prices["djia"])
+
 
 # %% [markdown]
 # ####  RATE data retrieval
@@ -184,6 +185,10 @@ tnote_yield = tnote_yield.rename(columns={"DGS10": "^TNX"})
 
 # tnote yield is not exactly the price, but we merge it anyway
 prices = prices.join(tnote_yield["^TNX"])
+
+# %%
+prices.rename({'djia': '^DJI'}, axis=1, inplace=True)
+prices
 
 # %% [markdown]
 # ## Calculating Returns
@@ -238,6 +243,11 @@ prices_plot
 # %% [markdown]
 # #### Returns from the original paper (for reference)
 # ![Returns from the original paper](../data/screenshots/returns.png)
+
+# %%
+# split the data
+returns = returns.loc[:'2000-03-23']
+returns_oos = returns.loc['2000-03-24':]
 
 # %%
 # | label: fig-returns
