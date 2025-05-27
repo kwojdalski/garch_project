@@ -216,11 +216,11 @@ returns["portfolio"] = portfolio_returns
 
 # %%
 # split the data
-returns = returns.loc[:'2000-03-23']
 returns_oos = returns.loc['2000-03-24':]
+returns = returns.loc[:'2000-03-23']
 
-prices = prices.loc[:'2000-03-23']
 prices_oos = prices.loc['2000-03-24':]
+prices = prices.loc[:'2000-03-23']
 
 # %% [markdown]
 # ## Visualizing Price and Returns
@@ -355,7 +355,7 @@ acf_plot
 # | tbl-cap-location: top
 
 logger.info("Fitting GARCH(1,1) model...")
-results = fit_garch(returns["portfolio"])
+results = fit_garch(returns["portfolio"]*100)
 
 logger.info(results.summary())
 # Extract coefficients, standard errors, z-statistics, and p-values
@@ -445,13 +445,67 @@ logger.info(forecast.variance.iloc[-1])
 # | label: fig-forecast
 # | fig-cap: Volatility Forecast
 
-plt.figure(figsize=(12, 6))
-plt.plot(returns['portfolio'][-100:], color='black', lw=1, label='returns')
-plt.plot(results.conditional_volatility[-100:], color='red', lw=1, label='GARCH volatility')
-plt.grid(alpha=0.3)
-plt.legend()
+# Plot volatility
+plt.figure(figsize = (14, 8))
+plt.plot((returns['portfolio']*100)**2, color = 'black', lw = 1)
+plt.plot(results.conditional_volatility, color = 'red', lw = 0.9)
+plt.grid(alpha = 0.3)
+plt.title("Volatility realized vs predicted")
 plt.show()
 
+
+# %% [markdown]
+# # Value at Risk
+
+# %% [markdown]
+# ![in-sample-VaR](../data/screenshots/in_sample_VaR.png)
+
+# %%
+# | label: fig-portfolio_loss
+# | fig-cap: Portfolio loss in sample
+
+# Value at risk - portfolio value 1 000 000$ at each point in time
+plt.figure(figsize = (14, 8))
+portfolio_returns = returns['portfolio']*(10**6)
+plt.plot(-portfolio_returns, color = 'black', lw = 1)
+plt.plot(results.conditional_volatility * 2.326 * 10**4, color = 'red', lw = 0.9)
+plt.grid(alpha=0.3)
+plt.title("Portfolio loss and 99% Value at Risk in sample")
+
+# %% [markdown]
+# # Out-of-sample model fit and Value at Risk
+
+# %% [markdown]
+# ![oos-VaR](../data/screenshots/out_of_sample_VaR.png)
+
+# %%
+# Rolling forecast without reestimating parameters
+mu = results.params['mu']
+omega = results.params['omega']
+alpha = results.params['alpha[1]']
+beta = results.params['beta[1]']
+
+epsilon2 = (returns_oos['portfolio']*100 - mu)**2
+sigma2 = np.zeros(len(returns_oos))
+sigma2[0] = omega/(1 - alpha - beta)
+
+for t in range(1, len(sigma2)):
+    sigma2[t] = omega + alpha*epsilon2[t-1] + beta*sigma2[t-1]
+
+
+# %%
+plt.figure(figsize = (14, 8))
+plt.plot((returns_oos['portfolio'].values*100)**2, color = 'black', lw = 1)
+plt.plot(np.sqrt(sigma2), color = 'red', lw = 0.9)
+
+# %%
+# Value at risk - portfolio value 1 000 000$ at each point in time
+plt.figure(figsize = (14, 8))
+portfolio_returns = returns_oos['portfolio'].values*(10**6)
+plt.plot(-portfolio_returns, color = 'black', lw = 1)
+plt.plot(np.sqrt(sigma2) * 2.326 * 10**4, color = 'red', lw = 0.9)
+plt.grid(alpha=0.3)
+plt.title("Portfolio loss and 99% Value at Risk")
 
 # %% [markdown]
 # # References
