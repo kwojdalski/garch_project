@@ -53,6 +53,7 @@ import logging
 import os
 from datetime import datetime
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from plotnine import (
@@ -162,7 +163,7 @@ prices = prices.drop(columns=["^DJI", "^TNX"])
 
 # %%
 djia_prices = pd.read_csv(
-    "../data/dja-performance-report-daily.csv",
+    "./data/dja-performance-report-daily.csv",
     index_col="dt",
     parse_dates=True,
 )
@@ -177,7 +178,7 @@ prices = prices.join(djia_prices["djia"])
 
 # %%
 tnote_yield = pd.read_csv(
-    "data/DGS10.csv",
+    "./data/DGS10.csv",
     index_col="observation_date",
     parse_dates=True,
 )
@@ -213,6 +214,14 @@ for symbol, weight in weights.items():
 # Add portfolio returns to the returns DataFrame
 returns["portfolio"] = portfolio_returns
 
+# %%
+# split the data
+returns = returns.loc[:'2000-03-23']
+returns_oos = returns.loc['2000-03-24':]
+
+prices = prices.loc[:'2000-03-23']
+prices_oos = prices.loc['2000-03-24':]
+
 # %% [markdown]
 # ## Visualizing Price and Returns
 #
@@ -230,48 +239,53 @@ returns["portfolio"] = portfolio_returns
 # | fig-cap: Nasdaq, Dow Jones and Bond Prices
 # | fig-subcap:
 # |   - 'Sample: March 23, 1990 to March 23, 2000.'
-prices_df = pd.DataFrame(prices).reset_index()
-prices_df = pd.melt(prices_df, id_vars=["Date"], var_name="Symbol", value_name="Price")
-prices_plot = (
-    ggplot(prices_df, aes(x="Date", y="Price", color="Symbol"))
-    + facet_wrap("Symbol", scales="free_y", ncol=1)
-    + geom_line(color="#FF9900")
-    + labs(title="", x="Date", y="Price")
-)
-prices_plot
+
+fig, axes = plt.subplots(3, 1, figsize=(12, 8))
+
+axes[0].plot(prices['^DJI'], color='black')
+axes[0].grid(alpha=0.3)
+axes[0].set_title('^DJI')
+
+axes[1].plot(prices['^IXIC'], color='black')
+axes[1].grid(alpha=0.3)
+axes[1].set_title('^IXIC')
+
+axes[2].plot(prices['^TNX'], color='black')
+axes[2].grid(alpha=0.3)
+axes[2].set_title('^TNX')
+
+plt.show()
+
 
 # %% [markdown]
 # #### Returns from the original paper (for reference)
 # ![Returns from the original paper](../data/screenshots/returns.png)
 
 # %%
-# split the data
-returns = returns.loc[:'2000-03-23']
-returns_oos = returns.loc['2000-03-24':]
-
-# %%
 # | label: fig-returns
 # | fig-cap: Nasdaq, Dow Jones and Bond Returns
 # | fig-subcap:
 # |   - 'Sample: March 23, 1990 to March 23, 2000.'
-returns_df = pd.DataFrame(returns).reset_index()
-returns_df = pd.melt(
-    returns_df, id_vars=["Date"], var_name="Symbol", value_name="Return"
-)
-returns_plot = (
-    ggplot(returns_df, aes(x="Date", y="Return", color="Symbol"))
-    + facet_wrap("Symbol", scales="free_y")
-    + geom_line(color="#FF9900")
-    + labs(title="", x="Date", y="Log Return")
-    + theme(
-        plot_title=element_text(size=14, face="bold"),
-        axis_title=element_text(size=12),
-        axis_text=element_text(size=10),
-    )
-)
+fig, axes = plt.subplots(2, 2, figsize = (16, 8))
 
+axes[0, 0].plot(returns['^DJI'], color = "black")
+axes[0, 0].set_title('^DJI')
+axes[0, 0].grid(linestyle = '--', alpha = 0.3)
 
-returns_plot
+axes[0, 1].plot(returns['^TNX'], color = "black")
+axes[0, 1].set_title('^TNX')
+axes[0, 1].grid(linestyle = '--', alpha = 0.3)
+
+axes[1, 0].plot(returns['^IXIC'], color = "black")
+axes[1, 0].set_title('^IXIC')
+axes[1, 0].grid(linestyle = '--', alpha = 0.3)
+
+axes[1, 1].plot(returns['portfolio'], color = "black")
+axes[1, 1].set_title('portfolio')
+axes[1, 1].grid(linestyle = '--', alpha = 0.3)
+
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
 # ## Portfolio Statistics
@@ -400,23 +414,12 @@ volatility_plot
 # Get standardized residuals
 std_resid = results.resid / np.sqrt(results.conditional_volatility)
 
-# Create dataframe for residuals
-resid_df = pd.DataFrame({"Date": std_resid.index, "Residual": std_resid.values})
+plt.figure(figsize=(12, 6))
+plt.plot(std_resid, color='black', lw=1)
+plt.grid(alpha=0.3)
+plt.title("Standardized residuals")
+plt.show()
 
-# Create residuals plot
-resid_plot = (
-    ggplot(resid_df, aes(x="Date", y="Residual"))
-    + geom_line(color="#FF9900")
-    + labs(title="Standardized Residuals", x="Date", y="Standardized Residual")
-    + theme_minimal()
-    + theme(
-        plot_title=element_text(size=14, face="bold"),
-        axis_title=element_text(size=12),
-        axis_text=element_text(size=10),
-    )
-)
-
-resid_plot
 
 # %% [markdown]
 # # Volatility Forecasting
@@ -442,44 +445,13 @@ logger.info(forecast.variance.iloc[-1])
 # | label: fig-forecast
 # | fig-cap: Volatility Forecast
 
-# Create dataframes for historical and forecast data
-historical_df = pd.DataFrame(
-    {
-        "Date": returns.index[-100:],
-        "Volatility": np.sqrt(results.conditional_volatility[-100:]),
-        "Type": "Historical",
-    }
-)
+plt.figure(figsize=(12, 6))
+plt.plot(returns['portfolio'][-100:], color='black', lw=1, label='returns')
+plt.plot(results.conditional_volatility[-100:], color='red', lw=1, label='GARCH volatility')
+plt.grid(alpha=0.3)
+plt.legend()
+plt.show()
 
-forecast_dates = pd.date_range(returns.index[-1], periods=6)[1:]
-forecast_df = pd.DataFrame(
-    {
-        "Date": forecast_dates,
-        "Volatility": np.sqrt(forecast.variance.iloc[-1]),
-        "Type": "Forecast",
-    }
-)
-
-# Combine dataframes
-combined_df = pd.concat([historical_df, forecast_df])
-
-# Create forecast plot
-forecast_plot = (
-    ggplot(combined_df, aes(x="Date", y="Volatility", color="Type"))
-    + geom_line()
-    + labs(title="Volatility Forecast", x="Date", y="Volatility")
-    + scale_color_manual(values=["#3366CC", "#FF9900"])
-    + theme_minimal()
-    + theme(
-        plot_title=element_text(size=14, face="bold"),
-        axis_title=element_text(size=12),
-        axis_text=element_text(size=10),
-        legend_title=element_blank(),
-    )
-)
-
-# Display plot
-forecast_plot
 
 # %% [markdown]
 # # References
