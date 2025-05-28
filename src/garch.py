@@ -72,14 +72,7 @@ from plotnine import (
 if os.getcwd().endswith("src") or os.getcwd().endswith("notebooks"):
     os.chdir("..")
 
-from src.utils import (
-    calculate_acf_table,
-    calculate_portfolio_stats,
-    calculate_returns,
-    fetch_stock_data,
-    fit_garch,
-    plot_volatility,
-)
+from src.utils import *
 
 # Configure logging
 logging.basicConfig(
@@ -355,7 +348,7 @@ acf_plot
 # | tbl-cap-location: top
 
 logger.info("Fitting GARCH(1,1) model...")
-results = fit_garch(returns["portfolio"]*100)
+results = fit_garch(returns["portfolio"]*100, vol="Garch", dist="normal")
 
 logger.info(results.summary())
 # Extract coefficients, standard errors, z-statistics, and p-values
@@ -461,16 +454,30 @@ plt.show()
 # ![in-sample-VaR](../data/screenshots/in_sample_VaR.png)
 
 # %%
+# Calculate VaR
+VaR_returns = calculate_VaR_returns(returns["portfolio"], results.conditional_volatility/100, 2.326)
+
+# %%
 # | label: fig-portfolio_loss
 # | fig-cap: Portfolio loss in sample
 
 # Value at risk - portfolio value 1 000 000$ at each point in time
+init_value = 10**6
+portfolio_returns = returns['portfolio']*init_value
+portfolio_VaR = VaR_returns*init_value
+
 plt.figure(figsize = (14, 8))
-portfolio_returns = returns['portfolio']*(10**6)
 plt.plot(-portfolio_returns, color = 'black', lw = 1)
-plt.plot(results.conditional_volatility * 2.326 * 10**4, color = 'red', lw = 0.9)
+plt.plot(-portfolio_VaR, color = 'red', lw = 0.9)
 plt.grid(alpha=0.3)
 plt.title("Portfolio loss and 99% Value at Risk in sample")
+
+# %%
+# Exceedances
+n_exc, perc_exc = count_exceedances(VaR_returns, returns["portfolio"], True)
+print(f"Number of exceedances: {n_exc}")
+print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
+
 
 # %% [markdown]
 # # Out-of-sample model fit and Value at Risk
@@ -506,6 +513,11 @@ plt.plot(-portfolio_returns, color = 'black', lw = 1)
 plt.plot(np.sqrt(sigma2) * 2.326 * 10**4, color = 'red', lw = 0.9)
 plt.grid(alpha=0.3)
 plt.title("Portfolio loss and 99% Value at Risk")
+
+# %%
+n_exc, perc_exc = count_exceedances(np.sqrt(sigma2) * (-2.326)/100, returns_oos['portfolio'].values, True)
+print(f"Number of exceedances: {n_exc}")
+print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 
 # %% [markdown]
 # # References

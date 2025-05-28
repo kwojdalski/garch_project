@@ -51,11 +51,11 @@ def calculate_returns(prices: pd.Series | pd.DataFrame):
     return np.log(prices / prices.shift(1)).dropna()
 
 
-def fit_garch(returns: pd.Series, p: int = 1, q: int = 1):
+def fit_garch(returns: pd.Series, p: int = 1, q: int = 1, **kwargs):
     """
     Fit GARCH(p,q) model to returns
     """
-    model = arch_model(returns, p=p, q=q, vol="Garch", dist="normal")
+    model = arch_model(returns, p=p, q=q, **kwargs)
     results = model.fit(disp="off")
     return results
 
@@ -140,3 +140,17 @@ def calculate_acf_table(series: pd.Series, nlags: int = 15):
     results = results.round(3)
 
     return results
+
+
+def calculate_VaR_returns(returns, conditional_volatility, n_sd):
+    mu = np.mean(returns)
+    VaR_returns = mu - conditional_volatility*n_sd
+    return VaR_returns
+
+
+def count_exceedances(VaR_returns, returns, perc=False):
+    n_exc = sum(returns < VaR_returns)
+    if perc:
+        perc_exc = n_exc/len(returns) 
+        return n_exc, perc_exc
+    return n_exc
