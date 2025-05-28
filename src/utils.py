@@ -60,13 +60,13 @@ def fit_garch(returns: pd.Series, p: int = 1, q: int = 1, **kwargs):
     return results
 
 
-def plot_volatility(results, returns: pd.Series):
+def plot_volatility(results, returns: pd.Series, scale=1000):
     """
     Plot the conditional volatility using plotnine
     """
     # Create a DataFrame for plotting
     volatility_df = pd.DataFrame(
-        {"Date": returns.index, "Volatility": np.sqrt(results.conditional_volatility)}
+        {"Date": returns.index, "Volatility": np.sqrt(results.conditional_volatility/scale)}
     )
 
     # Create the plot using plotnine
