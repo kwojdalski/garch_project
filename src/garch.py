@@ -22,15 +22,14 @@
 # # Introduction
 #
 # ## Background
-#
-# This project aims to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility.
+# The main goal of this projectis to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility. However to make things more interesting we add some extensions to the study. First of all, we provide our own GARCH(1,1) implementation. We compare GARCH(1,1) results with some other volatility models, particularly E-GARCH and GJR-GARCH on the same data sample that was used in the original paper. Finally, we examine how market volatility has evolved since the publication of the paper.
 #
 # ### Rationale behind the Study
 #
 # 1) From the initial inspection of the article, easy to obtain data
 # 2) Well-known author so we asssumed that the methodology is sound and well-explained
 # 3) The author's research has had significant influence and impact in the field of time series analysis
-# 4) Research could be easily extended for different datasets / portfolios
+# 4) Research could be easily extended for different datasets, portfolios and methods
 #
 #
 # ### Steps in the Research
@@ -38,9 +37,12 @@
 #
 # 1. Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle's paper
 # 2. Calculating and analyzing portfolio returns
-# 3. Fitting a GARCH(1,1) model to the portfolio returns
-# 4. Examining the model's performance in capturing volatility clustering
-# 5. Generating volatility forecasts in the same manner as Engle did
+# 3. Writing GARCH(1,1) implementation
+# 4. Fitting a GARCH(1,1) model to the portfolio returns
+# 5. Examining the model's performance in capturing volatility clustering
+# 6. Generating volatility forecasts in the same manner as Engle did
+# 7. Extending study with other methods
+# 8. Examining portfolio built on current data
 #
 # By following Engle's methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.
 #
@@ -318,7 +320,30 @@ acf_plot
 # %% [markdown]
 # # GARCH Model
 #
-# ## Model Parameters
+# ARCH models were first introduced by Engle in 1982 to model time-varying volatility in economic and financial time series. The idea was as follows - high squared residual at time $t$ leads to increased conditional variance at time $t+p$. We can write such ARCH(p) process:
+# $$
+# \begin{cases}
+# r_t = \mu_t + \varepsilon_t \quad \varepsilon_t \sim \mathcal{N}(0, \sigma_t^2) \\
+# \sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \alpha_2 \varepsilon_{t-2}^2 + ... + \alpha_p \varepsilon_{t-p}^2
+# \end{cases}
+# $$
+# However as shocks in time series often tend to be highly persistent, proper ARCH specification required quite big number of lags p. 
+#
+# This lead to obvious extension that includes past values of conditional variance. Such solution was proposed by Bollerslev in 1986 and is known as GARCH model. Interestingly Bollerslev was a student of Engle, who supervised his doctoral work.
+#
+# GARCH(p,q) model is defined as follows:
+# $$
+# \begin{cases}
+# r_t = \mu_t + \varepsilon_t, \quad \varepsilon_t \sim \mathcal{N}(0, \sigma_t^2) \\
+# \sigma_t^2 = \omega + \sum_{i=1}^p \alpha_i \varepsilon_{t-i}^2 + \sum_{j=1}^q \beta_j \sigma_{t-j}^2
+# \end{cases}
+# $$
+# We estimate model parameters using maximum likelihood estimator. Assuming conditional normality we define likelihood function as follows:
+# $$
+# L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi \sigma_t^2}} \exp\left( -\frac{(r_t - \mu_t)^2}{2 \sigma_t^2} \right)
+# $$
+#
+# ## GARCH(1,1)
 #
 # The GARCH(1,1) model is specified as:
 #
@@ -333,14 +358,105 @@ acf_plot
 # - $\varepsilon_{t-1}^2$ is the squared lagged returns
 # - $\sigma_{t-1}^2$ is the lagged conditional variance
 #
-# ## GARCH Model Estimation
+# We apply procedure to estimate GARCH(1,1) parameters
 #
-# ### Fitting the GARCH(1,1) Model
+
+# %%
+# Define initial parameters
+r = returns['portfolio']*100
+mu = np.mean(r)
+resid = r - mu
+resid_sq = resid**2
+
+
+# Log likelihood
+def negative_loglik(params):
+    omega, alpha, beta = params
+    sigma2 = np.zeros(len(r))
+
+    # Calculate conditional variance
+    sigma2[0] = omega/(1-alpha-beta)
+
+    for t in range(1, len(sigma2)):
+        sigma2[t] = omega + alpha*resid_sq[t-1] + beta*sigma2[t-1]
+
+    
+    logl = np.log(1/(np.sqrt(2*np.pi*sigma2))*np.exp(-resid_sq/(2*sigma2)))
+    sum_logl = np.sum(logl)
+
+    return -sum_logl
+
+
+# %% [markdown]
+# We do not write our own optimizing function as it is out of the scope of this project. Instead we use existing implementation from scipy
+
+# %%
+# We want to maximize sum of log likelihoods
+from scipy.optimize import minimize
+
+initial_guess = [np.var(r), 0, 0]
+bounds = [(0, None), (0, None), (0, None)]
+
+def constraint_stationarity(params):
+    _, alpha, beta = params
+    return 1 - alpha - beta
+
+constraints = ({
+    'type': 'ineq',
+    'fun': constraint_stationarity
+})
+
+optimal_res = minimize(
+    negative_loglik,
+    initial_guess,
+    bounds=bounds,
+    constraints=constraints,
+    options={'maxiter' : 100}
+)
+print('Success:', optimal_res.success)
+print('Message:', optimal_res.message)
+print('n iterations', optimal_res.nit)
+
+# %%
+omega, alpha, beta = optimal_res.x
+
+# %%
+from tabulate import tabulate
+
+table = [
+    ['omega', omega],
+    ['alpha', alpha],
+    ['beta', beta]
+]
+
+print(tabulate(table, headers=['Parameter', 'Value'], floatfmt=".6f"))
+
+# %%
+# Conditional volatility
+sigma2 = np.zeros(len(r))
+
+# Calculate conditional variance
+sigma2[0] = omega/(1-alpha-beta)
+
+for t in range(1, len(sigma2)):
+    sigma2[t] = omega + alpha*resid_sq[t-1] + beta*sigma2[t-1]
+
+# %%
+plt.figure(figsize=(12, 6))
+plt.plot(np.sqrt((r.values/100)**2), color='black', lw=0.9)
+plt.plot(np.sqrt(sigma2/10000), color='red', lw=1.1)
+
+
+# %% [markdown]
+# ## GARCH Model Existing Implementation
 #
-# Now we'll fit a GARCH(1,1) model to the returns
+# Above we have made our own implementation of GARCH(1,1) model. However there are already existing implementations. We will proceed with the study using arch_model from arch library.
 #
 # #### Article GARCH(1,1) Model (for reference)
 # ![GARCH(1,1) Model](../data/screenshots/garch_one_one.png)
+
+# %% [markdown]
+# We use arch library to fit GARCH(1, 1) model. However fitting the model to our returns in the original scale produces warning with recommendation to scale the returns by multiplying them by 1000. Therefore we fit the model to scaled returns. Here we have to remember that forecasted conditional volatility obtained from the resulting object will be scaled as well. For visuals we will rescale back to the original scale.
 
 # %%
 # | label: tbl-garch-one-one
@@ -348,9 +464,9 @@ acf_plot
 # | tbl-cap-location: top
 
 logger.info("Fitting GARCH(1,1) model...")
-results = fit_garch(returns["portfolio"]*100, vol="Garch", dist="normal")
+results = fit_garch(returns["portfolio"]*1000, vol="Garch", dist="normal")
 
-logger.info(results.summary())
+#logger.info(results.summary())
 # Extract coefficients, standard errors, z-statistics, and p-values
 coef = results.params
 std_err = results.std_err
@@ -366,11 +482,13 @@ model_results = pd.DataFrame(
         "P-Value": p_values,
     }
 )
+
 model_results
 
 # %% [markdown]
 # ## ACF of Squared Standardized Residuals
 #
+# The same as before we generate series of autocorrelations up to 15th lag together with Q-stats and their p-values. Results are pretty similar to those presented in the original paper. Note that here standardized residuals are basically returns adjusted for GARCH effects as mean portfolio return is very close to 0. This way we can interpret the results by saying that GARCH(1, 1) model manages to capture portfolio returns variance variability.
 #
 # #### Article ACF of Squared Standardized Residuals (for reference)
 # ![ACF of Squared Standardized Residuals](../data/screenshots/squared_standardized_residuals.png)
@@ -378,7 +496,7 @@ model_results
 # %%
 # | label: tbl-squared-residuals
 # | tbl-cap: Autocorrelations of Squared Standardized Residuals
-acf_plot = calculate_acf_table(results.resid / np.sqrt(results.conditional_volatility))
+acf_plot = calculate_acf_table(results.resid / results.conditional_volatility)
 acf_plot
 
 # %% [markdown]
@@ -405,7 +523,7 @@ volatility_plot
 # | fig-cap: Standardized Residuals
 
 # Get standardized residuals
-std_resid = results.resid / np.sqrt(results.conditional_volatility)
+std_resid = (results.resid / np.sqrt(results.conditional_volatility))/1000
 
 plt.figure(figsize=(12, 6))
 plt.plot(std_resid, color='black', lw=1)
@@ -427,12 +545,19 @@ plt.show()
 logger.info("Generating volatility forecast...")
 forecast = results.forecast(horizon=5)
 logger.info("\nVolatility Forecast:")
-logger.info(forecast.variance.iloc[-1])
+logger.info(forecast.variance.iloc[-1]/1000)
 
 # %% [markdown]
 # ## Visualizing Forecasts
 #
-# Let's visualize the forecast using plotnine:
+# Visual below shows conditional volatility and realized volatility defined as square root of squared returns assuming 0 mean:
+# $$
+# \text{Var}(r_t) = \mathbb{E}[(r_t - \mu)^2]
+# $$
+# if $\mu = 0$ we get:
+# $$
+# \text{Var}(r_t) = \mathbb{E}[r_t^2]
+# $$
 
 # %%
 # | label: fig-forecast
@@ -440,22 +565,59 @@ logger.info(forecast.variance.iloc[-1])
 
 # Plot volatility
 plt.figure(figsize = (14, 8))
-plt.plot((returns['portfolio']*100)**2, color = 'black', lw = 1)
-plt.plot(results.conditional_volatility, color = 'red', lw = 0.9)
+plt.plot(np.sqrt(returns['portfolio']**2), color = 'black', lw = 0.9)
+plt.plot(results.conditional_volatility/1000, color = 'red', lw = 1.1)
 plt.grid(alpha = 0.3)
 plt.title("Volatility realized vs predicted")
 plt.show()
 
 
 # %% [markdown]
+# At this point we can also compare results from our implementation with those obtained using arch library implementation
+
+# %%
+plt.figure(figsize = (14, 8))
+plt.plot(np.sqrt(returns['portfolio']**2), color = 'black', lw = 0.9, label = 'realized volatility')
+plt.plot(r.index, np.sqrt(sigma2/10000), color = 'green', lw = 1.1, label = 'GARCH - our implementation')
+plt.plot(results.conditional_volatility/1000, color = 'red', lw = 1.1, label = 'GARCH - arch library')
+plt.grid(alpha = 0.3)
+plt.title("Volatility realized vs predicted")
+plt.show()
+
+# %% [markdown]
 # # Value at Risk
+
+# %% [markdown]
+# Based on conditional volatility we calculate 1% value at risk. We assume initial portfolio value of 1 000 000$. We predict that 1 step ahead standard deviation will be 0.002487. 
+#
+# First we assume normal distribution of returns. We obtain 1% quantile by multiplying predicted standard deviation by 2.327. 
+
+# %%
+init_value = 10**6
+2.327*forecast.variance['h.1']/1000 * init_value
+
+# %% [markdown]
+# The 1% Value at Risk asusming normal distribution of standardized residuals is 5786$. Note that as mean return is very close to 0 we can omit this value in our calculation. We basically calculated the 99% quantile, but with 0 mean it is symmetrical.
+
+# %% [markdown]
+# We can also use empirical 1% quantile
+
+# %%
+emp_q = np.quantile(results.resid / np.sqrt(results.conditional_volatility), 0.01)
+-emp_q*forecast.variance['h.1']/1000 * init_value
+
+# %% [markdown]
+# Both values are significantly lower than those presented in the original paper. This comes from the discrepancies between our data and data used for the original study. It could be seen on portfolio returns plots that our portfolio returns are generally much lower than returns of portfolio from the study.
+
+# %% [markdown]
+# We also plot 1% value at risk for the whole in sample period. For reference we show the same plot from the original study.
 
 # %% [markdown]
 # ![in-sample-VaR](../data/screenshots/in_sample_VaR.png)
 
 # %%
 # Calculate VaR
-VaR_returns = calculate_VaR_returns(returns["portfolio"], results.conditional_volatility/100, 2.326)
+VaR_returns = calculate_VaR_returns(returns["portfolio"], results.conditional_volatility/1000, 2.327)
 
 # %%
 # | label: fig-portfolio_loss
@@ -467,10 +629,15 @@ portfolio_returns = returns['portfolio']*init_value
 portfolio_VaR = VaR_returns*init_value
 
 plt.figure(figsize = (14, 8))
-plt.plot(-portfolio_returns, color = 'black', lw = 1)
-plt.plot(-portfolio_VaR, color = 'red', lw = 0.9)
+plt.plot(-portfolio_returns, color = 'black', lw = 1, label='Loss')
+plt.plot(-portfolio_VaR, color = 'red', lw = 0.9, label='VaR')
 plt.grid(alpha=0.3)
 plt.title("Portfolio loss and 99% Value at Risk in sample")
+plt.legend()
+plt.show()
+
+# %% [markdown]
+# We show also the number of exceedances. Good model should produce such VaR estimates that actual portfolio loss is greater than the estimated around 1% of time. We see that for our GARCH(1, 1) VaR estimates assuming normal distribution of standardized residuals is 1.49%.
 
 # %%
 # Exceedances
@@ -483,6 +650,9 @@ print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 # # Out-of-sample model fit and Value at Risk
 
 # %% [markdown]
+# We obtain oit of sample predictions using rolling forecast without reestimating GARCH parameters
+
+# %% [markdown]
 # ![oos-VaR](../data/screenshots/out_of_sample_VaR.png)
 
 # %%
@@ -492,7 +662,7 @@ omega = results.params['omega']
 alpha = results.params['alpha[1]']
 beta = results.params['beta[1]']
 
-epsilon2 = (returns_oos['portfolio']*100 - mu)**2
+epsilon2 = (returns_oos['portfolio']*1000 - mu)**2
 sigma2 = np.zeros(len(returns_oos))
 sigma2[0] = omega/(1 - alpha - beta)
 
@@ -502,20 +672,22 @@ for t in range(1, len(sigma2)):
 
 # %%
 plt.figure(figsize = (14, 8))
-plt.plot((returns_oos['portfolio'].values*100)**2, color = 'black', lw = 1)
-plt.plot(np.sqrt(sigma2), color = 'red', lw = 0.9)
+plt.plot(np.sqrt((returns_oos['portfolio'].values)**2), color = 'black', lw = 1)
+plt.plot(np.sqrt(sigma2)/1000, color = 'red', lw = 0.9)
+plt.show()
 
 # %%
 # Value at risk - portfolio value 1 000 000$ at each point in time
 plt.figure(figsize = (14, 8))
 portfolio_returns = returns_oos['portfolio'].values*(10**6)
 plt.plot(-portfolio_returns, color = 'black', lw = 1)
-plt.plot(np.sqrt(sigma2) * 2.326 * 10**4, color = 'red', lw = 0.9)
+plt.plot(np.sqrt(sigma2) * 2.327 * 10**3, color = 'red', lw = 0.9)
 plt.grid(alpha=0.3)
 plt.title("Portfolio loss and 99% Value at Risk")
+plt.show()
 
 # %%
-n_exc, perc_exc = count_exceedances(np.sqrt(sigma2) * (-2.326)/100, returns_oos['portfolio'].values, True)
+n_exc, perc_exc = count_exceedances(np.sqrt(sigma2) * (-2.327)/1000, returns_oos['portfolio'].values, True)
 print(f"Number of exceedances: {n_exc}")
 print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 
