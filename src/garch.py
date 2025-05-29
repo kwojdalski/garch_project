@@ -499,7 +499,7 @@ acf_plot
 # | fig-cap: Conditional Volatility
 
 plt.figure(figsize=(12, 6))
-plt.plot(results.conditional_volatility, color='black')
+plt.plot(results.conditional_volatility/1000, color='black')
 plt.title('Conditional volatility')
 plt.show()
 
@@ -569,6 +569,7 @@ plt.plot(np.sqrt(returns['portfolio']**2), color = 'black', lw = 0.9, label = 'r
 plt.plot(r.index, np.sqrt(sigma2/10000), color = 'green', lw = 1.1, label = 'GARCH - our implementation')
 plt.plot(results.conditional_volatility/1000, color = 'red', lw = 1.1, label = 'GARCH - arch library')
 plt.title("Volatility realized vs predicted")
+plt.legend()
 plt.show()
 
 # %% [markdown]
@@ -618,7 +619,7 @@ portfolio_VaR = VaR_returns*init_value
 plt.figure(figsize = (14, 8))
 plt.plot(-portfolio_returns, color = 'black', lw = 1, label='Loss')
 plt.plot(-portfolio_VaR, color = 'red', lw = 0.9, label='VaR')
-plt.title("Portfolio loss and 99% Value at Risk in sample")
+plt.title("Portfolio loss and 1% Value at Risk in sample")
 plt.legend()
 plt.show()
 
@@ -668,11 +669,82 @@ plt.figure(figsize = (14, 8))
 portfolio_returns = returns_oos['portfolio']*(10**6)
 plt.plot(-portfolio_returns, color = 'black', lw = 1)
 plt.plot(returns_oos.index, np.sqrt(sigma2) * 2.327 * 10**3, color = 'red', lw = 0.9)
-plt.title("Portfolio loss and 99% Value at Risk")
+plt.title("Portfolio loss and 1% Value at Risk")
 plt.show()
 
 # %%
 n_exc, perc_exc = count_exceedances(np.sqrt(sigma2) * (-2.327)/1000, returns_oos['portfolio'].values, True)
+print(f"Number of exceedances: {n_exc}")
+print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
+
+# %% [markdown]
+# # Modern Market
+
+# %%
+start_date = datetime(2015, 1, 1)
+end_date = datetime(2025, 1, 1)
+
+prices_new = fetch_stock_data(symbols, start_date, end_date)
+returns_new = calculate_returns(prices_new)
+
+portfolio_prices_new = pd.Series(0, index=prices_new.index, dtype=float)
+
+# Apply weights to each component
+for symbol, weight in weights.items():
+    # Use pandas multiplication and addition
+    portfolio_returns_new = portfolio_prices_new.add(returns_new[symbol].multiply(weight))
+
+# Add portfolio returns to the returns DataFrame
+returns_new["portfolio"] = portfolio_returns_new
+
+# %%
+acf_plot = calculate_acf_table(returns_new["portfolio"])
+acf_plot
+
+# %%
+garch_new = results = fit_garch(returns_new["portfolio"]*1000, vol="Garch", dist="normal")
+coef = garch_new.params
+std_err = garch_new.std_err
+z_stat = coef / std_err
+p_values = garch_new.pvalues
+
+# Create a DataFrame to display the results
+model_results = pd.DataFrame(
+    {
+        "Coef": coef,
+        "St. Err": std_err,
+        "Z-Stat": z_stat,
+        "P-Value": p_values,
+    }
+)
+
+model_results
+
+# %%
+plt.figure(figsize = (14, 8))
+plt.plot(np.sqrt(returns_new['portfolio']**2), color = 'black', lw = 0.9, label = 'realized volatility')
+plt.plot(garch_new.conditional_volatility/1000, color = 'red', lw = 1.1, label = 'conditional volatility')
+plt.title("Volatility realized vs predicted")
+plt.legend()
+plt.show()
+
+# %%
+# Value at risk - portfolio value 1 000 000$ at each point in time
+VaR_returns = calculate_VaR_returns(returns_new["portfolio"], garch_new.conditional_volatility/1000, 2.327)
+
+init_value = 10**6
+portfolio_returns = returns_new['portfolio']*init_value
+portfolio_VaR = VaR_returns*init_value
+
+plt.figure(figsize = (14, 8))
+plt.plot(-portfolio_returns, color = 'black', lw = 1, label='Loss')
+plt.plot(-portfolio_VaR, color = 'red', lw = 0.9, label='VaR')
+plt.title("Portfolio loss and 1% Value at Risk in sample")
+plt.legend()
+plt.show()
+
+# %%
+n_exc, perc_exc = count_exceedances(VaR_returns, returns_new["portfolio"], True)
 print(f"Number of exceedances: {n_exc}")
 print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 
