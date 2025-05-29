@@ -60,30 +60,6 @@ def fit_garch(returns: pd.Series, p: int = 1, q: int = 1, **kwargs):
     return results
 
 
-def plot_volatility(results, returns: pd.Series, scale=1000):
-    """
-    Plot the conditional volatility using plotnine
-    """
-    # Create a DataFrame for plotting
-    volatility_df = pd.DataFrame(
-        {"Date": returns.index, "Volatility": np.sqrt(results.conditional_volatility/scale)}
-    )
-
-    # Create the plot using plotnine
-    volatility_plot = (
-        ggplot(volatility_df, aes(x="Date", y="Volatility"))
-        + geom_line()
-        + labs(title="Conditional Volatility", x="Date", y="Volatility")
-        + theme(
-            plot_title=element_text(size=14, face="bold"),
-            axis_title=element_text(size=12),
-            axis_text=element_text(size=10),
-        )
-    )
-
-    return volatility_plot
-
-
 # Calculate portfolio statistics
 def calculate_portfolio_stats(returns_data: pd.DataFrame):
     stats_dict = {}

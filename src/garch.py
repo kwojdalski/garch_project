@@ -56,20 +56,11 @@ import os
 from datetime import datetime
 
 import matplotlib.pyplot as plt
+plt.style.use('seaborn-v0_8-darkgrid')
+plt.rcParams['axes.grid'] = True
+
 import numpy as np
 import pandas as pd
-from plotnine import (
-    aes,
-    element_blank,
-    element_text,
-    facet_wrap,
-    geom_line,
-    ggplot,
-    labs,
-    scale_color_manual,
-    theme,
-    theme_minimal,
-)
 
 if os.getcwd().endswith("src") or os.getcwd().endswith("notebooks"):
     os.chdir("..")
@@ -81,6 +72,8 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
 
 # %% [markdown]
 # # Data Preparation
@@ -238,15 +231,12 @@ prices = prices.loc[:'2000-03-23']
 fig, axes = plt.subplots(3, 1, figsize=(12, 8))
 
 axes[0].plot(prices['^DJI'], color='black')
-axes[0].grid(alpha=0.3)
 axes[0].set_title('^DJI')
 
 axes[1].plot(prices['^IXIC'], color='black')
-axes[1].grid(alpha=0.3)
 axes[1].set_title('^IXIC')
 
 axes[2].plot(prices['^TNX'], color='black')
-axes[2].grid(alpha=0.3)
 axes[2].set_title('^TNX')
 
 plt.show()
@@ -265,19 +255,15 @@ fig, axes = plt.subplots(2, 2, figsize = (16, 8))
 
 axes[0, 0].plot(returns['^DJI'], color = "black")
 axes[0, 0].set_title('^DJI')
-axes[0, 0].grid(linestyle = '--', alpha = 0.3)
 
 axes[0, 1].plot(returns['^TNX'], color = "black")
 axes[0, 1].set_title('^TNX')
-axes[0, 1].grid(linestyle = '--', alpha = 0.3)
 
 axes[1, 0].plot(returns['^IXIC'], color = "black")
 axes[1, 0].set_title('^IXIC')
-axes[1, 0].grid(linestyle = '--', alpha = 0.3)
 
 axes[1, 1].plot(returns['portfolio'], color = "black")
 axes[1, 1].set_title('portfolio')
-axes[1, 1].grid(linestyle = '--', alpha = 0.3)
 
 plt.tight_layout()
 plt.show()
@@ -445,6 +431,8 @@ for t in range(1, len(sigma2)):
 plt.figure(figsize=(12, 6))
 plt.plot(np.sqrt((r.values/100)**2), color='black', lw=0.9)
 plt.plot(np.sqrt(sigma2/10000), color='red', lw=1.1)
+plt.title('Custom GARCH(1,1) conditional colatility')
+plt.show()
 
 
 # %% [markdown]
@@ -510,8 +498,10 @@ acf_plot
 # | label: fig-conditional-volatility
 # | fig-cap: Conditional Volatility
 
-volatility_plot = plot_volatility(results, returns)
-volatility_plot
+plt.figure(figsize=(12, 6))
+plt.plot(results.conditional_volatility, color='black')
+plt.title('Conditional volatility')
+plt.show()
 
 # %% [markdown]
 # ## Model Diagnostics
@@ -527,7 +517,6 @@ std_resid = (results.resid / np.sqrt(results.conditional_volatility))/1000
 
 plt.figure(figsize=(12, 6))
 plt.plot(std_resid, color='black', lw=1)
-plt.grid(alpha=0.3)
 plt.title("Standardized residuals")
 plt.show()
 
@@ -567,7 +556,6 @@ logger.info(forecast.variance.iloc[-1]/1000)
 plt.figure(figsize = (14, 8))
 plt.plot(np.sqrt(returns['portfolio']**2), color = 'black', lw = 0.9)
 plt.plot(results.conditional_volatility/1000, color = 'red', lw = 1.1)
-plt.grid(alpha = 0.3)
 plt.title("Volatility realized vs predicted")
 plt.show()
 
@@ -580,7 +568,6 @@ plt.figure(figsize = (14, 8))
 plt.plot(np.sqrt(returns['portfolio']**2), color = 'black', lw = 0.9, label = 'realized volatility')
 plt.plot(r.index, np.sqrt(sigma2/10000), color = 'green', lw = 1.1, label = 'GARCH - our implementation')
 plt.plot(results.conditional_volatility/1000, color = 'red', lw = 1.1, label = 'GARCH - arch library')
-plt.grid(alpha = 0.3)
 plt.title("Volatility realized vs predicted")
 plt.show()
 
@@ -631,7 +618,6 @@ portfolio_VaR = VaR_returns*init_value
 plt.figure(figsize = (14, 8))
 plt.plot(-portfolio_returns, color = 'black', lw = 1, label='Loss')
 plt.plot(-portfolio_VaR, color = 'red', lw = 0.9, label='VaR')
-plt.grid(alpha=0.3)
 plt.title("Portfolio loss and 99% Value at Risk in sample")
 plt.legend()
 plt.show()
@@ -672,17 +658,16 @@ for t in range(1, len(sigma2)):
 
 # %%
 plt.figure(figsize = (14, 8))
-plt.plot(np.sqrt((returns_oos['portfolio'].values)**2), color = 'black', lw = 1)
-plt.plot(np.sqrt(sigma2)/1000, color = 'red', lw = 0.9)
+plt.plot(np.sqrt(returns_oos['portfolio']**2), color = 'black', lw = 1)
+plt.plot(returns_oos.index, np.sqrt(sigma2)/1000, color = 'red', lw = 0.9)
 plt.show()
 
 # %%
 # Value at risk - portfolio value 1 000 000$ at each point in time
 plt.figure(figsize = (14, 8))
-portfolio_returns = returns_oos['portfolio'].values*(10**6)
+portfolio_returns = returns_oos['portfolio']*(10**6)
 plt.plot(-portfolio_returns, color = 'black', lw = 1)
-plt.plot(np.sqrt(sigma2) * 2.327 * 10**3, color = 'red', lw = 0.9)
-plt.grid(alpha=0.3)
+plt.plot(returns_oos.index, np.sqrt(sigma2) * 2.327 * 10**3, color = 'red', lw = 0.9)
 plt.title("Portfolio loss and 99% Value at Risk")
 plt.show()
 
