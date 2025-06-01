@@ -244,7 +244,7 @@ plt.show()
 
 # %% [markdown]
 # #### Returns from the original paper (for reference)
-# ![Returns from the original paper](../data/screenshots/returns.png)
+# ![Returns from the original paper](screenshots/returns.png)
 
 # %%
 # | label: fig-returns
@@ -272,7 +272,7 @@ plt.show()
 # ## Portfolio Statistics
 #
 # #### Article Portfolio Statistics (for reference)
-# ![Portfolio Statistics](../data/screenshots/portfolio_statistics.png)
+# ![Portfolio Statistics](screenshots/portfolio_statistics.png)
 
 # %%
 # | label: tbl-portfolio-stats
@@ -295,7 +295,7 @@ portfolio_stats
 # ## ACF of Squared Portfolio Returns
 #
 # #### Article ACF of Squared Portfolio Returns (for reference)
-# ![ACF of Squared Portfolio Returns](../data/screenshots/squared_returns.png)
+# ![ACF of Squared Portfolio Returns](screenshots/squared_returns.png)
 
 # %%
 # | label: tbl-portfolio-returns
@@ -441,7 +441,7 @@ plt.show()
 # Above we have made our own implementation of GARCH(1,1) model. However there are already existing implementations. We will proceed with the study using arch_model from arch library.
 #
 # #### Article GARCH(1,1) Model (for reference)
-# ![GARCH(1,1) Model](../data/screenshots/garch_one_one.png)
+# ![GARCH(1,1) Model](screenshots/garch_one_one.png)
 
 # %% [markdown]
 # We use arch library to fit GARCH(1, 1) model. However fitting the model to our returns in the original scale produces warning with recommendation to scale the returns by multiplying them by 1000. Therefore we fit the model to scaled returns. Here we have to remember that forecasted conditional volatility obtained from the resulting object will be scaled as well. For visuals we will rescale back to the original scale.
@@ -479,7 +479,7 @@ model_results
 # The same as before we generate series of autocorrelations up to 15th lag together with Q-stats and their p-values. Results are pretty similar to those presented in the original paper. Note that here standardized residuals are basically returns adjusted for GARCH effects as mean portfolio return is very close to 0. This way we can interpret the results by saying that GARCH(1, 1) model manages to capture portfolio returns variance variability.
 #
 # #### Article ACF of Squared Standardized Residuals (for reference)
-# ![ACF of Squared Standardized Residuals](../data/screenshots/squared_standardized_residuals.png)
+# ![ACF of Squared Standardized Residuals](screenshots/squared_standardized_residuals.png)
 
 # %%
 # | label: tbl-squared-residuals
@@ -601,7 +601,7 @@ emp_q = np.quantile(results.resid / np.sqrt(results.conditional_volatility), 0.0
 # We also plot 1% value at risk for the whole in sample period. For reference we show the same plot from the original study.
 
 # %% [markdown]
-# ![in-sample-VaR](../data/screenshots/in_sample_VaR.png)
+# ![in-sample-VaR](screenshots/in_sample_VaR.png)
 
 # %%
 # Calculate VaR
@@ -640,7 +640,7 @@ print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 # We obtain oit of sample predictions using rolling forecast without reestimating GARCH parameters
 
 # %% [markdown]
-# ![oos-VaR](../data/screenshots/out_of_sample_VaR.png)
+# ![oos-VaR](screenshots/out_of_sample_VaR.png)
 
 # %%
 # Rolling forecast without reestimating parameters
