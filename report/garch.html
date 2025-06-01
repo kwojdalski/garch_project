@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Krzysztof Wojdalski">
+<meta name="author" content="Piotr">
+<meta name="author" content="Shah">
+
+<title>GARCH Model Implementation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="garch_files/libs/clipboard/clipboard.min.js"></script>
+<script src="garch_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="garch_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="garch_files/libs/quarto-html/popper.min.js"></script>
+<script src="garch_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="garch_files/libs/quarto-html/anchor.min.js"></script>
+<link href="garch_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="garch_files/libs/quarto-html/quarto-syntax-highlighting-bcbce66894bfa8e7e94e40e0186b9bb8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="garch_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="garch_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="garch_files/libs/bootstrap/bootstrap-e52c317b831d71bd0833fd401c29266f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background">Background</a>
+  <ul class="collapse">
+  <li><a href="#rationale-behind-the-study" id="toc-rationale-behind-the-study" class="nav-link" data-scroll-target="#rationale-behind-the-study">Rationale behind the Study</a></li>
+  <li><a href="#steps-in-the-research" id="toc-steps-in-the-research" class="nav-link" data-scroll-target="#steps-in-the-research">Steps in the Research</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#imports-and-setup" id="toc-imports-and-setup" class="nav-link" data-scroll-target="#imports-and-setup">Imports and Setup</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">Data Preparation</a>
+  <ul class="collapse">
+  <li><a href="#portfolio-composition" id="toc-portfolio-composition" class="nav-link" data-scroll-target="#portfolio-composition">Portfolio Composition</a></li>
+  <li><a href="#fetching-stock-data" id="toc-fetching-stock-data" class="nav-link" data-scroll-target="#fetching-stock-data">Fetching Stock Data</a>
+  <ul class="collapse">
+  <li><a href="#rate-and-dow-jones-industrial-average-dji" id="toc-rate-and-dow-jones-industrial-average-dji" class="nav-link" data-scroll-target="#rate-and-dow-jones-industrial-average-dji">RATE and Dow Jones Industrial Average (^DJI)</a></li>
+  </ul></li>
+  <li><a href="#calculating-returns" id="toc-calculating-returns" class="nav-link" data-scroll-target="#calculating-returns">Calculating Returns</a></li>
+  <li><a href="#visualizing-price-and-returns" id="toc-visualizing-price-and-returns" class="nav-link" data-scroll-target="#visualizing-price-and-returns">Visualizing Price and Returns</a></li>
+  <li><a href="#portfolio-statistics" id="toc-portfolio-statistics" class="nav-link" data-scroll-target="#portfolio-statistics">Portfolio Statistics</a></li>
+  <li><a href="#acf-of-squared-portfolio-returns" id="toc-acf-of-squared-portfolio-returns" class="nav-link" data-scroll-target="#acf-of-squared-portfolio-returns">ACF of Squared Portfolio Returns</a></li>
+  </ul></li>
+  <li><a href="#garch-model" id="toc-garch-model" class="nav-link" data-scroll-target="#garch-model">GARCH Model</a>
+  <ul class="collapse">
+  <li><a href="#garch11" id="toc-garch11" class="nav-link" data-scroll-target="#garch11">GARCH(1,1)</a></li>
+  <li><a href="#garch-model-existing-implementation" id="toc-garch-model-existing-implementation" class="nav-link" data-scroll-target="#garch-model-existing-implementation">GARCH Model Existing Implementation</a></li>
+  <li><a href="#acf-of-squared-standardized-residuals" id="toc-acf-of-squared-standardized-residuals" class="nav-link" data-scroll-target="#acf-of-squared-standardized-residuals">ACF of Squared Standardized Residuals</a></li>
+  </ul></li>
+  <li><a href="#volatility-analysis" id="toc-volatility-analysis" class="nav-link" data-scroll-target="#volatility-analysis">Volatility Analysis</a>
+  <ul class="collapse">
+  <li><a href="#conditional-volatility" id="toc-conditional-volatility" class="nav-link" data-scroll-target="#conditional-volatility">Conditional Volatility</a></li>
+  <li><a href="#model-diagnostics" id="toc-model-diagnostics" class="nav-link" data-scroll-target="#model-diagnostics">Model Diagnostics</a></li>
+  </ul></li>
+  <li><a href="#volatility-forecasting" id="toc-volatility-forecasting" class="nav-link" data-scroll-target="#volatility-forecasting">Volatility Forecasting</a>
+  <ul class="collapse">
+  <li><a href="#generating-forecasts" id="toc-generating-forecasts" class="nav-link" data-scroll-target="#generating-forecasts">Generating Forecasts</a></li>
+  <li><a href="#visualizing-forecasts" id="toc-visualizing-forecasts" class="nav-link" data-scroll-target="#visualizing-forecasts">Visualizing Forecasts</a></li>
+  </ul></li>
+  <li><a href="#value-at-risk" id="toc-value-at-risk" class="nav-link" data-scroll-target="#value-at-risk">Value at Risk</a></li>
+  <li><a href="#out-of-sample-model-fit-and-value-at-risk" id="toc-out-of-sample-model-fit-and-value-at-risk" class="nav-link" data-scroll-target="#out-of-sample-model-fit-and-value-at-risk">Out-of-sample model fit and Value at Risk</a></li>
+  <li><a href="#modern-market" id="toc-modern-market" class="nav-link" data-scroll-target="#modern-market">Modern Market</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">GARCH Model Implementation</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Authors</div>
+    <div class="quarto-title-meta-contents">
+             <p>Krzysztof Wojdalski </p>
+             <p>Piotr </p>
+             <p>Shah </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>The main goal of this projectis to replicate the GARCH model analysis presented in Robert Engle’s 2001 Nobel Prize lecture, “GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics.” The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility. However to make things more interesting we add some extensions to the study. First of all, we provide our own GARCH(1,1) implementation. We compare GARCH(1,1) results with some other volatility models, particularly E-GARCH and GJR-GARCH on the same data sample that was used in the original paper. Finally, we examine how market volatility has evolved since the publication of the paper.</p>
+<section id="rationale-behind-the-study" class="level3">
+<h3 class="anchored" data-anchor-id="rationale-behind-the-study">Rationale behind the Study</h3>
+<ol type="1">
+<li>From the initial inspection of the article, easy to obtain data</li>
+<li>Well-known author so we asssumed that the methodology is sound and well-explained</li>
+<li>The author’s research has had significant influence and impact in the field of time series analysis</li>
+<li>Research could be easily extended for different datasets, portfolios and methods</li>
+</ol>
+</section>
+<section id="steps-in-the-research" class="level3">
+<h3 class="anchored" data-anchor-id="steps-in-the-research">Steps in the Research</h3>
+<p>The replication focuses on the following:</p>
+<ol type="1">
+<li>Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle’s paper</li>
+<li>Calculating and analyzing portfolio returns</li>
+<li>Writing GARCH(1,1) implementation</li>
+<li>Fitting a GARCH(1,1) model to the portfolio returns</li>
+<li>Examining the model’s performance in capturing volatility clustering</li>
+<li>Generating volatility forecasts in the same manner as Engle did</li>
+<li>Extending study with other methods</li>
+<li>Examining portfolio built on current data</li>
+</ol>
+<p>By following Engle’s methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.</p>
+</section>
+</section>
+</section>
+<section id="imports-and-setup" class="level1">
+<h1>Imports and Setup</h1>
+<div id="setup" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> logging</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-darkgrid'</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'axes.grid'</span>] <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.getcwd().endswith(<span class="st">"src"</span>) <span class="kw">or</span> os.getcwd().endswith(<span class="st">"report"</span>):</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    os.chdir(<span class="st">".."</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> src.utils <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure logging</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>logging.basicConfig(</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    level<span class="op">=</span>logging.INFO, <span class="bu">format</span><span class="op">=</span><span class="st">"</span><span class="sc">%(asctime)s</span><span class="st"> - </span><span class="sc">%(levelname)s</span><span class="st"> - </span><span class="sc">%(message)s</span><span class="st">"</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="data-preparation" class="level1">
+<h1>Data Preparation</h1>
+<section id="portfolio-composition" class="level2">
+<h2 class="anchored" data-anchor-id="portfolio-composition">Portfolio Composition</h2>
+<p>This portfolio consists of:</p>
+<ul>
+<li>50% Nasdaq (^IXIC)</li>
+<li>30% Dow Jones Industrial Average (^DJI)</li>
+<li>20% 10-year Treasury Constant Maturity Rate <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></li>
+</ul>
+<section id="problems-with-the-data" class="level4">
+<h4 class="anchored" data-anchor-id="problems-with-the-data">Problems with the data</h4>
+<p>Engle described the data set as follows:</p>
+<blockquote class="blockquote">
+<p>Let’s use the GARCH(1,1) tools to estimate the 1 percent value at risk of a $1,000,000 portfolio on March 23, 2000. This portfolio consists of 50 percent Nasdaq, 30 percent DowJones and 20 percent long bonds. The long bond is a ten-year constant maturity Treasury. The portfolio has constant proportions of wealth in each asset that would entail some rebalancing over time.</p>
+</blockquote>
+<p>Due to vagueness of the claim above, we’ll try to reverse engineer the portfolio, but it’s not a perfect solution. When we calculate return on the portfolio, we implictly assume daily rebalancing, i.e., weights are constant.</p>
+</section>
+</section>
+<section id="fetching-stock-data" class="level2">
+<h2 class="anchored" data-anchor-id="fetching-stock-data">Fetching Stock Data</h2>
+<p>We’ll fetch the portfolio components data using the implemented function:</p>
+<ul>
+<li>The function is implemented in <code>src/utils.py</code></li>
+<li>it uses <code>yfinance</code> - a Python package for downloading stock data from Yahoo Finance</li>
+<li>start and end dates are taken from the article</li>
+<li>weights for portfolio components are taken from the article, i.e.&nbsp;50% Nasdaq, 30% Dow Jones, and 20% 10-year Treasury.</li>
+</ul>
+<div id="fetch-data" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Nasdaq, Dow Jones, and 10-year Treasury</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>symbols <span class="op">=</span> [<span class="st">"^IXIC"</span>, <span class="st">"^DJI"</span>, <span class="st">"^TNX"</span>]  <span class="co">#</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the date range, based on the paper</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Sample period</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>start_date <span class="op">=</span> datetime(<span class="dv">1990</span>, <span class="dv">3</span>, <span class="dv">22</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>end_date <span class="op">=</span> datetime(<span class="dv">2001</span>, <span class="dv">6</span>, <span class="dv">1</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Portfolio weights, taken from the article</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> {</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"^IXIC"</span>: <span class="fl">0.50</span>,  <span class="co"># Nasdaq</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"^DJI"</span>: <span class="fl">0.30</span>,  <span class="co"># Dow Jones</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"^TNX"</span>: <span class="fl">0.20</span>,  <span class="co"># 10-year Treasury</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch data using our implementation</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"Fetching data..."</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> fetch_stock_data(symbols, start_date, end_date)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>prices.tail()</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Apparently, DJIA data is missing for 1990-1992, so we'll drop it</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.drop(columns<span class="op">=</span>[<span class="st">"^DJI"</span>, <span class="st">"^TNX"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="rate-and-dow-jones-industrial-average-dji" class="level3">
+<h3 class="anchored" data-anchor-id="rate-and-dow-jones-industrial-average-dji">RATE and Dow Jones Industrial Average (^DJI)</h3>
+<p>As the data for <code>^DJI</code> was missing for 1990-1992, we had to take it from somewhere else. We found Dow Jones Industrial Average (^DJI) data <a href="https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data">here</a>.</p>
+<p>For RATE we used a good proxy which we found here looks like a good proxy for TNX, we’ll use data we found <a href="https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&amp;chart_type=line&amp;drp=0&amp;fo=open%20sans&amp;graph_bgcolor=%23ffffff&amp;height=450&amp;mode=fred&amp;recession_bars=on&amp;txtcolor=%23444444&amp;ts=12&amp;tts=12&amp;width=1320&amp;nt=0&amp;thu=0&amp;trc=0&amp;show_legend=yes&amp;show_axis_titles=yes&amp;show_tooltip=yes&amp;id=DGS10&amp;scale=left&amp;cosd=2020-04-17&amp;coed=2025-04-17&amp;line_color=%230073e6&amp;link_values=false&amp;line_style=solid&amp;mark_type=none&amp;mw=3&amp;lw=3&amp;ost=-99999&amp;oet=99999&amp;mma=0&amp;fml=a&amp;fq=Daily&amp;fam=avg&amp;fgst=liin&amp;fgsnd=2020-02-01&amp;line_index=1&amp;transformation=lin&amp;vintage_date=2025-04-22&amp;revision_date=2025-04-22&amp;nd=1962-01-02">here</a></p>
+<section id="djia-data-retrieval" class="level4">
+<h4 class="anchored" data-anchor-id="djia-data-retrieval">DJIA data retrieval</h4>
+<div id="ffde918b" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>djia_prices <span class="op">=</span> pd.read_csv(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"./data/dja-performance-report-daily.csv"</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    index_col<span class="op">=</span><span class="st">"dt"</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    parse_dates<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>djia_prices <span class="op">=</span> djia_prices.rename(columns<span class="op">=</span>{<span class="st">"Close Value"</span>: <span class="st">"^DJI"</span>})</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.join(djia_prices[<span class="st">"djia"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="rate-data-retrieval" class="level4">
+<h4 class="anchored" data-anchor-id="rate-data-retrieval">RATE data retrieval</h4>
+<p>Data has been obtained from the hyperlink</p>
+<div id="57fc2b6d" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tnote_yield <span class="op">=</span> pd.read_csv(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"./data/DGS10.csv"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    index_col<span class="op">=</span><span class="st">"observation_date"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    parse_dates<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>tnote_yield <span class="op">=</span> tnote_yield.rename(columns<span class="op">=</span>{<span class="st">"DGS10"</span>: <span class="st">"^TNX"</span>})</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># tnote yield is not exactly the price, but we merge it anyway</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.join(tnote_yield[<span class="st">"^TNX"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="88f4ceb8" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>prices.rename({<span class="st">'djia'</span>: <span class="st">'^DJI'</span>}, axis<span class="op">=</span><span class="dv">1</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>prices</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="44">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">^IXIC</th>
+<th data-quarto-table-cell-role="th">^DJI</th>
+<th data-quarto-table-cell-role="th">^TNX</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Date</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1990-03-22</td>
+<td>434.500000</td>
+<td>2695.72</td>
+<td>8.53</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1990-03-23</td>
+<td>437.299988</td>
+<td>2704.28</td>
+<td>8.52</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1990-03-26</td>
+<td>438.799988</td>
+<td>2707.66</td>
+<td>8.51</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1990-03-27</td>
+<td>439.500000</td>
+<td>2736.94</td>
+<td>8.52</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1990-03-28</td>
+<td>436.700012</td>
+<td>2743.69</td>
+<td>8.51</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2001-05-24</td>
+<td>2282.020020</td>
+<td>11122.42</td>
+<td>5.52</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2001-05-25</td>
+<td>2251.030029</td>
+<td>11005.37</td>
+<td>5.52</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2001-05-29</td>
+<td>2175.540039</td>
+<td>11039.14</td>
+<td>5.54</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2001-05-30</td>
+<td>2084.500000</td>
+<td>10872.64</td>
+<td>5.54</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2001-05-31</td>
+<td>2110.489990</td>
+<td>10911.94</td>
+<td>5.43</td>
+</tr>
+</tbody>
+</table>
+
+<p>2828 rows × 3 columns</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="calculating-returns" class="level2">
+<h2 class="anchored" data-anchor-id="calculating-returns">Calculating Returns</h2>
+<p>This function uses log returns, which are calculated as follows:</p>
+<p><span class="math display">\[r_t = \ln \left( \frac{P_t}{P_{t-1}} \right)\]</span></p>
+<p>where <span class="math inline">\(P_t\)</span> is the price at time <span class="math inline">\(t\)</span>.</p>
+<div id="calculate-returns" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>returns <span class="op">=</span> calculate_returns(prices)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>portfolio_prices <span class="op">=</span> pd.Series(<span class="dv">0</span>, index<span class="op">=</span>prices.index, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply weights to each component</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> symbol, weight <span class="kw">in</span> weights.items():</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use pandas multiplication and addition</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    portfolio_returns <span class="op">=</span> portfolio_prices.add(returns[symbol].multiply(weight))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Add portfolio returns to the returns DataFrame</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>returns[<span class="st">"portfolio"</span>] <span class="op">=</span> portfolio_returns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="1b0b5b71" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># split the data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>returns_oos <span class="op">=</span> returns.loc[<span class="st">'2000-03-24'</span>:]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>returns <span class="op">=</span> returns.loc[:<span class="st">'2000-03-23'</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>prices_oos <span class="op">=</span> prices.loc[<span class="st">'2000-03-24'</span>:]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.loc[:<span class="st">'2000-03-23'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="visualizing-price-and-returns" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-price-and-returns">Visualizing Price and Returns</h2>
+<p>Let’s visualize prices (excl. portfolio) and returns for all data series and compare with the plot from the article.</p>
+<p>Visual inspection of the plot below shows that the data is very similar to the one in the article. The only difference is <code>^TNX</code> which doesn’t overlap perfectly with plots from the article (could be easily spotted by looking at the outliers.)</p>
+<p>Possible explanation: The 10-year Treasury Constant Maturity Rate (^TNX) is a model-derived value rather than an actual market price. Since new 10-year Treasury bonds aren’t issued daily, the constant maturity yield represents a theoretical value of what a 10-year Treasury security would yield if issued at current market conditions. This value is calculated through interpolation of yields from Treasury securities with similar credit quality but different maturities. While this approximation closely tracks what an actual new 10-year bond would yield, small discrepancies can exist. Nevertheless, the constant maturity rate provides valuable insights into market expectations regarding inflation, economic growth, and future interest rates.</p>
+<p>Hence, it’s likely that Engle’s methodology and / or selection of the securities with the same level of credit riskiness is different than the one used by Federal Reserve Bank of St.&nbsp;Louis in 2025.</p>
+<div id="cell-fig-prices" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">3</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(prices[<span class="st">'^DJI'</span>], color<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'^DJI'</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(prices[<span class="st">'^IXIC'</span>], color<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'^IXIC'</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].plot(prices[<span class="st">'^TNX'</span>], color<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">2</span>].set_title(<span class="st">'^TNX'</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-prices" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-prices-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="garch_files/figure-html/fig-prices-output-1.png" width="954" height="647" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-prices-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Sample: March 23, 1990 to March 23, 2000.
+</figcaption>
+</figure>
+</div>
+</div>
+<p>Nasdaq, Dow Jones and Bond Prices</p>
+</div>
+<section id="returns-from-the-original-paper-for-reference" class="level4">
+<h4 class="anchored" data-anchor-id="returns-from-the-original-paper-for-reference">Returns from the original paper (for reference)</h4>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="screenshots/returns.png" class="img-fluid figure-img"></p>
+<figcaption>Returns from the original paper</figcaption>
+</figure>
+</div>
+<div id="cell-fig-returns" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">16</span>, <span class="dv">8</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>, <span class="dv">0</span>].plot(returns[<span class="st">'^DJI'</span>], color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>, <span class="dv">0</span>].set_title(<span class="st">'^DJI'</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>, <span class="dv">1</span>].plot(returns[<span class="st">'^TNX'</span>], color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>, <span class="dv">1</span>].set_title(<span class="st">'^TNX'</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>, <span class="dv">0</span>].plot(returns[<span class="st">'^IXIC'</span>], color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>, <span class="dv">0</span>].set_title(<span class="st">'^IXIC'</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>, <span class="dv">1</span>].plot(returns[<span class="st">'portfolio'</span>], color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>, <span class="dv">1</span>].set_title(<span class="st">'portfolio'</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-returns" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-returns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="garch_files/figure-html/fig-returns-output-1.png" width="1526" height="758" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-returns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Sample: March 23, 1990 to March 23, 2000.
+</figcaption>
+</figure>
+</div>
+</div>
+<p>Nasdaq, Dow Jones and Bond Returns</p>
+</div>
+</section>
+</section>
+<section id="portfolio-statistics" class="level2">
+<h2 class="anchored" data-anchor-id="portfolio-statistics">Portfolio Statistics</h2>
+<section id="article-portfolio-statistics-for-reference" class="level4">
+<h4 class="anchored" data-anchor-id="article-portfolio-statistics-for-reference">Article Portfolio Statistics (for reference)</h4>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="screenshots/portfolio_statistics.png" class="img-fluid figure-img"></p>
+<figcaption>Portfolio Statistics</figcaption>
+</figure>
+</div>
+<div class="cell" data-execution_count="10" data-tbl-cap-location="top">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>portfolio_stats <span class="op">=</span> calculate_portfolio_stats(returns)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>portfolio_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-portfolio-stats" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-execution_count="10">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-portfolio-stats-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Portfolio Statistics
+</figcaption>
+<div aria-describedby="tbl-portfolio-stats-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="49">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">^IXIC</th>
+<th data-quarto-table-cell-role="th">^DJI</th>
+<th data-quarto-table-cell-role="th">^TNX</th>
+<th data-quarto-table-cell-role="th">portfolio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Mean</td>
+<td>0.0010</td>
+<td>0.0006</td>
+<td>-0.0001</td>
+<td>-0.0000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Std. Dev.</td>
+<td>0.0117</td>
+<td>0.0091</td>
+<td>0.0091</td>
+<td>0.0018</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Skewness</td>
+<td>-0.5298</td>
+<td>-0.3465</td>
+<td>0.3828</td>
+<td>0.3828</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Kurtosis</td>
+<td>7.4093</td>
+<td>8.1301</td>
+<td>5.9589</td>
+<td>5.9589</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The table above shows the summary statistics for our portfolio components and the overall portfolio. The statistics include mean returns, standard deviation, skewness, and kurtosis for each component.</p>
+<p>Our results show minor differences compared to Table 1 in Engle (2001):</p>
+<ul>
+<li>The statistics for Nasdaq (^IXIC) and Dow Jones (^DJI) differ by only 1-2 basis points</li>
+<li>Larger discrepancies appear for the Rate component, likely because the article lacks specificity about the exact data source used
+<ul>
+<li>The most notable differences are in skewness (0.38 vs -0.20) and kurtosis (4.96 vs 5.96)</li>
+</ul></li>
+<li>These differences in the Rate component are the primary reason for the slight variation between our replicated portfolio and the one presented in the paper</li>
+</ul>
+</section>
+</section>
+<section id="acf-of-squared-portfolio-returns" class="level2">
+<h2 class="anchored" data-anchor-id="acf-of-squared-portfolio-returns">ACF of Squared Portfolio Returns</h2>
+<section id="article-acf-of-squared-portfolio-returns-for-reference" class="level4">
+<h4 class="anchored" data-anchor-id="article-acf-of-squared-portfolio-returns-for-reference">Article ACF of Squared Portfolio Returns (for reference)</h4>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="screenshots/squared_returns.png" class="img-fluid figure-img"></p>
+<figcaption>ACF of Squared Portfolio Returns</figcaption>
+</figure>
+</div>
+<div class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>acf_plot <span class="op">=</span> calculate_acf_table(returns[<span class="st">"portfolio"</span>])</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>acf_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-portfolio-returns" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="11">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-portfolio-returns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Autocorrelations of Squared Portfolio Returns
+</figcaption>
+<div aria-describedby="tbl-portfolio-returns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="50">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AC</th>
+<th data-quarto-table-cell-role="th">Q-Stat</th>
+<th data-quarto-table-cell-role="th">Prob</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0.132</td>
+<td>43.421</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0.107</td>
+<td>71.818</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0.076</td>
+<td>86.103</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0.115</td>
+<td>118.744</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>0.090</td>
+<td>138.847</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">6</td>
+<td>0.084</td>
+<td>156.263</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">7</td>
+<td>0.059</td>
+<td>165.049</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>0.042</td>
+<td>169.422</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>0.058</td>
+<td>177.757</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">10</td>
+<td>0.065</td>
+<td>188.176</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">11</td>
+<td>0.052</td>
+<td>194.828</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">12</td>
+<td>0.021</td>
+<td>195.885</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">13</td>
+<td>0.133</td>
+<td>239.635</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">14</td>
+<td>0.082</td>
+<td>256.293</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">15</td>
+<td>0.076</td>
+<td>270.829</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="garch-model" class="level1">
+<h1>GARCH Model</h1>
+<p>ARCH models were first introduced by Engle in 1982 to model time-varying volatility in economic and financial time series. The idea was as follows - high squared residual at time <span class="math inline">\(t\)</span> leads to increased conditional variance at time <span class="math inline">\(t+p\)</span>. We can write such ARCH(p) process: <span class="math display">\[
+\begin{cases}
+r_t = \mu_t + \varepsilon_t \quad \varepsilon_t \sim \mathcal{N}(0, \sigma_t^2) \\
+\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \alpha_2 \varepsilon_{t-2}^2 + ... + \alpha_p \varepsilon_{t-p}^2
+\end{cases}
+\]</span> However as shocks in time series often tend to be highly persistent, proper ARCH specification required quite big number of lags p.&nbsp;</p>
+<p>This lead to obvious extension that includes past values of conditional variance. Such solution was proposed by Bollerslev in 1986 and is known as GARCH model. Interestingly Bollerslev was a student of Engle, who supervised his doctoral work.</p>
+<p>GARCH(p,q) model is defined as follows: <span class="math display">\[
+\begin{cases}
+r_t = \mu_t + \varepsilon_t, \quad \varepsilon_t \sim \mathcal{N}(0, \sigma_t^2) \\
+\sigma_t^2 = \omega + \sum_{i=1}^p \alpha_i \varepsilon_{t-i}^2 + \sum_{j=1}^q \beta_j \sigma_{t-j}^2
+\end{cases}
+\]</span> We estimate model parameters using maximum likelihood estimator. Assuming conditional normality we define likelihood function as follows: <span class="math display">\[
+L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi \sigma_t^2}} \exp\left( -\frac{(r_t - \mu_t)^2}{2 \sigma_t^2} \right)
+\]</span></p>
+<section id="garch11" class="level2">
+<h2 class="anchored" data-anchor-id="garch11">GARCH(1,1)</h2>
+<p>The GARCH(1,1) model is specified as:</p>
+<p><span class="math display">\[\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(\sigma_t^2\)</span> is the conditional variance</li>
+<li><span class="math inline">\(\omega\)</span> is the constant term</li>
+<li><span class="math inline">\(\alpha_1\)</span> is the ARCH effect</li>
+<li><span class="math inline">\(\beta_1\)</span> is the GARCH effect</li>
+<li><span class="math inline">\(\varepsilon_{t-1}^2\)</span> is the squared lagged returns</li>
+<li><span class="math inline">\(\sigma_{t-1}^2\)</span> is the lagged conditional variance</li>
+</ul>
+<p>We apply procedure to estimate GARCH(1,1) parameters</p>
+<div id="efb1e10d" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define initial parameters</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> returns[<span class="st">'portfolio'</span>]<span class="op">*</span><span class="dv">100</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>mu <span class="op">=</span> np.mean(r)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>resid <span class="op">=</span> r <span class="op">-</span> mu</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>resid_sq <span class="op">=</span> resid<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Log likelihood</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> negative_loglik(params):</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    omega, alpha, beta <span class="op">=</span> params</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    sigma2 <span class="op">=</span> np.zeros(<span class="bu">len</span>(r))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate conditional variance</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    sigma2[<span class="dv">0</span>] <span class="op">=</span> omega<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>alpha<span class="op">-</span>beta)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(sigma2)):</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        sigma2[t] <span class="op">=</span> omega <span class="op">+</span> alpha<span class="op">*</span>resid_sq[t<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> beta<span class="op">*</span>sigma2[t<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    logl <span class="op">=</span> np.log(<span class="dv">1</span><span class="op">/</span>(np.sqrt(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>sigma2))<span class="op">*</span>np.exp(<span class="op">-</span>resid_sq<span class="op">/</span>(<span class="dv">2</span><span class="op">*</span>sigma2)))</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    sum_logl <span class="op">=</span> np.<span class="bu">sum</span>(logl)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">-</span>sum_logl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We do not write our own optimizing function as it is out of the scope of this project. Instead we use existing implementation from scipy</p>
+<div id="0f98006a" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We want to maximize sum of log likelihoods</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> minimize</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>initial_guess <span class="op">=</span> [np.var(r), <span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>bounds <span class="op">=</span> [(<span class="dv">0</span>, <span class="va">None</span>), (<span class="dv">0</span>, <span class="va">None</span>), (<span class="dv">0</span>, <span class="va">None</span>)]</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> constraint_stationarity(params):</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    _, alpha, beta <span class="op">=</span> params</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">-</span> alpha <span class="op">-</span> beta</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>constraints <span class="op">=</span> ({</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'type'</span>: <span class="st">'ineq'</span>,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'fun'</span>: constraint_stationarity</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>optimal_res <span class="op">=</span> minimize(</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    negative_loglik,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    initial_guess,</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    bounds<span class="op">=</span>bounds,</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    constraints<span class="op">=</span>constraints,</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    options<span class="op">=</span>{<span class="st">'maxiter'</span> : <span class="dv">100</span>}</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Success:'</span>, optimal_res.success)</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Message:'</span>, optimal_res.message)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'n iterations'</span>, optimal_res.nit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Success: True
+Message: Optimization terminated successfully
+n iterations 21</code></pre>
+</div>
+</div>
+<div id="b57e5a16" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>omega, alpha, beta <span class="op">=</span> optimal_res.x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="9967b994" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tabulate <span class="im">import</span> tabulate</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>table <span class="op">=</span> [</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'omega'</span>, omega],</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'alpha'</span>, alpha],</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'beta'</span>, beta]</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tabulate(table, headers<span class="op">=</span>[<span class="st">'Parameter'</span>, <span class="st">'Value'</span>], floatfmt<span class="op">=</span><span class="st">".6f"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Parameter       Value
+-----------  --------
+omega        0.003016
+alpha        0.083557
+beta         0.827453</code></pre>
+</div>
+</div>
+<div id="c62747ce" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Conditional volatility</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="op">=</span> np.zeros(<span class="bu">len</span>(r))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate conditional variance</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>sigma2[<span class="dv">0</span>] <span class="op">=</span> omega<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>alpha<span class="op">-</span>beta)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(sigma2)):</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    sigma2[t] <span class="op">=</span> omega <span class="op">+</span> alpha<span class="op">*</span>resid_sq[t<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> beta<span class="op">*</span>sigma2[t<span class="op">-</span><span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="735a5479" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>plt.plot(np.sqrt((r.values<span class="op">/</span><span class="dv">100</span>)<span class="op">**</span><span class="dv">2</span>), color<span class="op">=</span><span class="st">'black'</span>, lw<span class="op">=</span><span class="fl">0.9</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>plt.plot(np.sqrt(sigma2<span class="op">/</span><span class="dv">10000</span>), color<span class="op">=</span><span class="st">'red'</span>, lw<span class="op">=</span><span class="fl">1.1</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Custom GARCH(1,1) conditional colatility'</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="garch_files/figure-html/cell-18-output-1.png" width="950" height="499" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="garch-model-existing-implementation" class="level2">
+<h2 class="anchored" data-anchor-id="garch-model-existing-implementation">GARCH Model Existing Implementation</h2>
+<p>Above we have made our own implementation of GARCH(1,1) model. However there are already existing implementations. We will proceed with the study using arch_model from arch library.</p>
+<section id="article-garch11-model-for-reference" class="level4">
+<h4 class="anchored" data-anchor-id="article-garch11-model-for-reference">Article GARCH(1,1) Model (for reference)</h4>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="screenshots/garch_one_one.png" class="img-fluid figure-img"></p>
+<figcaption>GARCH(1,1) Model</figcaption>
+</figure>
+</div>
+<p>We use arch library to fit GARCH(1, 1) model. However fitting the model to our returns in the original scale produces warning with recommendation to scale the returns by multiplying them by 1000. Therefore we fit the model to scaled returns. Here we have to remember that forecasted conditional volatility obtained from the resulting object will be scaled as well. For visuals we will rescale back to the original scale.</p>
+<div class="cell" data-execution_count="18" data-tbl-cap-location="top">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"Fitting GARCH(1,1) model..."</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> fit_garch(returns[<span class="st">"portfolio"</span>]<span class="op">*</span><span class="dv">1000</span>, vol<span class="op">=</span><span class="st">"Garch"</span>, dist<span class="op">=</span><span class="st">"normal"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#logger.info(results.summary())</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract coefficients, standard errors, z-statistics, and p-values</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>coef <span class="op">=</span> results.params</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>std_err <span class="op">=</span> results.std_err</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>z_stat <span class="op">=</span> coef <span class="op">/</span> std_err</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>p_values <span class="op">=</span> results.pvalues</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a DataFrame to display the results</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>model_results <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Coef"</span>: coef,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"St. Err"</span>: std_err,</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Z-Stat"</span>: z_stat,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"P-Value"</span>: p_values,</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>model_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-garch-one-one" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-execution_count="18">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-garch-one-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: GARCH(1,1)
+</figcaption>
+<div aria-describedby="tbl-garch-one-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="57">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Coef</th>
+<th data-quarto-table-cell-role="th">St. Err</th>
+<th data-quarto-table-cell-role="th">Z-Stat</th>
+<th data-quarto-table-cell-role="th">P-Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">mu</td>
+<td>-0.054009</td>
+<td>0.033409</td>
+<td>-1.616585</td>
+<td>0.105968</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">omega</td>
+<td>0.057837</td>
+<td>0.024790</td>
+<td>2.333083</td>
+<td>0.019644</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">alpha[1]</td>
+<td>0.042155</td>
+<td>0.010488</td>
+<td>4.019476</td>
+<td>0.000058</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">beta[1]</td>
+<td>0.940716</td>
+<td>0.014929</td>
+<td>63.010796</td>
+<td>0.000000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+</section>
+<section id="acf-of-squared-standardized-residuals" class="level2">
+<h2 class="anchored" data-anchor-id="acf-of-squared-standardized-residuals">ACF of Squared Standardized Residuals</h2>
+<p>The same as before we generate series of autocorrelations up to 15th lag together with Q-stats and their p-values. Results are pretty similar to those presented in the original paper. Note that here standardized residuals are basically returns adjusted for GARCH effects as mean portfolio return is very close to 0. This way we can interpret the results by saying that GARCH(1, 1) model manages to capture portfolio returns variance variability.</p>
+<section id="article-acf-of-squared-standardized-residuals-for-reference" class="level4">
+<h4 class="anchored" data-anchor-id="article-acf-of-squared-standardized-residuals-for-reference">Article ACF of Squared Standardized Residuals (for reference)</h4>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="screenshots/squared_standardized_residuals.png" class="img-fluid figure-img"></p>
+<figcaption>ACF of Squared Standardized Residuals</figcaption>
+</figure>
+</div>
+<div class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>acf_plot <span class="op">=</span> calculate_acf_table(results.resid <span class="op">/</span> results.conditional_volatility)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>acf_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-squared-residuals" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="19">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-squared-residuals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: Autocorrelations of Squared Standardized Residuals
+</figcaption>
+<div aria-describedby="tbl-squared-residuals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="58">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AC</th>
+<th data-quarto-table-cell-role="th">Q-Stat</th>
+<th data-quarto-table-cell-role="th">Prob</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>-0.011</td>
+<td>0.274</td>
+<td>0.601</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0.005</td>
+<td>0.342</td>
+<td>0.843</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>-0.025</td>
+<td>1.865</td>
+<td>0.601</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0.012</td>
+<td>2.202</td>
+<td>0.699</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>0.017</td>
+<td>2.941</td>
+<td>0.709</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">6</td>
+<td>-0.002</td>
+<td>2.951</td>
+<td>0.815</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">7</td>
+<td>-0.033</td>
+<td>5.590</td>
+<td>0.588</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>-0.005</td>
+<td>5.665</td>
+<td>0.685</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>0.009</td>
+<td>5.849</td>
+<td>0.755</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">10</td>
+<td>0.003</td>
+<td>5.870</td>
+<td>0.826</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">11</td>
+<td>-0.003</td>
+<td>5.887</td>
+<td>0.881</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">12</td>
+<td>-0.028</td>
+<td>7.814</td>
+<td>0.799</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">13</td>
+<td>0.072</td>
+<td>20.904</td>
+<td>0.075</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">14</td>
+<td>0.023</td>
+<td>22.195</td>
+<td>0.075</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">15</td>
+<td>0.017</td>
+<td>22.936</td>
+<td>0.086</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="volatility-analysis" class="level1">
+<h1>Volatility Analysis</h1>
+<section id="conditional-volatility" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-volatility">Conditional Volatility</h2>
+<p>Let’s plot the conditional volatility using our implementation:</p>
+<div id="cell-fig-conditional-volatility" class="cell" data-execution_count="20">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>plt.plot(results.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, color<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Conditional volatility'</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-conditional-volatility" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-conditional-volatility-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="garch_files/figure-html/fig-conditional-volatility-output-1.png" width="957" height="499" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-conditional-volatility-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Conditional Volatility
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model-diagnostics" class="level2">
+<h2 class="anchored" data-anchor-id="model-diagnostics">Model Diagnostics</h2>
+<p>Let’s examine the model residuals using plotnine:</p>
+<div id="cell-model-diagnostics" class="cell" data-execution_count="21">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get standardized residuals</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>std_resid <span class="op">=</span> (results.resid <span class="op">/</span> np.sqrt(results.conditional_volatility))<span class="op">/</span><span class="dv">1000</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>))</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>plt.plot(std_resid, color<span class="op">=</span><span class="st">'black'</span>, lw<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Standardized residuals"</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="model-diagnostics" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="garch_files/figure-html/model-diagnostics-output-1.png" width="958" height="499" class="figure-img"></p>
+<figcaption>Standardized Residuals</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="volatility-forecasting" class="level1">
+<h1>Volatility Forecasting</h1>
+<section id="generating-forecasts" class="level2">
+<h2 class="anchored" data-anchor-id="generating-forecasts">Generating Forecasts</h2>
+<p>Let’s generate volatility forecasts:</p>
+<div id="forecast" class="cell" data-execution_count="22">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate forecasts</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"Generating volatility forecast..."</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>forecast <span class="op">=</span> results.forecast(horizon<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"</span><span class="ch">\n</span><span class="st">Volatility Forecast:"</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>logger.info(forecast.variance.iloc[<span class="op">-</span><span class="dv">1</span>]<span class="op">/</span><span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="visualizing-forecasts" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-forecasts">Visualizing Forecasts</h2>
+<p>Visual below shows conditional volatility and realized volatility defined as square root of squared returns assuming 0 mean: <span class="math display">\[
+\text{Var}(r_t) = \mathbb{E}[(r_t - \mu)^2]
+\]</span> if <span class="math inline">\(\mu = 0\)</span> we get: <span class="math display">\[
+\text{Var}(r_t) = \mathbb{E}[r_t^2]
+\]</span></p>
+<div id="cell-fig-forecast" class="cell" data-execution_count="23">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot volatility</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>plt.plot(np.sqrt(returns[<span class="st">'portfolio'</span>]<span class="op">**</span><span class="dv">2</span>), color <span class="op">=</span> <span class="st">'black'</span>, lw <span class="op">=</span> <span class="fl">0.9</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>plt.plot(results.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, color <span class="op">=</span> <span class="st">'red'</span>, lw <span class="op">=</span> <span class="fl">1.1</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Volatility realized vs predicted"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-forecast" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-forecast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="garch_files/figure-html/fig-forecast-output-1.png" width="1099" height="647" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-forecast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Volatility Forecast
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>At this point we can also compare results from our implementation with those obtained using arch library implementation</p>
+<div id="11e53732" class="cell" data-execution_count="24">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>plt.plot(np.sqrt(returns[<span class="st">'portfolio'</span>]<span class="op">**</span><span class="dv">2</span>), color <span class="op">=</span> <span class="st">'black'</span>, lw <span class="op">=</span> <span class="fl">0.9</span>, label <span class="op">=</span> <span class="st">'realized volatility'</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>plt.plot(r.index, np.sqrt(sigma2<span class="op">/</span><span class="dv">10000</span>), color <span class="op">=</span> <span class="st">'green'</span>, lw <span class="op">=</span> <span class="fl">1.1</span>, label <span class="op">=</span> <span class="st">'GARCH - our implementation'</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>plt.plot(results.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, color <span class="op">=</span> <span class="st">'red'</span>, lw <span class="op">=</span> <span class="fl">1.1</span>, label <span class="op">=</span> <span class="st">'GARCH - arch library'</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Volatility realized vs predicted"</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="garch_files/figure-html/cell-25-output-1.png" width="1099" height="647" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="value-at-risk" class="level1">
+<h1>Value at Risk</h1>
+<p>Based on conditional volatility we calculate 1% value at risk. We assume initial portfolio value of 1 000 000$. We predict that 1 step ahead standard deviation will be 0.002487.</p>
+<p>First we assume normal distribution of returns. We obtain 1% quantile by multiplying predicted standard deviation by 2.327.</p>
+<div id="50d3b791" class="cell" data-execution_count="25">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>init_value <span class="op">=</span> <span class="dv">10</span><span class="op">**</span><span class="dv">6</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fl">2.327</span><span class="op">*</span>forecast.variance[<span class="st">'h.1'</span>]<span class="op">/</span><span class="dv">1000</span> <span class="op">*</span> init_value</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="64">
+<pre><code>Date
+2000-03-23    5786.423504
+Name: h.1, dtype: float64</code></pre>
+</div>
+</div>
+<p>The 1% Value at Risk asusming normal distribution of standardized residuals is 5786$. Note that as mean return is very close to 0 we can omit this value in our calculation. We basically calculated the 99% quantile, but with 0 mean it is symmetrical.</p>
+<p>We can also use empirical 1% quantile</p>
+<div id="46c8a06c" class="cell" data-execution_count="26">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>emp_q <span class="op">=</span> np.quantile(results.resid <span class="op">/</span> np.sqrt(results.conditional_volatility), <span class="fl">0.01</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="op">-</span>emp_q<span class="op">*</span>forecast.variance[<span class="st">'h.1'</span>]<span class="op">/</span><span class="dv">1000</span> <span class="op">*</span> init_value</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="65">
+<pre><code>Date
+2000-03-23    8138.600734
+Name: h.1, dtype: float64</code></pre>
+</div>
+</div>
+<p>Both values are significantly lower than those presented in the original paper. This comes from the discrepancies between our data and data used for the original study. It could be seen on portfolio returns plots that our portfolio returns are generally much lower than returns of portfolio from the study.</p>
+<p>We also plot 1% value at risk for the whole in sample period. For reference we show the same plot from the original study.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="screenshots/in_sample_VaR.png" class="img-fluid figure-img"></p>
+<figcaption>in-sample-VaR</figcaption>
+</figure>
+</div>
+<div id="f068157d" class="cell" data-execution_count="27">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate VaR</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>VaR_returns <span class="op">=</span> calculate_VaR_returns(returns[<span class="st">"portfolio"</span>], results.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, <span class="fl">2.327</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="cell-fig-portfolio_loss" class="cell" data-execution_count="28">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Value at risk - portfolio value 1 000 000$ at each point in time</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>init_value <span class="op">=</span> <span class="dv">10</span><span class="op">**</span><span class="dv">6</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>portfolio_returns <span class="op">=</span> returns[<span class="st">'portfolio'</span>]<span class="op">*</span>init_value</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>portfolio_VaR <span class="op">=</span> VaR_returns<span class="op">*</span>init_value</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="op">-</span>portfolio_returns, color <span class="op">=</span> <span class="st">'black'</span>, lw <span class="op">=</span> <span class="dv">1</span>, label<span class="op">=</span><span class="st">'Loss'</span>)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="op">-</span>portfolio_VaR, color <span class="op">=</span> <span class="st">'red'</span>, lw <span class="op">=</span> <span class="fl">0.9</span>, label<span class="op">=</span><span class="st">'VaR'</span>)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Portfolio loss and 1% Value at Risk in sample"</span>)</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-portfolio_loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-portfolio_loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="garch_files/figure-html/fig-portfolio_loss-output-1.png" width="1110" height="647" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-portfolio_loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Portfolio loss in sample
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We show also the number of exceedances. Good model should produce such VaR estimates that actual portfolio loss is greater than the estimated around 1% of time. We see that for our GARCH(1, 1) VaR estimates assuming normal distribution of standardized residuals is 1.49%.</p>
+<div id="70a84035" class="cell" data-execution_count="29">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exceedances</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>n_exc, perc_exc <span class="op">=</span> count_exceedances(VaR_returns, returns[<span class="st">"portfolio"</span>], <span class="va">True</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of exceedances: </span><span class="sc">{</span>n_exc<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Percentge of exceedances: </span><span class="sc">{</span>perc_exc<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of exceedances: 37
+Percentge of exceedances: 1.49%</code></pre>
+</div>
+</div>
+</section>
+<section id="out-of-sample-model-fit-and-value-at-risk" class="level1">
+<h1>Out-of-sample model fit and Value at Risk</h1>
+<p>We obtain oit of sample predictions using rolling forecast without reestimating GARCH parameters</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="screenshots/out_of_sample_VaR.png" class="img-fluid figure-img"></p>
+<figcaption>oos-VaR</figcaption>
+</figure>
+</div>
+<div id="83d75314" class="cell" data-execution_count="30">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rolling forecast without reestimating parameters</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>mu <span class="op">=</span> results.params[<span class="st">'mu'</span>]</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>omega <span class="op">=</span> results.params[<span class="st">'omega'</span>]</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>alpha <span class="op">=</span> results.params[<span class="st">'alpha[1]'</span>]</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>beta <span class="op">=</span> results.params[<span class="st">'beta[1]'</span>]</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>epsilon2 <span class="op">=</span> (returns_oos[<span class="st">'portfolio'</span>]<span class="op">*</span><span class="dv">1000</span> <span class="op">-</span> mu)<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="op">=</span> np.zeros(<span class="bu">len</span>(returns_oos))</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>sigma2[<span class="dv">0</span>] <span class="op">=</span> omega<span class="op">/</span>(<span class="dv">1</span> <span class="op">-</span> alpha <span class="op">-</span> beta)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(sigma2)):</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    sigma2[t] <span class="op">=</span> omega <span class="op">+</span> alpha<span class="op">*</span>epsilon2[t<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> beta<span class="op">*</span>sigma2[t<span class="op">-</span><span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="ebc9690c" class="cell" data-execution_count="31">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>plt.plot(np.sqrt(returns_oos[<span class="st">'portfolio'</span>]<span class="op">**</span><span class="dv">2</span>), color <span class="op">=</span> <span class="st">'black'</span>, lw <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>plt.plot(returns_oos.index, np.sqrt(sigma2)<span class="op">/</span><span class="dv">1000</span>, color <span class="op">=</span> <span class="st">'red'</span>, lw <span class="op">=</span> <span class="fl">0.9</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="garch_files/figure-html/cell-32-output-1.png" width="1099" height="627" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="95cd4f0d" class="cell" data-execution_count="32">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Value at risk - portfolio value 1 000 000$ at each point in time</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>portfolio_returns <span class="op">=</span> returns_oos[<span class="st">'portfolio'</span>]<span class="op">*</span>(<span class="dv">10</span><span class="op">**</span><span class="dv">6</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="op">-</span>portfolio_returns, color <span class="op">=</span> <span class="st">'black'</span>, lw <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>plt.plot(returns_oos.index, np.sqrt(sigma2) <span class="op">*</span> <span class="fl">2.327</span> <span class="op">*</span> <span class="dv">10</span><span class="op">**</span><span class="dv">3</span>, color <span class="op">=</span> <span class="st">'red'</span>, lw <span class="op">=</span> <span class="fl">0.9</span>)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Portfolio loss and 1% Value at Risk"</span>)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="garch_files/figure-html/cell-33-output-1.png" width="1103" height="647" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="335dea62" class="cell" data-execution_count="33">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>n_exc, perc_exc <span class="op">=</span> count_exceedances(np.sqrt(sigma2) <span class="op">*</span> (<span class="op">-</span><span class="fl">2.327</span>)<span class="op">/</span><span class="dv">1000</span>, returns_oos[<span class="st">'portfolio'</span>].values, <span class="va">True</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of exceedances: </span><span class="sc">{</span>n_exc<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Percentge of exceedances: </span><span class="sc">{</span>perc_exc<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of exceedances: 6
+Percentge of exceedances: 2.02%</code></pre>
+</div>
+</div>
+</section>
+<section id="modern-market" class="level1">
+<h1>Modern Market</h1>
+<div id="c4b3b49e" class="cell" data-execution_count="34">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>start_date <span class="op">=</span> datetime(<span class="dv">2015</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>end_date <span class="op">=</span> datetime(<span class="dv">2025</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>prices_new <span class="op">=</span> fetch_stock_data(symbols, start_date, end_date)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>returns_new <span class="op">=</span> calculate_returns(prices_new)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>portfolio_prices_new <span class="op">=</span> pd.Series(<span class="dv">0</span>, index<span class="op">=</span>prices_new.index, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply weights to each component</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> symbol, weight <span class="kw">in</span> weights.items():</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use pandas multiplication and addition</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    portfolio_returns_new <span class="op">=</span> portfolio_prices_new.add(returns_new[symbol].multiply(weight))</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Add portfolio returns to the returns DataFrame</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>returns_new[<span class="st">"portfolio"</span>] <span class="op">=</span> portfolio_returns_new</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div id="1eec69c2" class="cell" data-execution_count="35">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>acf_plot <span class="op">=</span> calculate_acf_table(returns_new[<span class="st">"portfolio"</span>])</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>acf_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="74">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AC</th>
+<th data-quarto-table-cell-role="th">Q-Stat</th>
+<th data-quarto-table-cell-role="th">Prob</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0.631</td>
+<td>1002.358</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0.319</td>
+<td>1258.485</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0.174</td>
+<td>1334.339</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0.306</td>
+<td>1569.834</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>0.455</td>
+<td>2090.769</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">6</td>
+<td>0.428</td>
+<td>2553.289</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">7</td>
+<td>0.298</td>
+<td>2776.581</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>0.192</td>
+<td>2869.775</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>0.202</td>
+<td>2972.433</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">10</td>
+<td>0.162</td>
+<td>3039.081</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">11</td>
+<td>0.126</td>
+<td>3079.170</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">12</td>
+<td>0.071</td>
+<td>3091.837</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">13</td>
+<td>0.066</td>
+<td>3102.878</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">14</td>
+<td>0.087</td>
+<td>3122.196</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">15</td>
+<td>0.084</td>
+<td>3140.151</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="0ccf33b2" class="cell" data-execution_count="36">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>garch_new <span class="op">=</span> results <span class="op">=</span> fit_garch(returns_new[<span class="st">"portfolio"</span>]<span class="op">*</span><span class="dv">1000</span>, vol<span class="op">=</span><span class="st">"Garch"</span>, dist<span class="op">=</span><span class="st">"normal"</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>coef <span class="op">=</span> garch_new.params</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>std_err <span class="op">=</span> garch_new.std_err</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>z_stat <span class="op">=</span> coef <span class="op">/</span> std_err</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>p_values <span class="op">=</span> garch_new.pvalues</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a DataFrame to display the results</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>model_results <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Coef"</span>: coef,</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"St. Err"</span>: std_err,</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Z-Stat"</span>: z_stat,</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"P-Value"</span>: p_values,</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>model_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="75">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Coef</th>
+<th data-quarto-table-cell-role="th">St. Err</th>
+<th data-quarto-table-cell-role="th">Z-Stat</th>
+<th data-quarto-table-cell-role="th">P-Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">mu</td>
+<td>0.082917</td>
+<td>0.074523</td>
+<td>1.112648</td>
+<td>0.265860</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">omega</td>
+<td>0.129925</td>
+<td>0.086924</td>
+<td>1.494692</td>
+<td>0.134995</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">alpha[1]</td>
+<td>0.066501</td>
+<td>0.023374</td>
+<td>2.845131</td>
+<td>0.004439</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">beta[1]</td>
+<td>0.930088</td>
+<td>0.023826</td>
+<td>39.036770</td>
+<td>0.000000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="e8645368" class="cell" data-execution_count="37">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>plt.plot(np.sqrt(returns_new[<span class="st">'portfolio'</span>]<span class="op">**</span><span class="dv">2</span>), color <span class="op">=</span> <span class="st">'black'</span>, lw <span class="op">=</span> <span class="fl">0.9</span>, label <span class="op">=</span> <span class="st">'realized volatility'</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>plt.plot(garch_new.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, color <span class="op">=</span> <span class="st">'red'</span>, lw <span class="op">=</span> <span class="fl">1.1</span>, label <span class="op">=</span> <span class="st">'conditional volatility'</span>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Volatility realized vs predicted"</span>)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="garch_files/figure-html/cell-38-output-1.png" width="1091" height="647" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="05dbd772" class="cell" data-execution_count="38">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Value at risk - portfolio value 1 000 000$ at each point in time</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>VaR_returns <span class="op">=</span> calculate_VaR_returns(returns_new[<span class="st">"portfolio"</span>], garch_new.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, <span class="fl">2.327</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>init_value <span class="op">=</span> <span class="dv">10</span><span class="op">**</span><span class="dv">6</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>portfolio_returns <span class="op">=</span> returns_new[<span class="st">'portfolio'</span>]<span class="op">*</span>init_value</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>portfolio_VaR <span class="op">=</span> VaR_returns<span class="op">*</span>init_value</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="op">-</span>portfolio_returns, color <span class="op">=</span> <span class="st">'black'</span>, lw <span class="op">=</span> <span class="dv">1</span>, label<span class="op">=</span><span class="st">'Loss'</span>)</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="op">-</span>portfolio_VaR, color <span class="op">=</span> <span class="st">'red'</span>, lw <span class="op">=</span> <span class="fl">0.9</span>, label<span class="op">=</span><span class="st">'VaR'</span>)</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Portfolio loss and 1% Value at Risk in sample"</span>)</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="garch_files/figure-html/cell-39-output-1.png" width="1110" height="647" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="8661cc6a" class="cell" data-execution_count="39">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>n_exc, perc_exc <span class="op">=</span> count_exceedances(VaR_returns, returns_new[<span class="st">"portfolio"</span>], <span class="va">True</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Number of exceedances: </span><span class="sc">{</span>n_exc<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Percentge of exceedances: </span><span class="sc">{</span>perc_exc<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of exceedances: 34
+Percentge of exceedances: 1.35%</code></pre>
+</div>
+</div>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<ul>
+<li>Engle, R. F. (2001). GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics. Journal of Economic Perspectives, 15(4), 157-168.</li>
+<li>Kaggle. (2023). Dow Jones Industrial Average (^DJI) Data. [Dataset]. Available at: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data</li>
+<li>St.&nbsp;Louis Fed. (2023). 10-Year Treasury Constant Maturity Rate [^TNX]. [Dataset]. Available at: https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&amp;chart_type=line&amp;drp=0&amp;fo=open%20sans&amp;graph_bgcolor=%23ffffff&amp;height=450&amp;mode=fred&amp;recession_bars=on&amp;txtcolor=%23444444&amp;ts=12&amp;tts=12&amp;width=1320&amp;nt=0&amp;thu=0&amp;trc=0&amp;show_legend=yes&amp;show_axis_titles=yes&amp;show_tooltip=yes&amp;id=DGS10&amp;scale=left&amp;cosd=2020-04-17&amp;coed=2025-04-17&amp;line_color=%230073e6&amp;link_values=false&amp;line_style=solid&amp;mark_type=none&amp;mw=3&amp;lw=3&amp;ost=-99999&amp;oet=99999&amp;mma=0&amp;fml=a&amp;fq=Daily&amp;fam=avg&amp;fgst=liin&amp;fgsnd=2020-02-01&amp;line_index=1&amp;transformation=lin&amp;vintage_date=2025-04-22&amp;revision_date=2025-04-22&amp;nd=1962-01-02</li>
+<li>Yahoo Finance. (2023). [Dataset]. Available at: https://finance.yahoo.com/quote/%5EIXIC/history?period1=631152000&amp;period2=1713878400&amp;interval=1d&amp;filter=history&amp;frequency=1d&amp;includeAdjustedClose=true</li>
+<li>GenAI used for proof checking and type hinting</li>
+</ul>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Potentially ^TNX, this needs to be checked further on.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
