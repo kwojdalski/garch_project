@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 from arch import arch_model
-from plotnine import aes, element_text, geom_line, ggplot, labs, theme
 from scipy import stats
 from statsmodels.tsa.stattools import acf as acf_stats
 
