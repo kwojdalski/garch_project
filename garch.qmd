@@ -21,29 +21,28 @@ jupyter: python3
 # Introduction
 
 ## Background
-The main goal of this projectis to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility. However to make things more interesting we add some extensions to the study. First of all, we provide our own GARCH(1,1) implementation. We compare GARCH(1,1) results with some other volatility models, particularly E-GARCH and GJR-GARCH on the same data sample that was used in the original paper. Finally, we examine how market volatility has evolved since the publication of the paper.
+The primary objective of this project is to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture illustrates the application of GARCH models in analyzing and forecasting financial market volatility. To enhance the study, we incorporate several extensions: first, we develop our own GARCH(1,1) implementation; second, we compare GARCH(1,1) results with alternative volatility models, specifically E-GARCH and GJR-GARCH, using the same dataset as the original paper; and finally, we investigate the evolution of market volatility since the paper's publication.
 
 ### Rationale behind the Study
 
-1) From the initial inspection of the article, easy to obtain data
-2) Well-known author so we asssumed that the methodology is sound and well-explained
-3) The author's research has had significant influence and impact in the field of time series analysis
-4) Research could be easily extended for different datasets, portfolios and methods
-
+1) The article's data requirements are readily accessible and obtainable
+2) The author's established reputation suggests methodological rigor and clarity
+3) The research has made substantial contributions to time series analysis
+4) The framework allows for extension to diverse datasets and methodologies
 
 ### Steps in the Research
-The replication focuses on the following:
+The replication encompasses the following key steps:
 
-1. Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle's paper
-2. Calculating and analyzing portfolio returns
-3. Writing GARCH(1,1) implementation
-4. Fitting a GARCH(1,1) model to the portfolio returns
-5. Examining the model's performance in capturing volatility clustering
-6. Generating volatility forecasts in the same manner as Engle did
-7. Extending study with other methods
-8. Examining portfolio built on current data
+1. Replicating Engle's portfolio composition with identical asset allocation
+2. Computing and evaluating portfolio return characteristics
+3. Developing a custom GARCH(1,1) model implementation
+4. Estimating GARCH(1,1) parameters using portfolio return data
+5. Assessing the model's ability to capture volatility clustering patterns
+6. Producing volatility forecasts following Engle's methodology
+7. Implementing additional volatility models for comparative analysis
+8. Analyzing portfolio performance using contemporary market data
 
-By following Engle's methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.
+This methodological approach enables a comprehensive evaluation of GARCH modeling techniques in financial time series analysis.
 
 
 # Imports and Setup
@@ -81,32 +80,35 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 ```
-
 # Data Preparation
 
 ## Portfolio Composition
 
-This portfolio consists of:
+The portfolio allocation follows Engle's specification:
 
-- 50% Nasdaq (^IXIC)
-- 30% Dow Jones Industrial Average (^DJI)
-- 20% 10-year Treasury Constant Maturity Rate [^1]
+- 50% allocation to Nasdaq Composite Index (^IXIC)
+- 30% allocation to Dow Jones Industrial Average (^DJI)
+- 20% allocation to 10-Year Treasury Constant Maturity Rate [^1]
 
-[^1]: Potentially ^TNX, this needs to be checked further on.
+[^1]: The ^TNX symbol is used as a proxy for the 10-year Treasury rate.
 
-#### Problems with the data
+#### Data Source Considerations
 
-Engle described the data set as follows:
+Engle's original description states:
 
 > Let's use the GARCH(1,1) tools to estimate the 1 percent
- value at risk of a $1,000,000 portfolio on March 23, 2000. This portfolio consists of
- 50 percent Nasdaq, 30 percent DowJones and 20 percent long bonds. The long
- bond is a ten-year constant maturity Treasury. The portfolio has constant proportions of wealth
- in each asset that would entail some rebalancing over time.
+value at risk of a $1,000,000 portfolio on March 23, 2000. This portfolio consists of
+50 percent Nasdaq, 30 percent DowJones and 20 percent long bonds. The long
+bond is a ten-year constant maturity Treasury. The portfolio has constant proportions of wealth
+in each asset that would entail some rebalancing over time.
 
-Due to vagueness of the claim above, we'll try to reverse engineer the portfolio, but it's not
-a perfect solution. When we calculate return on the portfolio, we implictly assume daily rebalancing, i.e.,
-weights are constant.
+The implementation requires several assumptions:
+
+1. Daily rebalancing is assumed to maintain constant portfolio weights
+2. The ^TNX symbol serves as a proxy for the 10-year Treasury rate
+3. Portfolio returns are calculated using these constant weights
+
+These assumptions may introduce some deviation from Engle's original analysis, but provide a reasonable approximation for replication purposes.
 
 ## Fetching Stock Data
 
@@ -322,7 +324,7 @@ r_t = \mu_t + \varepsilon_t \quad \varepsilon_t \sim \mathcal{N}(0, \sigma_t^2) 
 \sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \alpha_2 \varepsilon_{t-2}^2 + ... + \alpha_p \varepsilon_{t-p}^2
 \end{cases}
 $$
-However as shocks in time series often tend to be highly persistent, proper ARCH specification required quite big number of lags p. 
+However as shocks in time series often tend to be highly persistent, proper ARCH specification required quite big number of lags p.
 
 This lead to obvious extension that includes past values of conditional variance. Such solution was proposed by Bollerslev in 1986 and is known as GARCH model. Interestingly Bollerslev was a student of Engle, who supervised his doctoral work.
 
@@ -374,7 +376,7 @@ def negative_loglik(params):
     for t in range(1, len(sigma2)):
         sigma2[t] = omega + alpha*resid_sq[t-1] + beta*sigma2[t-1]
 
-    
+
     logl = np.log(1/(np.sqrt(2*np.pi*sigma2))*np.exp(-resid_sq/(2*sigma2)))
     #logl = -0.5 * (np.log(2 * np.pi) + np.log(sigma2) + resid_sq / sigma2)
     sum_logl = np.sum(logl)
@@ -440,7 +442,7 @@ for t in range(1, len(sigma2)):
 plt.figure(figsize=(12, 6))
 plt.plot(np.sqrt((r.values/100)**2), color='black', lw=0.9)
 plt.plot(np.sqrt(sigma2/10000), color='red', lw=1.1)
-plt.title('Custom GARCH(1,1) conditional colatility')
+plt.title('Custom GARCH(1,1) conditional volatility')
 plt.show()
 ```
 
@@ -483,7 +485,7 @@ model_results
 
 ## ACF of Squared Standardized Residuals
 
-The same as before we generate series of autocorrelations up to 15th lag together with Q-stats and their p-values. Results are pretty similar to those presented in the original paper. Note that here standardized residuals are basically returns adjusted for GARCH effects as mean portfolio return is very close to 0. This way we can interpret the results by saying that GARCH(1, 1) model manages to capture portfolio returns variance variability.
+As in the previous analysis, we compute autocorrelations up to lag 15, including Q-statistics and their corresponding p-values. The results closely align with those reported in the original paper. The standardized residuals represent returns adjusted for GARCH effects, given that the mean portfolio return is approximately zero. This interpretation suggests that the GARCH(1,1) model effectively captures the variance dynamics in portfolio returns.
 
 #### Article ACF of Squared Standardized Residuals (for reference)
 ![ACF of Squared Standardized Residuals](screenshots/squared_standardized_residuals.png)
@@ -578,22 +580,23 @@ plt.legend()
 plt.show()
 ```
 
-Green line can barely be seen. GARCH parameters we got from our implementations are almost the same as those obtained from arch_model library implementation. Therefore forecasted conditional volatility also has to be nearly identical. 
+The green line showing our GARCH model is hard to see because it almost perfectly matches the red line from the arch library. This means our model gives very similar results to the standard library version.
 
 # Value at Risk
+Based on the estimated conditional volatility, we calculate the 1% Value at Risk (VaR) for a portfolio with an initial value of $1,000,000. The one-step-ahead forecast yields a standard deviation of 0.014772.
 
-Based on conditional volatility we calculate 1% value at risk. We assume initial portfolio value of 1 000 000$. We predict that 1 step ahead standard deviation will be 0.014772. 
-
-First we assume normal distribution of returns. We obtain 1% quantile by multiplying predicted standard deviation by 2.327. 
+We assume returns follow a normal distribution. The 1% quantile is calculated by multiplying the predicted standard deviation by 2.327, which represents the critical value for a 99% confidence interval under normality.
 
 ```{python}
 init_value = 10**6
 2.327*np.sqrt(forecast.variance['h.1'].iloc[-1])/1000 * init_value
 ```
+The 1% Value at Risk (VaR) under normal distribution assumptions is $34,375.
+Since the mean return is negligible, we can exclude it from our calculations.
+The VaR represents the 99th percentile of the distribution, which is
+symmetric around zero due to the near-zero mean.
 
-The 1% Value at Risk asusming normal distribution of standardized residuals is 34375$. Note that as mean return is very close to 0 we can omit this value in our calculation. We basically calculated the 99% quantile, but with 0 mean it is symmetrical.
-
-We can also use empirical 1% quantile
+An alternative approach is to use the empirical 1% quantile.
 
 ```{python}
 emp_q = np.quantile(results.resid/results.conditional_volatility, 0.01)
@@ -601,9 +604,9 @@ print(f"1 percent quantile: {emp_q}")
 print(-emp_q*np.sqrt(forecast.variance['h.1'].iloc[-1])/1000 * init_value)
 ```
 
-Results we obtained are pretty similar to those presented in the original paper. Interestingly, even empirical 1st quantile is very close to -2.844, which is the original result. 
+The results we obtained are pretty similar to those presented in the original paper. Interestingly, even the empirical 1st quantile is very close to -2.844, which is the original result.
 
-We also plot 1% value at risk for the whole in sample period. For reference we show the same plot from the original study.
+We also plot 1% value at risk for the whole in sample period. For reference, we show the same plot from the original study.
 
 ![in-sample-VaR](screenshots/in_sample_VaR.png)
 
@@ -627,7 +630,7 @@ plt.legend()
 plt.show()
 ```
 
-We show also the number of exceedances. Good model should produce such VaR estimates that actual portfolio loss is greater than the estimated around 1% of time. We see that for our GARCH(1, 1) VaR estimates assuming normal distribution of standardized residuals is 2.06%.
+We also show the number of exceedances. A good model should produce VaR estimates where the actual portfolio loss exceeds the estimated value approximately 1% of the time. For our GARCH(1,1) model with VaR estimates assuming normal distribution of standardized residuals, the exceedance rate is 2.06%.
 
 ```{python}
 # Exceedances
@@ -770,8 +773,7 @@ plt.show()
 We extend our study with E-GARCH and GJR-GARCH models.
 
 ## E-GARCH
-
-GARCH model is obviously not perfect. One of the main drawdowns is that it assumes symmetrical volatility shocks, while in reality this assumption is usually not met. E-GARCH extends standard GARCH model and accounts for possible non-symetric volatility.
+The GARCH model is not perfect. One of its main drawbacks is that it assumes symmetrical volatility shocks, while in reality this assumption is usually not met. E-GARCH extends the standard GARCH model and accounts for possible non-symmetric volatility.
 
 The conditional variance equation is:
 
@@ -781,11 +783,11 @@ $$
 
 Where:
 
-- $\sigma_t^2$: Conditional variance at time $t$  
-- $\varepsilon_t$: Residuals (innovations)  
-- $\omega: Constant term  
-- $\beta$: Persistence parameter  
-- $\alpha: Response to magnitude of shocks  
+- $\sigma_t^2$: Conditional variance at time $t$
+- $\varepsilon_t$: Residuals (innovations)
+- $\omega: Constant term
+- $\beta$: Persistence parameter
+- $\alpha: Response to magnitude of shocks
 - $\gamma$: Captures **asymmetry** (leverage effect)
 
 ```{python}
@@ -835,7 +837,7 @@ print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 
 ## GJR-GARCH
 
-Another model loosing symmetric volatility shocks assumption is GJR-GARCH
+Another model relaxing the symmetric volatility shocks assumption is GJR-GARCH
 
 Let the return be defined as:
 
@@ -852,14 +854,14 @@ $$
 
 Where:
 
-- $ r_t$: Return at time  $t$  
-- $\varepsilon_t$: Innovation (shock)  
-- $\sigma_t^2$: Conditional variance  
-- $z_t \sim N(0,1)$: i.i.d. standard normal variable  
-- $\omega > 0$: Constant term  
-- $\alpha \geq 0$: ARCH coefficient  
-- $\beta \geq 0$: GARCH coefficient  
-- $\gamma \geq 0$: Leverage/asymmetry coefficient  
+- $ r_t$: Return at time  $t$
+- $\varepsilon_t$: Innovation (shock)
+- $\sigma_t^2$: Conditional variance
+- $z_t \sim N(0,1)$: i.i.d. standard normal variable
+- $\omega > 0$: Constant term
+- $\alpha \geq 0$: ARCH coefficient
+- $\beta \geq 0$: GARCH coefficient
+- $\gamma \geq 0$: Leverage/asymmetry coefficient
 - $I_{\{\varepsilon_{t-1} < 0\}}$: Indicator function (1 if $\varepsilon_{t-1} < 0$, else 0)
 
 ```{python}
@@ -933,11 +935,11 @@ plt.legend()
 plt.show()
 ```
 
-The plot above shows that predicted in-sample volatility is similar for all three models. E-GARCH model gives least number of exceedances for in sample VaR.
+The plot above shows that predicted in-sample volatility is similar for all three models. The E-GARCH model gives the least number of exceedances for in-sample VaR.
 
 # Modern Market
 
-We check how GARCH(1,1) performs for more recent data, particularly 2015-2025 period
+We check how GARCH(1,1) performs for more recent data, particularly the 2015-2025 period.
 
 ```{python}
 start_date = datetime(2015, 1, 1)
@@ -961,7 +963,7 @@ acf_plot = calculate_acf_table(returns_new["portfolio"])
 acf_plot
 ```
 
-This ACF table shows that squared returns correlations are much higher for current data than for data used in the original study.
+The ACF table reveals that squared returns exhibit stronger correlations in the current dataset compared to the original study's data.
 
 ```{python}
 garch_new = results = fit_garch(returns_new["portfolio"]*1000, vol="Garch", dist="normal")
@@ -992,7 +994,7 @@ plt.legend()
 plt.show()
 ```
 
-Conditional volatility looks well fitted, so we see that GARCH model performs quite well even nowadays. We note huge volatility spike during covid period. It is vastly underestimated by our model.
+The conditional volatility appears well-fitted, demonstrating that the GARCH model performs effectively even in contemporary markets. We observe a significant volatility spike during the COVID-19 period, which our model substantially underestimates.
 
 ```{python}
 # Value at risk - portfolio value 1 000 000$ at each point in time

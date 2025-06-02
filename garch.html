@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.29">
+<meta name="generator" content="quarto-1.6.43">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -20,13 +20,12 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -37,7 +36,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -62,16 +61,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="garch_files/libs/clipboard/clipboard.min.js"></script>
-<script src="garch_files/libs/quarto-html/quarto.js" type="module"></script>
-<script src="garch_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="garch_files/libs/quarto-html/quarto.js"></script>
 <script src="garch_files/libs/quarto-html/popper.min.js"></script>
 <script src="garch_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="garch_files/libs/quarto-html/anchor.min.js"></script>
 <link href="garch_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="garch_files/libs/quarto-html/quarto-syntax-highlighting-bcbce66894bfa8e7e94e40e0186b9bb8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="garch_files/libs/quarto-html/quarto-syntax-highlighting-7fd0fe4245b865325b8ce8dccb604d59.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="garch_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="garch_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="garch_files/libs/bootstrap/bootstrap-e52c317b831d71bd0833fd401c29266f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="garch_files/libs/bootstrap/bootstrap-859fdc8a5e322124a7e81024587906da.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
@@ -108,13 +106,13 @@ window.Quarto = {
 
 </head>
 
-<body class="quarto-light">
+<body>
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
   <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">Table of contents</h2>
-   
+
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
   <ul class="collapse">
@@ -185,11 +183,11 @@ window.Quarto = {
              <p>Shah Syed </p>
           </div>
   </div>
-    
-  
-    
+
+
+
   </div>
-  
+
 
 
 </header>
@@ -199,30 +197,30 @@ window.Quarto = {
 <h1>Introduction</h1>
 <section id="background" class="level2">
 <h2 class="anchored" data-anchor-id="background">Background</h2>
-<p>The main goal of this projectis to replicate the GARCH model analysis presented in Robert Engle’s 2001 Nobel Prize lecture, “GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics.” The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility. However to make things more interesting we add some extensions to the study. First of all, we provide our own GARCH(1,1) implementation. We compare GARCH(1,1) results with some other volatility models, particularly E-GARCH and GJR-GARCH on the same data sample that was used in the original paper. Finally, we examine how market volatility has evolved since the publication of the paper.</p>
+<p>The primary objective of this project is to replicate the GARCH model analysis presented in Robert Engle’s 2001 Nobel Prize lecture, “GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics.” The lecture illustrates the application of GARCH models in analyzing and forecasting financial market volatility. To enhance the study, we incorporate several extensions: first, we develop our own GARCH(1,1) implementation; second, we compare GARCH(1,1) results with alternative volatility models, specifically E-GARCH and GJR-GARCH, using the same dataset as the original paper; and finally, we investigate the evolution of market volatility since the paper’s publication.</p>
 <section id="rationale-behind-the-study" class="level3">
 <h3 class="anchored" data-anchor-id="rationale-behind-the-study">Rationale behind the Study</h3>
 <ol type="1">
-<li>From the initial inspection of the article, easy to obtain data</li>
-<li>Well-known author so we asssumed that the methodology is sound and well-explained</li>
-<li>The author’s research has had significant influence and impact in the field of time series analysis</li>
-<li>Research could be easily extended for different datasets, portfolios and methods</li>
+<li>The article’s data requirements are readily accessible and obtainable</li>
+<li>The author’s established reputation suggests methodological rigor and clarity</li>
+<li>The research has made substantial contributions to time series analysis</li>
+<li>The framework allows for extension to diverse datasets and methodologies</li>
 </ol>
 </section>
 <section id="steps-in-the-research" class="level3">
 <h3 class="anchored" data-anchor-id="steps-in-the-research">Steps in the Research</h3>
-<p>The replication focuses on the following:</p>
+<p>The replication encompasses the following key steps:</p>
 <ol type="1">
-<li>Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle’s paper</li>
-<li>Calculating and analyzing portfolio returns</li>
-<li>Writing GARCH(1,1) implementation</li>
-<li>Fitting a GARCH(1,1) model to the portfolio returns</li>
-<li>Examining the model’s performance in capturing volatility clustering</li>
-<li>Generating volatility forecasts in the same manner as Engle did</li>
-<li>Extending study with other methods</li>
-<li>Examining portfolio built on current data</li>
+<li>Replicating Engle’s portfolio composition with identical asset allocation</li>
+<li>Computing and evaluating portfolio return characteristics</li>
+<li>Developing a custom GARCH(1,1) model implementation</li>
+<li>Estimating GARCH(1,1) parameters using portfolio return data</li>
+<li>Assessing the model’s ability to capture volatility clustering patterns</li>
+<li>Producing volatility forecasts following Engle’s methodology</li>
+<li>Implementing additional volatility models for comparative analysis</li>
+<li>Analyzing portfolio performance using contemporary market data</li>
 </ol>
-<p>By following Engle’s methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.</p>
+<p>This methodological approach enables a comprehensive evaluation of GARCH modeling techniques in financial time series analysis.</p>
 </section>
 </section>
 </section>
@@ -262,7 +260,7 @@ window.Quarto = {
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Import paths: ['C:\\Users\\jagus\\AppData\\Local\\Programs\\Python\\Python310\\python310.zip', 'C:\\Users\\jagus\\AppData\\Local\\Programs\\Python\\Python310\\DLLs', 'C:\\Users\\jagus\\AppData\\Local\\Programs\\Python\\Python310\\lib']</code></pre>
+<pre><code>Import paths: ['/Users/krzysztofwojdalski/.pyenv/versions/3.12.5/lib/python312.zip', '/Users/krzysztofwojdalski/.pyenv/versions/3.12.5/lib/python3.12', '/Users/krzysztofwojdalski/.pyenv/versions/3.12.5/lib/python3.12/lib-dynload']</code></pre>
 </div>
 </div>
 </section>
@@ -270,19 +268,25 @@ window.Quarto = {
 <h1>Data Preparation</h1>
 <section id="portfolio-composition" class="level2">
 <h2 class="anchored" data-anchor-id="portfolio-composition">Portfolio Composition</h2>
-<p>This portfolio consists of:</p>
+<p>The portfolio allocation follows Engle’s specification:</p>
 <ul>
-<li>50% Nasdaq (^IXIC)</li>
-<li>30% Dow Jones Industrial Average (^DJI)</li>
-<li>20% 10-year Treasury Constant Maturity Rate <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></li>
+<li>50% allocation to Nasdaq Composite Index (^IXIC)</li>
+<li>30% allocation to Dow Jones Industrial Average (^DJI)</li>
+<li>20% allocation to 10-Year Treasury Constant Maturity Rate <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></li>
 </ul>
-<section id="problems-with-the-data" class="level4">
-<h4 class="anchored" data-anchor-id="problems-with-the-data">Problems with the data</h4>
-<p>Engle described the data set as follows:</p>
+<section id="data-source-considerations" class="level4">
+<h4 class="anchored" data-anchor-id="data-source-considerations">Data Source Considerations</h4>
+<p>Engle’s original description states:</p>
 <blockquote class="blockquote">
 <p>Let’s use the GARCH(1,1) tools to estimate the 1 percent value at risk of a $1,000,000 portfolio on March 23, 2000. This portfolio consists of 50 percent Nasdaq, 30 percent DowJones and 20 percent long bonds. The long bond is a ten-year constant maturity Treasury. The portfolio has constant proportions of wealth in each asset that would entail some rebalancing over time.</p>
 </blockquote>
-<p>Due to vagueness of the claim above, we’ll try to reverse engineer the portfolio, but it’s not a perfect solution. When we calculate return on the portfolio, we implictly assume daily rebalancing, i.e., weights are constant.</p>
+<p>The implementation requires several assumptions:</p>
+<ol type="1">
+<li>Daily rebalancing is assumed to maintain constant portfolio weights</li>
+<li>The ^TNX symbol serves as a proxy for the 10-year Treasury rate</li>
+<li>Portfolio returns are calculated using these constant weights</li>
+</ol>
+<p>These assumptions may introduce some deviation from Engle’s original analysis, but provide a reasonable approximation for replication purposes.</p>
 </section>
 </section>
 <section id="fetching-stock-data" class="level2">
@@ -333,7 +337,7 @@ window.Quarto = {
 <p>For RATE we used a good proxy which we found here looks like a good proxy for TNX, we’ll use data we found <a href="https://fred.stlouisfed.org/data/DGS10">here</a></p>
 <section id="djia-data-retrieval" class="level4">
 <h4 class="anchored" data-anchor-id="djia-data-retrieval">DJIA data retrieval</h4>
-<div id="5992d6b1" class="cell" data-execution_count="3">
+<div id="790c5c15" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>djia_prices <span class="op">=</span> pd.read_csv(</span>
@@ -350,7 +354,7 @@ window.Quarto = {
 <section id="rate-data-retrieval" class="level4">
 <h4 class="anchored" data-anchor-id="rate-data-retrieval">RATE data retrieval</h4>
 <p>Data has been obtained from the hyperlink</p>
-<div id="04423743" class="cell" data-execution_count="4">
+<div id="8d093d27" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tnote_yield <span class="op">=</span> pd.read_csv(</span>
@@ -482,7 +486,7 @@ window.Quarto = {
 </details>
 </div>
 <p>We split the data and proceed with sample for period 1990-2000. In the original paper out of sample forecast has been produced, thus we need additional year of data to replicate this.</p>
-<div id="a2945694" class="cell" data-execution_count="6">
+<div id="20ad40b9" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># split the data</span></span>
@@ -493,7 +497,7 @@ window.Quarto = {
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.loc[:<span class="st">'2000-03-23'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="a2a3ffaa" class="cell" data-execution_count="7">
+<div id="64582feb" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>returns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -940,7 +944,7 @@ L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi \sigma_t^2}} \exp\left( -\frac{(r_
 <li><span class="math inline">\(\sigma_{t-1}^2\)</span> is the lagged conditional variance</li>
 </ul>
 <p>We apply procedure to estimate GARCH(1,1) parameters</p>
-<div id="ce6b334a" class="cell" data-execution_count="12">
+<div id="9bb4231b" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define initial parameters</span></span>
@@ -970,7 +974,7 @@ L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi \sigma_t^2}} \exp\left( -\frac{(r_
 </details>
 </div>
 <p>We do not write our own optimizing function as it is out of the scope of this project. Instead we use existing implementation from scipy</p>
-<div id="e9f000cc" class="cell" data-execution_count="13">
+<div id="87580fa3" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We want to maximize sum of log likelihoods</span></span>
@@ -1002,10 +1006,10 @@ L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi \sigma_t^2}} \exp\left( -\frac{(r_
 <div class="cell-output cell-output-stdout">
 <pre><code>Success: True
 Message: Optimization terminated successfully
-n iterations 54</code></pre>
+n iterations 62</code></pre>
 </div>
 </div>
-<div id="39ed13ad" class="cell" data-execution_count="14">
+<div id="b6f58495" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tabulate <span class="im">import</span> tabulate</span>
@@ -1023,12 +1027,12 @@ n iterations 54</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Parameter       Value
 -----------  --------
-omega        1.212094
-alpha        0.102727
-beta         0.878127</code></pre>
+omega        1.212394
+alpha        0.102739
+beta         0.878112</code></pre>
 </div>
 </div>
-<div id="58c98d54" class="cell" data-execution_count="15">
+<div id="54e768bf" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Conditional volatility</span></span>
@@ -1044,7 +1048,7 @@ beta         0.878127</code></pre>
 <span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>))</span>
 <span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>plt.plot(np.sqrt((r.values<span class="op">/</span><span class="dv">100</span>)<span class="op">**</span><span class="dv">2</span>), color<span class="op">=</span><span class="st">'black'</span>, lw<span class="op">=</span><span class="fl">0.9</span>)</span>
 <span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>plt.plot(np.sqrt(sigma2<span class="op">/</span><span class="dv">10000</span>), color<span class="op">=</span><span class="st">'red'</span>, lw<span class="op">=</span><span class="fl">1.1</span>)</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Custom GARCH(1,1) conditional colatility'</span>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Custom GARCH(1,1) conditional volatility'</span>)</span>
 <span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
@@ -1116,31 +1120,31 @@ Table&nbsp;3: GARCH(1,1)
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">mu</td>
-<td>0.596852</td>
-<td>0.128569</td>
-<td>4.642269</td>
-<td>3.446031e-06</td>
+<td>0.596855</td>
+<td>0.128571</td>
+<td>4.642232</td>
+<td>3.446657e-06</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">omega</td>
-<td>1.109939</td>
-<td>0.590824</td>
-<td>1.878630</td>
-<td>6.029507e-02</td>
+<td>1.110225</td>
+<td>0.591040</td>
+<td>1.878425</td>
+<td>6.032300e-02</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">alpha[1]</td>
-<td>0.103035</td>
-<td>0.037960</td>
-<td>2.714297</td>
-<td>6.641656e-03</td>
+<td>0.103043</td>
+<td>0.037963</td>
+<td>2.714270</td>
+<td>6.642193e-03</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">beta[1]</td>
-<td>0.882438</td>
-<td>0.041933</td>
-<td>21.044055</td>
-<td>2.592334e-98</td>
+<td>0.882425</td>
+<td>0.041940</td>
+<td>21.040197</td>
+<td>2.812083e-98</td>
 </tr>
 </tbody>
 </table>
@@ -1155,7 +1159,7 @@ Table&nbsp;3: GARCH(1,1)
 </section>
 <section id="acf-of-squared-standardized-residuals" class="level2">
 <h2 class="anchored" data-anchor-id="acf-of-squared-standardized-residuals">ACF of Squared Standardized Residuals</h2>
-<p>The same as before we generate series of autocorrelations up to 15th lag together with Q-stats and their p-values. Results are pretty similar to those presented in the original paper. Note that here standardized residuals are basically returns adjusted for GARCH effects as mean portfolio return is very close to 0. This way we can interpret the results by saying that GARCH(1, 1) model manages to capture portfolio returns variance variability.</p>
+<p>As in the previous analysis, we compute autocorrelations up to lag 15, including Q-statistics and their corresponding p-values. The results closely align with those reported in the original paper. The standardized residuals represent returns adjusted for GARCH effects, given that the mean portfolio return is approximately zero. This interpretation suggests that the GARCH(1,1) model effectively captures the variance dynamics in portfolio returns.</p>
 <section id="article-acf-of-squared-standardized-residuals-for-reference" class="level4">
 <h4 class="anchored" data-anchor-id="article-acf-of-squared-standardized-residuals-for-reference">Article ACF of Squared Standardized Residuals (for reference)</h4>
 <div class="quarto-figure quarto-figure-center">
@@ -1199,49 +1203,49 @@ Table&nbsp;4: Autocorrelations of Squared Standardized Residuals
 <tr class="even">
 <td data-quarto-table-cell-role="th">2</td>
 <td>0.062</td>
-<td>9.488</td>
+<td>9.487</td>
 <td>0.009</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">3</td>
 <td>-0.019</td>
-<td>10.375</td>
+<td>10.374</td>
 <td>0.016</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">4</td>
 <td>-0.001</td>
-<td>10.377</td>
+<td>10.376</td>
 <td>0.035</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">5</td>
 <td>-0.010</td>
-<td>10.618</td>
+<td>10.617</td>
 <td>0.060</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">6</td>
 <td>-0.019</td>
-<td>11.555</td>
+<td>11.554</td>
 <td>0.073</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">7</td>
 <td>0.000</td>
-<td>11.556</td>
+<td>11.555</td>
 <td>0.116</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">8</td>
 <td>-0.026</td>
-<td>13.188</td>
+<td>13.187</td>
 <td>0.106</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">9</td>
 <td>-0.013</td>
-<td>13.608</td>
+<td>13.607</td>
 <td>0.137</td>
 </tr>
 <tr class="even">
@@ -1253,13 +1257,13 @@ Table&nbsp;4: Autocorrelations of Squared Standardized Residuals
 <tr class="odd">
 <td data-quarto-table-cell-role="th">11</td>
 <td>-0.020</td>
-<td>14.614</td>
+<td>14.613</td>
 <td>0.201</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">12</td>
 <td>-0.016</td>
-<td>15.256</td>
+<td>15.255</td>
 <td>0.228</td>
 </tr>
 <tr class="odd">
@@ -1271,13 +1275,13 @@ Table&nbsp;4: Autocorrelations of Squared Standardized Residuals
 <tr class="even">
 <td data-quarto-table-cell-role="th">14</td>
 <td>0.010</td>
-<td>15.501</td>
+<td>15.500</td>
 <td>0.345</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">15</td>
 <td>-0.014</td>
-<td>16.006</td>
+<td>16.005</td>
 <td>0.382</td>
 </tr>
 </tbody>
@@ -1321,7 +1325,7 @@ Figure&nbsp;3: Conditional Volatility
 </section>
 <section id="model-diagnostics" class="level2">
 <h2 class="anchored" data-anchor-id="model-diagnostics">Model Diagnostics</h2>
-<p>Let’s examine the model residuals using plotnine:</p>
+<p>Let’s examine the model residuals:</p>
 <div id="cell-model-diagnostics" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>Code</summary>
@@ -1391,7 +1395,7 @@ Figure&nbsp;4: Volatility Forecast
 </div>
 </div>
 <p>At this point we can also compare results from our implementation with those obtained using arch library implementation</p>
-<div id="ce4536a7" class="cell" data-execution_count="22">
+<div id="a78b734f" class="cell" data-execution_count="22">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
@@ -1410,26 +1414,26 @@ Figure&nbsp;4: Volatility Forecast
 </div>
 </div>
 </div>
-<p>Green line can barely be seen. GARCH parameters we got from our implementations are almost the same as those obtained from arch_model library implementation. Therefore forecasted conditional volatility also has to be nearly identical.</p>
+<p>The green line showing our GARCH model is hard to see because it almost perfectly matches the red line from the arch library. This means our model gives very similar results to the standard library version.</p>
 </section>
 </section>
 <section id="value-at-risk" class="level1">
 <h1>Value at Risk</h1>
-<p>Based on conditional volatility we calculate 1% value at risk. We assume initial portfolio value of 1 000 000$. We predict that 1 step ahead standard deviation will be 0.014772.</p>
-<p>First we assume normal distribution of returns. We obtain 1% quantile by multiplying predicted standard deviation by 2.327.</p>
-<div id="8e0fcd04" class="cell" data-execution_count="23">
+<p>Based on the estimated conditional volatility, we calculate the 1% Value at Risk (VaR) for a portfolio with an initial value of $1,000,000. The one-step-ahead forecast yields a standard deviation of 0.014772.</p>
+<p>We assume returns follow a normal distribution. The 1% quantile is calculated by multiplying the predicted standard deviation by 2.327, which represents the critical value for a 99% confidence interval under normality.</p>
+<div id="f8330991" class="cell" data-execution_count="23">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>init_value <span class="op">=</span> <span class="dv">10</span><span class="op">**</span><span class="dv">6</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fl">2.327</span><span class="op">*</span>np.sqrt(forecast.variance[<span class="st">'h.1'</span>].iloc[<span class="op">-</span><span class="dv">1</span>])<span class="op">/</span><span class="dv">1000</span> <span class="op">*</span> init_value</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="23">
-<pre><code>34375.36296788773</code></pre>
+<pre><code>34375.084444784516</code></pre>
 </div>
 </div>
-<p>The 1% Value at Risk asusming normal distribution of standardized residuals is 5786$. Note that as mean return is very close to 0 we can omit this value in our calculation. We basically calculated the 99% quantile, but with 0 mean it is symmetrical.</p>
-<p>We can also use empirical 1% quantile</p>
-<div id="04c7e1c1" class="cell" data-execution_count="24">
+<p>The 1% Value at Risk (VaR) under normal distribution assumptions is $34,375. Since the mean return is negligible, we can exclude it from our calculations. The VaR represents the 99th percentile of the distribution, which is symmetric around zero due to the near-zero mean.</p>
+<p>An alternative approach is to use the empirical 1% quantile.</p>
+<div id="9fa406b5" class="cell" data-execution_count="24">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>emp_q <span class="op">=</span> np.quantile(results.resid<span class="op">/</span>results.conditional_volatility, <span class="fl">0.01</span>)</span>
@@ -1437,12 +1441,12 @@ Figure&nbsp;4: Volatility Forecast
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="op">-</span>emp_q<span class="op">*</span>np.sqrt(forecast.variance[<span class="st">'h.1'</span>].iloc[<span class="op">-</span><span class="dv">1</span>])<span class="op">/</span><span class="dv">1000</span> <span class="op">*</span> init_value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>1 percent quantile: -2.8985929706180666
-42819.160060663504</code></pre>
+<pre><code>1 percent quantile: -2.898561249514305
+42818.3445296237</code></pre>
 </div>
 </div>
-<p>Results we obtained are pretty similar to those presented in the original paper. Interestingly, even empirical 1st quantile is very close to -2.844, which is the original result.</p>
-<p>We also plot 1% value at risk for the whole in sample period. For reference we show the same plot from the original study.</p>
+<p>The results we obtained are pretty similar to those presented in the original paper. Interestingly, even the empirical 1st quantile is very close to -2.844, which is the original result.</p>
+<p>We also plot 1% value at risk for the whole in sample period. For reference, we show the same plot from the original study.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="screenshots/in_sample_VaR.png" class="img-fluid figure-img"></p>
@@ -1480,8 +1484,8 @@ Figure&nbsp;5: Portfolio loss in sample
 </div>
 </div>
 </div>
-<p>We show also the number of exceedances. Good model should produce such VaR estimates that actual portfolio loss is greater than the estimated around 1% of time. We see that for our GARCH(1, 1) VaR estimates assuming normal distribution of standardized residuals is 1.49%.</p>
-<div id="0e355ba2" class="cell" data-execution_count="26">
+<p>We also show the number of exceedances. A good model should produce VaR estimates where the actual portfolio loss exceeds the estimated value approximately 1% of the time. For our GARCH(1,1) model with VaR estimates assuming normal distribution of standardized residuals, the exceedance rate is 2.06%.</p>
+<div id="c20e9f66" class="cell" data-execution_count="26">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exceedances</span></span>
@@ -1504,7 +1508,7 @@ Percentge of exceedances: 2.06%</code></pre>
 <figcaption>oos-VaR</figcaption>
 </figure>
 </div>
-<div id="1129e456" class="cell" data-execution_count="27">
+<div id="4296f9a4" class="cell" data-execution_count="27">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rolling forecast without reestimating parameters</span></span>
@@ -1534,7 +1538,7 @@ Percentge of exceedances: 2.06%</code></pre>
 </div>
 </div>
 </div>
-<div id="80916c16" class="cell" data-execution_count="28">
+<div id="58549fd4" class="cell" data-execution_count="28">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Value at risk - portfolio value 1 000 000$ at each point in time</span></span>
@@ -1554,7 +1558,7 @@ Percentge of exceedances: 2.06%</code></pre>
 </div>
 </div>
 </div>
-<div id="6751dfd3" class="cell" data-execution_count="29">
+<div id="f02daeb4" class="cell" data-execution_count="29">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>n_exc, perc_exc <span class="op">=</span> count_exceedances(np.sqrt(sigma2) <span class="op">*</span> (<span class="op">-</span><span class="fl">2.327</span>)<span class="op">/</span><span class="dv">1000</span>, returns_oos[<span class="st">'portfolio'</span>].values, <span class="va">True</span>)</span>
@@ -1571,7 +1575,7 @@ Percentge of exceedances: 1.35%</code></pre>
 <h1>Extensions</h1>
 <section id="alternative-error-distributions" class="level2">
 <h2 class="anchored" data-anchor-id="alternative-error-distributions">Alternative Error Distributions</h2>
-<div id="f687bf39" class="cell" data-execution_count="30">
+<div id="f4e7991c" class="cell" data-execution_count="30">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arch</span>
@@ -1598,7 +1602,7 @@ Percentge of exceedances: 1.35%</code></pre>
 <span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    alt_models[name] <span class="op">=</span> res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="abcc1aca" class="cell" data-execution_count="31">
+<div id="fdc73be0" class="cell" data-execution_count="31">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 6.2   Information-criterion comparison table</span></span>
@@ -1613,7 +1617,7 @@ Percentge of exceedances: 1.35%</code></pre>
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"</span><span class="ch">\n</span><span class="st">Error-Distribution Comparison:</span><span class="ch">\n</span><span class="sc">%s</span><span class="st">"</span>, comp.to_string(index<span class="op">=</span><span class="va">False</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="c9a650a7" class="cell" data-execution_count="32">
+<div id="25d06dee" class="cell" data-execution_count="32">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 6.3  Overlay conditional-volatility paths</span></span>
@@ -1646,7 +1650,7 @@ Percentge of exceedances: 1.35%</code></pre>
 </div>
 </div>
 </div>
-<div id="9f0ccc3c" class="cell" data-execution_count="33">
+<div id="f08c17e7" class="cell" data-execution_count="33">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 6.4   Q-Q plots of standardized residuals</span></span>
@@ -1676,10 +1680,30 @@ Percentge of exceedances: 1.35%</code></pre>
 </div>
 </div>
 </div>
+<p>We extend our study with E-GARCH and GJR-GARCH models.</p>
 </section>
 <section id="e-garch" class="level2">
 <h2 class="anchored" data-anchor-id="e-garch">E-GARCH</h2>
-<div id="d46c99cd" class="cell" data-execution_count="34">
+<p>The GARCH model is not perfect. One of its main drawbacks is that it assumes symmetrical volatility shocks, while in reality this assumption is usually not met. E-GARCH extends the standard GARCH model and accounts for possible non-symmetric volatility.</p>
+<p>The conditional variance equation is:</p>
+<p><span class="math display">\[
+\ln(\sigma_t^2) = \omega + \beta \ln(\sigma_{t-1}^2) + \alpha \left| \frac{\varepsilon_{t-1}}{\sigma_{t-1}} \right| + \gamma \frac{\varepsilon_{t-1}}{\sigma_{t-1}}
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\sigma_t^2\)</span>: Conditional variance at time <span class="math inline">\(t\)</span><br>
+</li>
+<li><span class="math inline">\(\varepsilon_t\)</span>: Residuals (innovations)<br>
+</li>
+<li>$: Constant term<br>
+</li>
+<li><span class="math inline">\(\beta\)</span>: Persistence parameter<br>
+</li>
+<li>$: Response to magnitude of shocks<br>
+</li>
+<li><span class="math inline">\(\gamma\)</span>: Captures <strong>asymmetry</strong> (leverage effect)</li>
+</ul>
+<div id="147ce3c7" class="cell" data-execution_count="34">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>results_egarch <span class="op">=</span> fit_garch(returns[<span class="st">"portfolio"</span>]<span class="op">*</span><span class="dv">1000</span>, vol<span class="op">=</span><span class="st">"egarch"</span>, dist<span class="op">=</span><span class="st">"normal"</span>)</span>
@@ -1719,30 +1743,30 @@ Percentge of exceedances: 1.35%</code></pre>
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">mu</td>
-<td>0.617429</td>
+<td>0.617431</td>
 <td>0.131582</td>
-<td>4.692350</td>
+<td>4.692367</td>
 <td>0.000003</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">omega</td>
 <td>0.087417</td>
 <td>0.045542</td>
-<td>1.919497</td>
-<td>0.054921</td>
+<td>1.919494</td>
+<td>0.054922</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">alpha[1]</td>
 <td>0.209258</td>
 <td>0.062087</td>
-<td>3.370424</td>
+<td>3.370420</td>
 <td>0.000751</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">beta[1]</td>
 <td>0.979960</td>
 <td>0.010973</td>
-<td>89.310450</td>
+<td>89.310202</td>
 <td>0.000000</td>
 </tr>
 </tbody>
@@ -1751,7 +1775,7 @@ Percentge of exceedances: 1.35%</code></pre>
 </div>
 </div>
 </div>
-<div id="ceaa45ff" class="cell" data-execution_count="35">
+<div id="1ca64a57" class="cell" data-execution_count="35">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>VaR_returns <span class="op">=</span> calculate_VaR_returns(returns[<span class="st">"portfolio"</span>], results_egarch.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, <span class="fl">2.327</span>)</span>
@@ -1776,7 +1800,7 @@ Percentge of exceedances: 1.35%</code></pre>
 </div>
 </div>
 </div>
-<div id="5a23a120" class="cell" data-execution_count="36">
+<div id="00f1bb43" class="cell" data-execution_count="36">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exceedances</span></span>
@@ -1792,7 +1816,37 @@ Percentge of exceedances: 2.02%</code></pre>
 </section>
 <section id="gjr-garch" class="level2">
 <h2 class="anchored" data-anchor-id="gjr-garch">GJR-GARCH</h2>
-<div id="f32d9180" class="cell" data-execution_count="37">
+<p>Another model relaxing the symmetric volatility shocks assumption is GJR-GARCH</p>
+<p>Let the return be defined as:</p>
+<p><span class="math display">\[
+r_t = \mu + \varepsilon_t \\
+\varepsilon_t = \sigma_t z_t
+\]</span></p>
+<p>The conditional variance equation of GJR-GARCH(1,1,1) is:</p>
+<p><span class="math display">\[
+\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \gamma \varepsilon_{t-1}^2 \cdot I_{\{\varepsilon_{t-1} &lt; 0\}} + \beta \sigma_{t-1}^2
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li>$ r_t$: Return at time <span class="math inline">\(t\)</span><br>
+</li>
+<li><span class="math inline">\(\varepsilon_t\)</span>: Innovation (shock)<br>
+</li>
+<li><span class="math inline">\(\sigma_t^2\)</span>: Conditional variance<br>
+</li>
+<li><span class="math inline">\(z_t \sim N(0,1)\)</span>: i.i.d. standard normal variable<br>
+</li>
+<li><span class="math inline">\(\omega &gt; 0\)</span>: Constant term<br>
+</li>
+<li><span class="math inline">\(\alpha \geq 0\)</span>: ARCH coefficient<br>
+</li>
+<li><span class="math inline">\(\beta \geq 0\)</span>: GARCH coefficient<br>
+</li>
+<li><span class="math inline">\(\gamma \geq 0\)</span>: Leverage/asymmetry coefficient<br>
+</li>
+<li><span class="math inline">\(I_{\{\varepsilon_{t-1} &lt; 0\}}\)</span>: Indicator function (1 if <span class="math inline">\(\varepsilon_{t-1} &lt; 0\)</span>, else 0)</li>
+</ul>
+<div id="fc6e9076" class="cell" data-execution_count="37">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>results_gjrgarch <span class="op">=</span> fit_garch(returns[<span class="st">"portfolio"</span>]<span class="op">*</span><span class="dv">1000</span>, o<span class="op">=</span><span class="dv">1</span>, dist<span class="op">=</span><span class="st">"normal"</span>)</span>
@@ -1832,38 +1886,38 @@ Percentge of exceedances: 2.02%</code></pre>
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">mu</td>
-<td>0.460930</td>
+<td>0.460929</td>
 <td>0.121817</td>
-<td>3.783774</td>
-<td>1.544682e-04</td>
+<td>3.783770</td>
+<td>1.544707e-04</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">omega</td>
-<td>1.092293</td>
-<td>0.654363</td>
-<td>1.669247</td>
-<td>9.506850e-02</td>
+<td>1.092295</td>
+<td>0.654360</td>
+<td>1.669257</td>
+<td>9.506645e-02</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">alpha[1]</td>
 <td>0.055540</td>
 <td>0.025114</td>
-<td>2.211470</td>
-<td>2.700328e-02</td>
+<td>2.211478</td>
+<td>2.700272e-02</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">gamma[1]</td>
 <td>0.077981</td>
 <td>0.040117</td>
-<td>1.943839</td>
-<td>5.191491e-02</td>
+<td>1.943847</td>
+<td>5.191396e-02</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">beta[1]</td>
 <td>0.888757</td>
-<td>0.044850</td>
-<td>19.816359</td>
-<td>2.151212e-87</td>
+<td>0.044849</td>
+<td>19.816458</td>
+<td>2.146997e-87</td>
 </tr>
 </tbody>
 </table>
@@ -1871,7 +1925,7 @@ Percentge of exceedances: 2.02%</code></pre>
 </div>
 </div>
 </div>
-<div id="c16aeab7" class="cell" data-execution_count="38">
+<div id="c69fa3ec" class="cell" data-execution_count="38">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>fitted <span class="op">=</span> {</span>
@@ -1889,12 +1943,12 @@ Percentge of exceedances: 2.02%</code></pre>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>               mu   omega  alpha[1]  beta[1]  gamma[1]
-garch      0.5969  1.1099    0.1030   0.8824       NaN
+garch      0.5969  1.1102    0.1030   0.8824       NaN
 e-garch    0.6174  0.0874    0.2093   0.9800       NaN
 gjr-garch  0.4609  1.0923    0.0555   0.8888     0.078</code></pre>
 </div>
 </div>
-<div id="618bc702" class="cell" data-execution_count="39">
+<div id="712b6d44" class="cell" data-execution_count="39">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>VaR_returns <span class="op">=</span> calculate_VaR_returns(returns[<span class="st">"portfolio"</span>], results_gjrgarch.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, <span class="fl">2.327</span>)</span>
@@ -1919,7 +1973,7 @@ gjr-garch  0.4609  1.0923    0.0555   0.8888     0.078</code></pre>
 </div>
 </div>
 </div>
-<div id="e8526ed9" class="cell" data-execution_count="40">
+<div id="771cf0af" class="cell" data-execution_count="40">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exceedances</span></span>
@@ -1932,7 +1986,7 @@ gjr-garch  0.4609  1.0923    0.0555   0.8888     0.078</code></pre>
 Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
-<div id="26b43e54" class="cell" data-execution_count="41">
+<div id="b0c70c39" class="cell" data-execution_count="41">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">8</span>))</span>
@@ -1952,11 +2006,13 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
+<p>The plot above shows that predicted in-sample volatility is similar for all three models. The E-GARCH model gives the least number of exceedances for in-sample VaR.</p>
 </section>
 </section>
 <section id="modern-market" class="level1">
 <h1>Modern Market</h1>
-<div id="57a8a403" class="cell" data-execution_count="42">
+<p>We check how GARCH(1,1) performs for more recent data, particularly the 2015-2025 period.</p>
+<div id="7e97711f" class="cell" data-execution_count="42">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>start_date <span class="op">=</span> datetime(<span class="dv">2015</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
@@ -2089,7 +2145,8 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
-<div id="31d00107" class="cell" data-execution_count="43">
+<p>The ACF table reveals that squared returns exhibit stronger correlations in the current dataset compared to the original study’s data.</p>
+<div id="e59aa056" class="cell" data-execution_count="43">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>garch_new <span class="op">=</span> results <span class="op">=</span> fit_garch(returns_new[<span class="st">"portfolio"</span>]<span class="op">*</span><span class="dv">1000</span>, vol<span class="op">=</span><span class="st">"Garch"</span>, dist<span class="op">=</span><span class="st">"normal"</span>)</span>
@@ -2127,31 +2184,31 @@ Percentge of exceedances: 2.14%</code></pre>
 <tbody>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">mu</td>
-<td>0.672851</td>
+<td>0.672853</td>
 <td>0.169883</td>
-<td>3.960671</td>
-<td>7.473942e-05</td>
+<td>3.960681</td>
+<td>7.473620e-05</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">omega</td>
-<td>4.269705</td>
-<td>1.350048</td>
-<td>3.162631</td>
-<td>1.563502e-03</td>
+<td>4.269813</td>
+<td>1.350099</td>
+<td>3.162593</td>
+<td>1.563706e-03</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">alpha[1]</td>
-<td>0.135067</td>
-<td>0.027285</td>
-<td>4.950204</td>
-<td>7.413580e-07</td>
+<td>0.135068</td>
+<td>0.027286</td>
+<td>4.950177</td>
+<td>7.414609e-07</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">beta[1]</td>
-<td>0.831906</td>
-<td>0.032405</td>
-<td>25.671938</td>
-<td>2.405934e-145</td>
+<td>0.831904</td>
+<td>0.032406</td>
+<td>25.671275</td>
+<td>2.447306e-145</td>
 </tr>
 </tbody>
 </table>
@@ -2159,7 +2216,7 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
-<div id="273fd41b" class="cell" data-execution_count="44">
+<div id="b46fbbe3" class="cell" data-execution_count="44">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
@@ -2177,7 +2234,8 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
-<div id="079ec7d7" class="cell" data-execution_count="45">
+<p>The conditional volatility appears well-fitted, demonstrating that the GARCH model performs effectively even in contemporary markets. We observe a significant volatility spike during the COVID-19 period, which our model substantially underestimates.</p>
+<div id="306c2d41" class="cell" data-execution_count="45">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Value at risk - portfolio value 1 000 000$ at each point in time</span></span>
@@ -2202,7 +2260,7 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
-<div id="67c91c92" class="cell" data-execution_count="46">
+<div id="087b1b54" class="cell" data-execution_count="46">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>n_exc, perc_exc <span class="op">=</span> count_exceedances(VaR_returns, returns_new[<span class="st">"portfolio"</span>], <span class="va">True</span>)</span>
@@ -2230,409 +2288,427 @@ Percentge of exceedances: 2.07%</code></pre>
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>Potentially ^TNX, this needs to be checked further on.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>The ^TNX symbol is used as a proxy for the 10-year Treasury rate.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button,
+        { trigger: "manual",
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
       }
-      return false;
-    }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
-    }
-    const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
-        }
-        return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
     });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
         }
       }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
-        },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
     }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
-      });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
     }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
-          }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
-            }
-          }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
-          }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
-          }
-          return note.innerHTML;
-        }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config);
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
       } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
         }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
       }
     }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
-            }
-          } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
-            });
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined;
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
           }
         } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
+          // See if we can fetch this
+          fetch(url.split('#')[0])
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
+            const note = htmlDoc.getElementById(id);
             if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
+              const html = processXRef(id, note);
               instance.setContent(html);
-            } 
+            }
           }).finally(() => {
             instance.enable();
             instance.show();
           });
         }
-      }, function(instance) {
-      });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
-        };
-      }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
-            }
-          });
-        }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
       } else {
-        return undefined;
-      }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
             }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          }
+        }).finally(() => {
+          instance.enable();
+          instance.show();
         });
       }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
     }
-  });
-  </script>
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
 </div> <!-- /content -->
 
 
