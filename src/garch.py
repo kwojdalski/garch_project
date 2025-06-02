@@ -54,7 +54,15 @@
 import logging
 import os
 from datetime import datetime
+import os, sys
 
+#for mac
+root = os.path.abspath(os.path.join(os.getcwd(), ".."))
+if root not in sys.path:
+    sys.path.insert(0, root)
+
+print("Import paths:", sys.path[:3])
+#####
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-v0_8-darkgrid')
 plt.rcParams['axes.grid'] = True
@@ -175,7 +183,6 @@ tnote_yield = tnote_yield.rename(columns={"DGS10": "^TNX"})
 
 # tnote yield is not exactly the price, but we merge it anyway
 prices = prices.join(tnote_yield["^TNX"])
-
 prices
 
 # %% [markdown]
@@ -200,7 +207,6 @@ for symbol, weight in weights.items():
 
 # Add portfolio returns to the returns DataFrame
 returns["portfolio"] = portfolio_returns
-
 # %% [markdown]
 # We split the data and proceed with sample for period 1990-2000. In the original paper out of sample forecast has been produced, thus we need additional year of data to replicate this.
 
@@ -688,6 +694,89 @@ print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 # # Extensions
 
 # %% [markdown]
+# ## Alternative Error Distributions
+
+# %%
+import arch
+# 6.1   Estimate GARCH(1,1) with four innovation distributions
+distros = {
+    "Normal"   : "normal",
+    "Student-t": "t",
+    "Skew-t"   : "skewt",
+    "GED"      : "ged",
+}
+
+alt_models = {}
+for name, dist in distros.items():
+    logger.info(f"Fitting GARCH(1,1) with {name} errors …")
+    am = arch.arch_model(
+        returns["portfolio"] * 1000,
+        vol="GARCH",
+        p=1,
+        q=1,
+        dist=dist,
+        rescale=False,
+    )
+    res = am.fit(disp="off")
+    alt_models[name] = res
+
+# %%
+# 6.2   Information-criterion comparison table
+comp = pd.DataFrame(
+    {
+        "Distribution": list(alt_models.keys()),
+        "LogLik"      : [m.loglikelihood for m in alt_models.values()],
+        "AIC"         : [m.aic            for m in alt_models.values()],
+        "BIC"         : [m.bic            for m in alt_models.values()],
+    }
+).sort_values("AIC")
+logger.info("\nError-Distribution Comparison:\n%s", comp.to_string(index=False))
+
+# %%
+# 6.3  Overlay conditional-volatility paths
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+for name, res in alt_models.items():
+    ax.plot(
+        res.conditional_volatility.index,
+        np.sqrt(res.conditional_volatility),
+        label=name,
+        linewidth=1,
+    )
+
+ax.set_title("Conditional Volatility – Alternative Error Distributions")
+ax.set_xlabel("Date")
+ax.set_ylabel("Volatility")
+ax.legend(frameon=False)
+fig.tight_layout()
+plt.show()
+
+# %%
+# 6.4   Q-Q plots of standardized residuals
+import matplotlib.pyplot as plt
+from scipy import stats
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+axes = axes.flatten()
+
+for ax, (name, res) in zip(axes, alt_models.items()):
+    std_resid = res.resid / np.sqrt(res.conditional_volatility)
+    if name == "Student-t":
+        nu = res.params["nu"]
+        stats.probplot(std_resid, dist="t", sparams=(nu,), plot=ax)
+    else:  # Normal, Skew-t, GED → compare to N(0,1)
+        stats.probplot(std_resid, dist="norm", plot=ax)
+    ax.set_title(f"{name} errors")
+
+fig.tight_layout()
+plt.show()
+
+
+# %% [markdown]
 # ## E-GARCH
 
 # %%
@@ -755,6 +844,20 @@ model_results = pd.DataFrame(
 )
 
 model_results
+
+# %%
+fitted = {
+    "garch" : results,
+    "e-garch" : results_egarch,
+    "gjr-garch" : results_gjrgarch
+}
+
+param_frames = []
+for name, res in fitted.items():
+    df = res.params.rename(name).to_frame().T
+    param_frames.append(df)
+comparison = pd.concat(param_frames)
+print(comparison.round(4))
 
 # %%
 VaR_returns = calculate_VaR_returns(returns["portfolio"], results_gjrgarch.conditional_volatility/1000, 2.327)
@@ -859,7 +962,7 @@ print(f"Number of exceedances: {n_exc}")
 print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 
 # %% [markdown]
-# # References
+# # Conclusion
 #
 # * Engle, R. F. (2001). GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics. Journal of Economic Perspectives, 15(4), 157-168.
 # * Kaggle. (2023). Dow Jones Industrial Average (^DJI) Data. [Dataset]. Available at: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data
