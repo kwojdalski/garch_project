@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 from arch import arch_model
-from plotnine import aes, element_text, geom_line, ggplot, labs, theme
 from scipy import stats
 from statsmodels.tsa.stattools import acf as acf_stats
 
@@ -51,37 +50,13 @@ def calculate_returns(prices: pd.Series | pd.DataFrame):
     return np.log(prices / prices.shift(1)).dropna()
 
 
-def fit_garch(returns: pd.Series, p: int = 1, q: int = 1):
+def fit_garch(returns: pd.Series, p: int = 1, q: int = 1, **kwargs):
     """
     Fit GARCH(p,q) model to returns
     """
-    model = arch_model(returns, p=p, q=q, vol="Garch", dist="normal")
+    model = arch_model(returns, p=p, q=q, **kwargs)
     results = model.fit(disp="off")
     return results
-
-
-def plot_volatility(results, returns: pd.Series):
-    """
-    Plot the conditional volatility using plotnine
-    """
-    # Create a DataFrame for plotting
-    volatility_df = pd.DataFrame(
-        {"Date": returns.index, "Volatility": np.sqrt(results.conditional_volatility)}
-    )
-
-    # Create the plot using plotnine
-    volatility_plot = (
-        ggplot(volatility_df, aes(x="Date", y="Volatility"))
-        + geom_line()
-        + labs(title="Conditional Volatility", x="Date", y="Volatility")
-        + theme(
-            plot_title=element_text(size=14, face="bold"),
-            axis_title=element_text(size=12),
-            axis_text=element_text(size=10),
-        )
-    )
-
-    return volatility_plot
 
 
 # Calculate portfolio statistics
@@ -140,3 +115,17 @@ def calculate_acf_table(series: pd.Series, nlags: int = 15):
     results = results.round(3)
 
     return results
+
+
+def calculate_VaR_returns(returns, conditional_volatility, n_sd):
+    mu = np.mean(returns)
+    VaR_returns = mu - conditional_volatility*n_sd
+    return VaR_returns
+
+
+def count_exceedances(VaR_returns, returns, perc=False):
+    n_exc = sum(returns < VaR_returns)
+    if perc:
+        perc_exc = n_exc/len(returns) 
+        return n_exc, perc_exc
+    return n_exc

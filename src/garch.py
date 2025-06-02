@@ -3,8 +3,8 @@
 # title: GARCH Model Implementation
 # author:
 #   - name: "Krzysztof Wojdalski"
-#   - name: "Piotr"
-#   - name: "Shah"
+#   - name: "Piotr Jagiełło"
+#   - name: "Shah Syed"
 # format:
 #   html:
 #     toc: true
@@ -22,15 +22,14 @@
 # # Introduction
 #
 # ## Background
-#
-# This project aims to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility.
+# The main goal of this projectis to replicate the GARCH model analysis presented in Robert Engle's 2001 Nobel Prize lecture, "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics." The lecture demonstrates how GARCH models can be used to analyze and forecast financial market volatility. However to make things more interesting we add some extensions to the study. First of all, we provide our own GARCH(1,1) implementation. We compare GARCH(1,1) results with some other volatility models, particularly E-GARCH and GJR-GARCH on the same data sample that was used in the original paper. Finally, we examine how market volatility has evolved since the publication of the paper.
 #
 # ### Rationale behind the Study
 #
 # 1) From the initial inspection of the article, easy to obtain data
 # 2) Well-known author so we asssumed that the methodology is sound and well-explained
 # 3) The author's research has had significant influence and impact in the field of time series analysis
-# 4) Research could be easily extended for different datasets / portfolios
+# 4) Research could be easily extended for different datasets, portfolios and methods
 #
 #
 # ### Steps in the Research
@@ -38,9 +37,12 @@
 #
 # 1. Constructing a portfolio similar (or, hopefully, identical) to the one used in Engle's paper
 # 2. Calculating and analyzing portfolio returns
-# 3. Fitting a GARCH(1,1) model to the portfolio returns
-# 4. Examining the model's performance in capturing volatility clustering
-# 5. Generating volatility forecasts in the same manner as Engle did
+# 3. Writing GARCH(1,1) implementation
+# 4. Fitting a GARCH(1,1) model to the portfolio returns
+# 5. Examining the model's performance in capturing volatility clustering
+# 6. Generating volatility forecasts in the same manner as Engle did
+# 7. Extending study with other methods
+# 8. Examining portfolio built on current data
 #
 # By following Engle's methodology, the project provides a practical implementation of GARCH modeling techniques for financial time series analysis.
 #
@@ -53,38 +55,25 @@ import logging
 import os
 from datetime import datetime
 
+import matplotlib.pyplot as plt
+plt.style.use('seaborn-v0_8-darkgrid')
+plt.rcParams['axes.grid'] = True
+
 import numpy as np
 import pandas as pd
-from plotnine import (
-    aes,
-    element_blank,
-    element_text,
-    facet_wrap,
-    geom_line,
-    ggplot,
-    labs,
-    scale_color_manual,
-    theme,
-    theme_minimal,
-)
 
-if os.getcwd().endswith("src") or os.getcwd().endswith("notebooks"):
+if os.getcwd().endswith("src") or os.getcwd().endswith("report"):
     os.chdir("..")
 
-from src.utils import (
-    calculate_acf_table,
-    calculate_portfolio_stats,
-    calculate_returns,
-    fetch_stock_data,
-    fit_garch,
-    plot_volatility,
-)
+from src.utils import *
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
 
 # %% [markdown]
 # # Data Preparation
@@ -130,7 +119,7 @@ symbols = ["^IXIC", "^DJI", "^TNX"]  #
 # Define the date range, based on the paper
 # Sample period
 start_date = datetime(1990, 3, 22)
-end_date = datetime(2000, 3, 24)
+end_date = datetime(2001, 6, 1)
 
 # Portfolio weights, taken from the article
 weights = {
@@ -156,18 +145,20 @@ prices = prices.drop(columns=["^DJI", "^TNX"])
 # As the data for `^DJI` was missing for 1990-1992, we had to take it from somewhere else.
 # We found Dow Jones Industrial Average (^DJI) data [here](https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data).
 #
-# For RATE we used a good proxy which we found here looks like a good proxy for TNX, we'll use data we found [here](https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02)
+# For RATE we used a good proxy which we found here looks like a good proxy for TNX, we'll use data we found [here](https://fred.stlouisfed.org/data/DGS10)
 #
 # ####  DJIA data retrieval
 
 # %%
 djia_prices = pd.read_csv(
-    "data/dja-performance-report-daily.csv",
-    index_col="Effective Date",
+    "./data/dja-performance-report-daily.csv",
+    index_col="dt",
     parse_dates=True,
 )
 djia_prices = djia_prices.rename(columns={"Close Value": "^DJI"})
-prices = prices.join(djia_prices["^DJI"])
+prices = prices.join(djia_prices["djia"])
+prices.rename({'djia': '^DJI'}, axis=1, inplace=True)
+
 
 # %% [markdown]
 # ####  RATE data retrieval
@@ -176,7 +167,7 @@ prices = prices.join(djia_prices["^DJI"])
 
 # %%
 tnote_yield = pd.read_csv(
-    "data/DGS10.csv",
+    "./data/DGS10.csv",
     index_col="observation_date",
     parse_dates=True,
 )
@@ -184,6 +175,8 @@ tnote_yield = tnote_yield.rename(columns={"DGS10": "^TNX"})
 
 # tnote yield is not exactly the price, but we merge it anyway
 prices = prices.join(tnote_yield["^TNX"])
+
+prices
 
 # %% [markdown]
 # ## Calculating Returns
@@ -198,15 +191,29 @@ prices = prices.join(tnote_yield["^TNX"])
 # | label: calculate-returns
 returns = calculate_returns(prices)
 
-portfolio_prices = pd.Series(0, index=prices.index, dtype=float)
+portfolio_returns = pd.Series(0, index=returns.index, dtype=float)
 
 # Apply weights to each component
 for symbol, weight in weights.items():
     # Use pandas multiplication and addition
-    portfolio_returns = portfolio_prices.add(returns[symbol].multiply(weight))
+    portfolio_returns += returns[symbol] * weight
 
 # Add portfolio returns to the returns DataFrame
 returns["portfolio"] = portfolio_returns
+
+# %% [markdown]
+# We split the data and proceed with sample for period 1990-2000. In the original paper out of sample forecast has been produced, thus we need additional year of data to replicate this.
+
+# %%
+# split the data
+returns_oos = returns.loc['2000-03-24':]
+returns = returns.loc[:'2000-03-23']
+
+prices_oos = prices.loc['2000-03-24':]
+prices = prices.loc[:'2000-03-23']
+
+# %%
+returns
 
 # %% [markdown]
 # ## Visualizing Price and Returns
@@ -225,49 +232,52 @@ returns["portfolio"] = portfolio_returns
 # | fig-cap: Nasdaq, Dow Jones and Bond Prices
 # | fig-subcap:
 # |   - 'Sample: March 23, 1990 to March 23, 2000.'
-prices_df = pd.DataFrame(prices).reset_index()
-prices_df = pd.melt(prices_df, id_vars=["Date"], var_name="Symbol", value_name="Price")
-prices_plot = (
-    ggplot(prices_df, aes(x="Date", y="Price", color="Symbol"))
-    + facet_wrap("Symbol", scales="free_y", ncol=1)
-    + geom_line(color="#FF9900")
-    + labs(title="", x="Date", y="Price")
-)
-prices_plot
+
+fig, axes = plt.subplots(3, 1, figsize=(12, 8))
+
+axes[0].plot(prices['^DJI'], color='black')
+axes[0].set_title('^DJI')
+
+axes[1].plot(prices['^IXIC'], color='black')
+axes[1].set_title('^IXIC')
+
+axes[2].plot(prices['^TNX'], color='black')
+axes[2].set_title('^TNX')
+
+plt.show()
+
 
 # %% [markdown]
 # #### Returns from the original paper (for reference)
-# ![Returns from the original paper](../data/screenshots/returns.png)
+# ![Returns from the original paper](screenshots/returns.png)
 
 # %%
 # | label: fig-returns
 # | fig-cap: Nasdaq, Dow Jones and Bond Returns
 # | fig-subcap:
 # |   - 'Sample: March 23, 1990 to March 23, 2000.'
-returns_df = pd.DataFrame(returns).reset_index()
-returns_df = pd.melt(
-    returns_df, id_vars=["Date"], var_name="Symbol", value_name="Return"
-)
-returns_plot = (
-    ggplot(returns_df, aes(x="Date", y="Return", color="Symbol"))
-    + facet_wrap("Symbol", scales="free_y")
-    + geom_line(color="#FF9900")
-    + labs(title="", x="Date", y="Log Return")
-    + theme(
-        plot_title=element_text(size=14, face="bold"),
-        axis_title=element_text(size=12),
-        axis_text=element_text(size=10),
-    )
-)
+fig, axes = plt.subplots(2, 2, figsize = (16, 8))
 
+axes[0, 0].plot(returns['^DJI'], color = "black")
+axes[0, 0].set_title('^DJI')
 
-returns_plot
+axes[0, 1].plot(returns['^TNX'], color = "black")
+axes[0, 1].set_title('^TNX')
+
+axes[1, 0].plot(returns['^IXIC'], color = "black")
+axes[1, 0].set_title('^IXIC')
+
+axes[1, 1].plot(returns['portfolio'], color = "black")
+axes[1, 1].set_title('portfolio')
+
+plt.tight_layout()
+plt.show()
 
 # %% [markdown]
 # ## Portfolio Statistics
 #
 # #### Article Portfolio Statistics (for reference)
-# ![Portfolio Statistics](../data/screenshots/portfolio_statistics.png)
+# ![Portfolio Statistics](screenshots/portfolio_statistics.png)
 
 # %%
 # | label: tbl-portfolio-stats
@@ -290,7 +300,7 @@ portfolio_stats
 # ## ACF of Squared Portfolio Returns
 #
 # #### Article ACF of Squared Portfolio Returns (for reference)
-# ![ACF of Squared Portfolio Returns](../data/screenshots/squared_returns.png)
+# ![ACF of Squared Portfolio Returns](screenshots/squared_returns.png)
 
 # %%
 # | label: tbl-portfolio-returns
@@ -301,7 +311,30 @@ acf_plot
 # %% [markdown]
 # # GARCH Model
 #
-# ## Model Parameters
+# ARCH models were first introduced by Engle in 1982 to model time-varying volatility in economic and financial time series. The idea was as follows - high squared residual at time $t$ leads to increased conditional variance at time $t+p$. We can write such ARCH(p) process:
+# $$
+# \begin{cases}
+# r_t = \mu_t + \varepsilon_t \quad \varepsilon_t \sim \mathcal{N}(0, \sigma_t^2) \\
+# \sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \alpha_2 \varepsilon_{t-2}^2 + ... + \alpha_p \varepsilon_{t-p}^2
+# \end{cases}
+# $$
+# However as shocks in time series often tend to be highly persistent, proper ARCH specification required quite big number of lags p. 
+#
+# This lead to obvious extension that includes past values of conditional variance. Such solution was proposed by Bollerslev in 1986 and is known as GARCH model. Interestingly Bollerslev was a student of Engle, who supervised his doctoral work.
+#
+# GARCH(p,q) model is defined as follows:
+# $$
+# \begin{cases}
+# r_t = \mu_t + \varepsilon_t, \quad \varepsilon_t \sim \mathcal{N}(0, \sigma_t^2) \\
+# \sigma_t^2 = \omega + \sum_{i=1}^p \alpha_i \varepsilon_{t-i}^2 + \sum_{j=1}^q \beta_j \sigma_{t-j}^2
+# \end{cases}
+# $$
+# We estimate model parameters using maximum likelihood estimator. Assuming conditional normality we define likelihood function as follows:
+# $$
+# L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi \sigma_t^2}} \exp\left( -\frac{(r_t - \mu_t)^2}{2 \sigma_t^2} \right)
+# $$
+#
+# ## GARCH(1,1)
 #
 # The GARCH(1,1) model is specified as:
 #
@@ -316,14 +349,106 @@ acf_plot
 # - $\varepsilon_{t-1}^2$ is the squared lagged returns
 # - $\sigma_{t-1}^2$ is the lagged conditional variance
 #
-# ## GARCH Model Estimation
+# We apply procedure to estimate GARCH(1,1) parameters
 #
-# ### Fitting the GARCH(1,1) Model
+
+# %%
+# Define initial parameters
+r = returns['portfolio']*1000
+mu = np.mean(r)
+resid = r - mu
+resid_sq = resid**2
+
+
+# Log likelihood
+def negative_loglik(params):
+    omega, alpha, beta = params
+    sigma2 = np.zeros(len(r))
+
+    # Calculate conditional variance
+    sigma2[0] = omega/(1-alpha-beta)
+
+    for t in range(1, len(sigma2)):
+        sigma2[t] = omega + alpha*resid_sq[t-1] + beta*sigma2[t-1]
+
+    
+    logl = np.log(1/(np.sqrt(2*np.pi*sigma2))*np.exp(-resid_sq/(2*sigma2)))
+    #logl = -0.5 * (np.log(2 * np.pi) + np.log(sigma2) + resid_sq / sigma2)
+    sum_logl = np.sum(logl)
+
+    return -sum_logl
+
+
+# %% [markdown]
+# We do not write our own optimizing function as it is out of the scope of this project. Instead we use existing implementation from scipy
+
+# %%
+# We want to maximize sum of log likelihoods
+from scipy.optimize import minimize
+
+initial_guess = [np.var(r), 0, 0]
+bounds = [(0, None), (0, None), (0, None)]
+
+def constraint_stationarity(params):
+    _, alpha, beta = params
+    return 1 - alpha - beta
+
+constraints = ({
+    'type': 'ineq',
+    'fun': constraint_stationarity
+})
+
+optimal_res = minimize(
+    negative_loglik,
+    initial_guess,
+    bounds=bounds,
+    constraints=constraints,
+    options={'maxiter' : 1000}
+)
+print('Success:', optimal_res.success)
+print('Message:', optimal_res.message)
+print('n iterations', optimal_res.nit)
+
+# %%
+from tabulate import tabulate
+
+omega, alpha, beta = optimal_res.x
+
+table = [
+    ['omega', omega],
+    ['alpha', alpha],
+    ['beta', beta]
+]
+
+print(tabulate(table, headers=['Parameter', 'Value'], floatfmt=".6f"))
+
+# %%
+# Conditional volatility
+sigma2 = np.zeros(len(r))
+
+# Calculate conditional variance
+sigma2[0] = omega/(1-alpha-beta)
+
+for t in range(1, len(sigma2)):
+    sigma2[t] = omega + alpha*resid_sq[t-1] + beta*sigma2[t-1]
+
+
+plt.figure(figsize=(12, 6))
+plt.plot(np.sqrt((r.values/100)**2), color='black', lw=0.9)
+plt.plot(np.sqrt(sigma2/10000), color='red', lw=1.1)
+plt.title('Custom GARCH(1,1) conditional colatility')
+plt.show()
+
+# %% [markdown]
+# ## GARCH Model Existing Implementation
 #
-# Now we'll fit a GARCH(1,1) model to the returns
+# Above we have made our own implementation of GARCH(1,1) model. However there are already existing implementations. We will proceed with the study using arch_model from arch library.
 #
 # #### Article GARCH(1,1) Model (for reference)
-# ![GARCH(1,1) Model](../data/screenshots/garch_one_one.png)
+# ![GARCH(1,1) Model](screenshots/garch_one_one.png)
+
+# %% [markdown]
+# We use arch library to fit GARCH(1, 1) model. However fitting the model to our returns in the original scale produces warning with recommendation to scale the returns by multiplying them by 1000. Therefore we fit the model to scaled returns. Here we have to remember that forecasted conditional volatility obtained from the resulting object will be scaled as well. For visuals we will rescale back to the original scale.
 
 # %%
 # | label: tbl-garch-one-one
@@ -331,9 +456,9 @@ acf_plot
 # | tbl-cap-location: top
 
 logger.info("Fitting GARCH(1,1) model...")
-results = fit_garch(returns["portfolio"])
+results = fit_garch(returns["portfolio"]*1000, vol="Garch", dist="normal")
 
-logger.info(results.summary())
+#logger.info(results.summary())
 # Extract coefficients, standard errors, z-statistics, and p-values
 coef = results.params
 std_err = results.std_err
@@ -349,19 +474,21 @@ model_results = pd.DataFrame(
         "P-Value": p_values,
     }
 )
+
 model_results
 
 # %% [markdown]
 # ## ACF of Squared Standardized Residuals
 #
+# The same as before we generate series of autocorrelations up to 15th lag together with Q-stats and their p-values. Results are pretty similar to those presented in the original paper. Note that here standardized residuals are basically returns adjusted for GARCH effects as mean portfolio return is very close to 0. This way we can interpret the results by saying that GARCH(1, 1) model manages to capture portfolio returns variance variability.
 #
 # #### Article ACF of Squared Standardized Residuals (for reference)
-# ![ACF of Squared Standardized Residuals](../data/screenshots/squared_standardized_residuals.png)
+# ![ACF of Squared Standardized Residuals](screenshots/squared_standardized_residuals.png)
 
 # %%
 # | label: tbl-squared-residuals
 # | tbl-cap: Autocorrelations of Squared Standardized Residuals
-acf_plot = calculate_acf_table(results.resid / np.sqrt(results.conditional_volatility))
+acf_plot = calculate_acf_table(results.resid / results.conditional_volatility)
 acf_plot
 
 # %% [markdown]
@@ -375,8 +502,10 @@ acf_plot
 # | label: fig-conditional-volatility
 # | fig-cap: Conditional Volatility
 
-volatility_plot = plot_volatility(results, returns)
-volatility_plot
+plt.figure(figsize=(12, 6))
+plt.plot(results.conditional_volatility/1000, color='black')
+plt.title('Conditional volatility')
+plt.show()
 
 # %% [markdown]
 # ## Model Diagnostics
@@ -388,25 +517,13 @@ volatility_plot
 # | fig-cap: Standardized Residuals
 
 # Get standardized residuals
-std_resid = results.resid / np.sqrt(results.conditional_volatility)
+std_resid = (results.resid / np.sqrt(results.conditional_volatility))/1000
 
-# Create dataframe for residuals
-resid_df = pd.DataFrame({"Date": std_resid.index, "Residual": std_resid.values})
+plt.figure(figsize=(12, 6))
+plt.plot(std_resid, color='black', lw=1)
+plt.title("Standardized residuals")
+plt.show()
 
-# Create residuals plot
-resid_plot = (
-    ggplot(resid_df, aes(x="Date", y="Residual"))
-    + geom_line(color="#FF9900")
-    + labs(title="Standardized Residuals", x="Date", y="Standardized Residual")
-    + theme_minimal()
-    + theme(
-        plot_title=element_text(size=14, face="bold"),
-        axis_title=element_text(size=12),
-        axis_text=element_text(size=10),
-    )
-)
-
-resid_plot
 
 # %% [markdown]
 # # Volatility Forecasting
@@ -421,55 +538,325 @@ resid_plot
 logger.info("Generating volatility forecast...")
 forecast = results.forecast(horizon=5)
 logger.info("\nVolatility Forecast:")
-logger.info(forecast.variance.iloc[-1])
+logger.info(np.sqrt(forecast.variance.iloc[-1])/1000)
 
 # %% [markdown]
 # ## Visualizing Forecasts
 #
-# Let's visualize the forecast using plotnine:
+# Visual below shows conditional volatility and realized volatility defined as square root of squared returns assuming 0 mean:
+# $$
+# \text{Var}(r_t) = \mathbb{E}[(r_t - \mu)^2]
+# $$
+# if $\mu = 0$ we get:
+# $$
+# \text{Var}(r_t) = \mathbb{E}[r_t^2]
+# $$
 
 # %%
 # | label: fig-forecast
 # | fig-cap: Volatility Forecast
 
-# Create dataframes for historical and forecast data
-historical_df = pd.DataFrame(
+# Plot volatility
+plt.figure(figsize = (14, 8))
+plt.plot(np.sqrt(returns['portfolio']**2), color = 'black', lw = 0.9)
+plt.plot(results.conditional_volatility/1000, color = 'red', lw = 1.1)
+plt.title("Volatility realized vs predicted")
+plt.show()
+
+
+# %% [markdown]
+# At this point we can also compare results from our implementation with those obtained using arch library implementation
+
+# %%
+plt.figure(figsize = (14, 8))
+plt.plot(np.sqrt(returns['portfolio']**2), color = 'black', lw = 0.9, label = 'realized volatility')
+plt.plot(r.index, np.sqrt(sigma2/1000000), color = 'green', lw = 1.1, label = 'GARCH - our implementation')
+plt.plot(results.conditional_volatility/1000, color = 'red', lw = 1.1, label = 'GARCH - arch library')
+plt.title("Volatility realized vs predicted")
+plt.legend()
+plt.show()
+
+# %% [markdown]
+# Green line can barely be seen. GARCH parameters we got from our implementations are almost the same as those obtained from arch_model library implementation. Therefore forecasted conditional volatility also has to be nearly identical. 
+
+# %% [markdown]
+# # Value at Risk
+
+# %% [markdown]
+# Based on conditional volatility we calculate 1% value at risk. We assume initial portfolio value of 1 000 000$. We predict that 1 step ahead standard deviation will be 0.014772. 
+#
+# First we assume normal distribution of returns. We obtain 1% quantile by multiplying predicted standard deviation by 2.327. 
+
+# %%
+init_value = 10**6
+2.327*np.sqrt(forecast.variance['h.1'].iloc[-1])/1000 * init_value
+
+# %% [markdown]
+# The 1% Value at Risk asusming normal distribution of standardized residuals is 5786$. Note that as mean return is very close to 0 we can omit this value in our calculation. We basically calculated the 99% quantile, but with 0 mean it is symmetrical.
+
+# %% [markdown]
+# We can also use empirical 1% quantile
+
+# %%
+emp_q = np.quantile(results.resid/results.conditional_volatility, 0.01)
+print(f"1 percent quantile: {emp_q}")
+print(-emp_q*np.sqrt(forecast.variance['h.1'].iloc[-1])/1000 * init_value)
+
+# %% [markdown]
+# Results we obtained are pretty similar to those presented in the original paper. Interestingly, even empirical 1st quantile is very close to -2.844, which is the original result. 
+
+# %% [markdown]
+# We also plot 1% value at risk for the whole in sample period. For reference we show the same plot from the original study.
+
+# %% [markdown]
+# ![in-sample-VaR](screenshots/in_sample_VaR.png)
+
+# %%
+# | label: fig-portfolio_loss
+# | fig-cap: Portfolio loss in sample
+
+# Calculate VaR
+VaR_returns = calculate_VaR_returns(returns["portfolio"], results.conditional_volatility/1000, 2.327)
+
+# Value at risk - portfolio value 1 000 000$ at each point in time
+init_value = 10**6
+portfolio_returns = returns['portfolio']*init_value
+portfolio_VaR = VaR_returns*init_value
+
+plt.figure(figsize = (14, 8))
+plt.plot(-portfolio_returns, color = 'black', lw = 1, label='Loss')
+plt.plot(-portfolio_VaR, color = 'red', lw = 0.9, label='VaR')
+plt.title("Portfolio loss and 1% Value at Risk in sample")
+plt.legend()
+plt.show()
+
+# %% [markdown]
+# We show also the number of exceedances. Good model should produce such VaR estimates that actual portfolio loss is greater than the estimated around 1% of time. We see that for our GARCH(1, 1) VaR estimates assuming normal distribution of standardized residuals is 1.49%.
+
+# %%
+# Exceedances
+n_exc, perc_exc = count_exceedances(VaR_returns, returns["portfolio"], True)
+print(f"Number of exceedances: {n_exc}")
+print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
+
+
+# %% [markdown]
+# # Out-of-sample model fit and Value at Risk
+
+# %% [markdown]
+# We obtain oit of sample predictions using rolling forecast without reestimating GARCH parameters
+
+# %% [markdown]
+# ![oos-VaR](screenshots/out_of_sample_VaR.png)
+
+# %%
+# Rolling forecast without reestimating parameters
+mu = results.params['mu']
+omega = results.params['omega']
+alpha = results.params['alpha[1]']
+beta = results.params['beta[1]']
+
+epsilon2 = (returns_oos['portfolio']*1000 - mu)**2
+sigma2 = np.zeros(len(returns_oos))
+sigma2[0] = omega/(1 - alpha - beta)
+
+for t in range(1, len(sigma2)):
+    sigma2[t] = omega + alpha*epsilon2[t-1] + beta*sigma2[t-1]
+
+
+plt.figure(figsize = (14, 8))
+plt.plot(np.sqrt(returns_oos['portfolio']**2), color = 'black', lw = 1)
+plt.plot(returns_oos.index, np.sqrt(sigma2)/1000, color = 'red', lw = 0.9)
+plt.show()
+
+# %%
+# Value at risk - portfolio value 1 000 000$ at each point in time
+portfolio_returns = returns_oos['portfolio']*(10**6)
+
+plt.figure(figsize = (14, 8))
+plt.plot(-portfolio_returns, color = 'black', lw = 1)
+plt.plot(returns_oos.index, np.sqrt(sigma2) * 2.327 * 10**3, color = 'red', lw = 0.9)
+plt.title("Portfolio loss and 1% Value at Risk")
+plt.show()
+
+# %%
+n_exc, perc_exc = count_exceedances(np.sqrt(sigma2) * (-2.327)/1000, returns_oos['portfolio'].values, True)
+print(f"Number of exceedances: {n_exc}")
+print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
+
+# %% [markdown]
+# # Extensions
+
+# %% [markdown]
+# ## E-GARCH
+
+# %%
+results_egarch = fit_garch(returns["portfolio"]*1000, vol="egarch", dist="normal")
+
+# Extract coefficients, standard errors, z-statistics, and p-values
+coef = results_egarch.params
+std_err = results_egarch.std_err
+z_stat = coef / std_err
+p_values = results_egarch.pvalues
+
+# Create a DataFrame to display the results
+model_results = pd.DataFrame(
     {
-        "Date": returns.index[-100:],
-        "Volatility": np.sqrt(results.conditional_volatility[-100:]),
-        "Type": "Historical",
+        "Coef": coef,
+        "St. Err": std_err,
+        "Z-Stat": z_stat,
+        "P-Value": p_values,
     }
 )
 
-forecast_dates = pd.date_range(returns.index[-1], periods=6)[1:]
-forecast_df = pd.DataFrame(
+model_results
+
+# %%
+VaR_returns = calculate_VaR_returns(returns["portfolio"], results_egarch.conditional_volatility/1000, 2.327)
+
+# Value at risk - portfolio value 1 000 000$ at each point in time
+init_value = 10**6
+portfolio_returns = returns['portfolio']*init_value
+portfolio_VaR = VaR_returns*init_value
+
+plt.figure(figsize = (14, 8))
+plt.plot(-portfolio_returns, color = 'black', lw = 1, label='Loss')
+plt.plot(-portfolio_VaR, color = 'red', lw = 0.9, label='VaR')
+plt.title("Portfolio loss and 1% Value at Risk in sample")
+plt.legend()
+plt.show()
+
+# %%
+# Exceedances
+n_exc, perc_exc = count_exceedances(VaR_returns, returns["portfolio"], True)
+print(f"Number of exceedances: {n_exc}")
+print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
+
+# %% [markdown]
+# ## GJR-GARCH
+
+# %%
+results_gjrgarch = fit_garch(returns["portfolio"]*1000, o=1, dist="normal")
+
+# Extract coefficients, standard errors, z-statistics, and p-values
+coef = results_gjrgarch.params
+std_err = results_gjrgarch.std_err
+z_stat = coef / std_err
+p_values = results_gjrgarch.pvalues
+
+# Create a DataFrame to display the results
+model_results = pd.DataFrame(
     {
-        "Date": forecast_dates,
-        "Volatility": np.sqrt(forecast.variance.iloc[-1]),
-        "Type": "Forecast",
+        "Coef": coef,
+        "St. Err": std_err,
+        "Z-Stat": z_stat,
+        "P-Value": p_values,
     }
 )
 
-# Combine dataframes
-combined_df = pd.concat([historical_df, forecast_df])
+model_results
 
-# Create forecast plot
-forecast_plot = (
-    ggplot(combined_df, aes(x="Date", y="Volatility", color="Type"))
-    + geom_line()
-    + labs(title="Volatility Forecast", x="Date", y="Volatility")
-    + scale_color_manual(values=["#3366CC", "#FF9900"])
-    + theme_minimal()
-    + theme(
-        plot_title=element_text(size=14, face="bold"),
-        axis_title=element_text(size=12),
-        axis_text=element_text(size=10),
-        legend_title=element_blank(),
-    )
+# %%
+VaR_returns = calculate_VaR_returns(returns["portfolio"], results_gjrgarch.conditional_volatility/1000, 2.327)
+
+# Value at risk - portfolio value 1 000 000$ at each point in time
+init_value = 10**6
+portfolio_returns = returns['portfolio']*init_value
+portfolio_VaR = VaR_returns*init_value
+
+plt.figure(figsize = (14, 8))
+plt.plot(-portfolio_returns, color = 'black', lw = 1, label='Loss')
+plt.plot(-portfolio_VaR, color = 'red', lw = 0.9, label='VaR')
+plt.title("Portfolio loss and 1% Value at Risk in sample")
+plt.legend()
+plt.show()
+
+# %%
+# Exceedances
+n_exc, perc_exc = count_exceedances(VaR_returns, returns["portfolio"], True)
+print(f"Number of exceedances: {n_exc}")
+print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
+
+# %%
+plt.figure(figsize=(14, 8))
+plt.plot(np.sqrt(returns["portfolio"]**2), color='black', lw=0.9, label='returns')
+plt.plot(results.conditional_volatility/1000, color='red', lw=1.1, label='garch')
+plt.plot(results_egarch.conditional_volatility/1000, color='green', lw=1.1, label='e-garch')
+plt.plot(results_gjrgarch.conditional_volatility/1000, color='blue', lw=1.1, label='gjr-garch')
+plt.title("Conditional Volatility Comparison")
+plt.legend()
+plt.show()
+
+# %% [markdown]
+# # Modern Market
+
+# %%
+start_date = datetime(2015, 1, 1)
+end_date = datetime(2025, 1, 1)
+
+prices_new = fetch_stock_data(symbols, start_date, end_date)
+returns_new = calculate_returns(prices_new)
+
+portfolio_returns_new = pd.Series(0, index=returns_new.index, dtype=float)
+
+# Apply weights to each component
+for symbol, weight in weights.items():
+    # Use pandas multiplication and addition
+    portfolio_returns_new += returns_new[symbol] * weight
+
+# Add portfolio returns to the returns DataFrame
+returns_new["portfolio"] = portfolio_returns_new
+
+
+acf_plot = calculate_acf_table(returns_new["portfolio"])
+acf_plot
+
+# %%
+garch_new = results = fit_garch(returns_new["portfolio"]*1000, vol="Garch", dist="normal")
+coef = garch_new.params
+std_err = garch_new.std_err
+z_stat = coef / std_err
+p_values = garch_new.pvalues
+
+# Create a DataFrame to display the results
+model_results = pd.DataFrame(
+    {
+        "Coef": coef,
+        "St. Err": std_err,
+        "Z-Stat": z_stat,
+        "P-Value": p_values,
+    }
 )
 
-# Display plot
-forecast_plot
+model_results
+
+# %%
+plt.figure(figsize = (14, 8))
+plt.plot(np.sqrt(returns_new['portfolio']**2), color = 'black', lw = 0.9, label = 'realized volatility')
+plt.plot(garch_new.conditional_volatility/1000, color = 'red', lw = 1.1, label = 'conditional volatility')
+plt.title("Volatility realized vs predicted")
+plt.legend()
+plt.show()
+
+# %%
+# Value at risk - portfolio value 1 000 000$ at each point in time
+VaR_returns = calculate_VaR_returns(returns_new["portfolio"], garch_new.conditional_volatility/1000, 2.327)
+
+init_value = 10**6
+portfolio_returns = returns_new['portfolio']*init_value
+portfolio_VaR = VaR_returns*init_value
+
+plt.figure(figsize = (14, 8))
+plt.plot(-portfolio_returns, color = 'black', lw = 1, label='Loss')
+plt.plot(-portfolio_VaR, color = 'red', lw = 0.9, label='VaR')
+plt.title("Portfolio loss and 1% Value at Risk in sample")
+plt.legend()
+plt.show()
+
+# %%
+n_exc, perc_exc = count_exceedances(VaR_returns, returns_new["portfolio"], True)
+print(f"Number of exceedances: {n_exc}")
+print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 
 # %% [markdown]
 # # References
