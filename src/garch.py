@@ -85,12 +85,13 @@ logger = logging.getLogger(__name__)
 # ## Fetching Stock Data
 #
 # We'll fetch the portfolio components data using our implementation function:
+"""
 
 # %%
 # | label: fetch-data
 # Parameters
+# 
 # we skip fetching, since data is already downloaded
-"""
 symbols = ["^IXIC", "^DJI", "^TNX"]  # Nasdaq, Dow Jones, and 10-year Treasury
 # Define the date range from Robert Engle's paper (2001)
 # Sample period from Table 2 and Table 3: March 23, 1990 to March 23, 2000
@@ -116,7 +117,7 @@ prices = fetch_stock_data(symbols, start_date, end_date)
 # Display the first few rows
 prices.dtypes
 
-file_path = "/Users/shah/garch_project/src/prices.pkl"
+file_path = "data/prices.pkl"
 prices.to_pickle(file_path)
 """
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
@@ -126,6 +127,26 @@ prices.to_pickle(file_path)
 # found it here: https://www.kaggle.com/datasets/shiveshprakash/34-year-daily-stock-data
 # For RATE which looks we'll use
 # https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DGS10&scale=left&cosd=2020-04-17&coed=2025-04-17&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Daily&fam=avg&fgst=liin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-04-22&revision_date=2025-04-22&nd=1962-01-02
+
+#%%
+prices = pd.read_pickle("/Users/shah/garch_project/data/prices.pkl")
+print(prices.columns)
+#%%
+prices = prices.drop(columns= "^DJI")
+prices.columns
+
+# %%
+djia_prices = pd.read_csv(
+    "/Users/shah/garch_project/data/dja-performance-report-daily.csv",
+    index_col="dt",
+    parse_dates=True,
+)
+djia_prices.index
+#%%
+djia_prices = djia_prices.rename(columns={"djia": "^DJI"})
+prices = prices.join(djia_prices["^DJI"])
+#%%
+prices.shape
 # %%
 # Portfolio weights
 weights = {
@@ -133,41 +154,6 @@ weights = {
     "^DJI": 0.30,  # Dow Jones
     "^TNX": 0.20,  # 10-year Treasury
 }
-
-#%%
-
-# %%
-"""
-djia_prices = pd.read_csv(
-    "data/dja-performance-report-daily.csv",
-    index_col="Effective Date",
-    parse_dates=True,
-)
-djia_prices = djia_prices.rename(columns={"Close Value": "^DJI"})
-prices = prices.join(djia_prices["^DJI"])
-
-"""
-# %%
-djia_prices = pd.read_pickle("/Users/shah/garch_project/src/prices.pkl")[['^DJI']]
-djia_prices.index = pd.to_datetime(djia_prices.index)
-print(djia_prices.head(5))
-
-prices = pd.read_pickle("/Users/shah/garch_project/src/prices.pkl")
-print(prices.head(5))
-
-# %%
-"""
-tnote_yield = pd.read_csv(
-    "data/DGS10.csv",
-    index_col="observation_date",
-    parse_dates=True,
-)
-tnote_yield = tnote_yield.rename(columns={"DGS10": "^TNX"})
-
-# tnote yield is not exactly the price, but we merge it anyway
-prices = prices.join(tnote_yield["^TNX"])
-
-"""
 # %% [markdown]
 # ## Calculating Returns
 #
@@ -255,7 +241,7 @@ returns_plot
 # | label: fit-garch
 # Fit GARCH(1,1) model using our implementation
 logger.info("Fitting GARCH(1,1) model...")
-garch_results = fit_garch(returns['portfolio'].*1000)
+garch_results = fit_garch(returns['portfolio']*1000)
 
 
 # Display model summary
@@ -567,10 +553,61 @@ fig.tight_layout()
 plt.show()
 
 
-# %%
+# %% [markdown]
 # ## Alternative Volatility Specifications
 
 # We fit three additional conditional‐variance models—EGARCH(1,1), GJR‐GARCH(1,1) and TARCH(1,1)—on the portfolio returns, extract their parameters side by side and plot their implied volatilities.
+# *Table 1*  
+# **EGARCH(1,1)**
+# <hr/>
+# <div align="center"><em>Variance Equation</em></div>
+# <hr/>
+#
+# | Variable    |    Coef     |   St. Err    |   Z-Stat   |    P-Value     |
+# |------------:|------------:|-------------:|-----------:|---------------:|
+# | **alpha[1]**   |   0.095657   |   0.018533   |  5.161418  |    2.45E-07    |
+# | **beta[1]**    |   0.984675   |   0.005594   | 176.035053 |    0.00E+00    |
+# | **gamma[1]**   |      NaN     |      NaN     |     NaN    |       NaN      |
+# | **mu**         |  -0.059259   |   0.030740   |  -1.927751 |    5.39E-02    |
+# | **nu**         |   5.520671   |   0.573608   |   9.624466 |    6.30E-22    |
+# | **omega**      |   0.023097   |   0.007324   |   3.153660 |    1.61E-03    |
+#
+# _Covariance estimator: robust_
+#
+# *Table 2*  
+# **GARCH(1,1)**
+# <hr/>
+# <div align="center"><em>Variance Equation</em></div>
+# <hr/>
+#
+# | Variable    |    Coef     |   St. Err    |   Z-Stat   |    P-Value     |
+# |------------:|------------:|-------------:|-----------:|---------------:|
+# | **alpha[1]**   |   0.042309   |   0.011004   |   3.844999 |    0.000121    |
+# | **beta[1]**    |   0.940358   |   0.015847   |  59.338601 |       0        |
+# | **gamma[1]**   |      NaN     |      NaN     |     NaN    |       NaN      |
+# | **mu**         |  -0.055487   |   0.033495   |  -1.656560 |    0.097608    |
+# | **nu**         |      NaN     |      NaN     |     NaN    |       NaN      |
+# | **omega**      |   0.058653   |   0.025826   |   2.271130 |    0.023139    |
+#
+# _Covariance estimator: robust_
+#
+# *Table 3*  
+# **GJR-GARCH(1,1)**
+# <hr/>
+# <div align="center"><em>Variance Equation</em></div>
+# <hr/>
+#
+# | Variable    |    Coef     |   St. Err    |   Z-Stat   |    P-Value     |
+# |------------:|------------:|-------------:|-----------:|---------------:|
+# | **alpha[1]**   |   0.031845   |   0.014090   |   2.260150 |    0.023812    |
+# | **beta[1]**    |   0.947663   |   0.016999   |  55.746914 |       0        |
+# | **gamma[1]**   |   0.016657   |   0.013657   |   1.219652 |    0.222597    |
+# | **mu**         |  -0.062503   |   0.033477   |  -1.867041 |    0.061896    |
+# | **nu**         |      NaN     |      NaN     |     NaN    |       NaN      |
+# | **omega**      |   0.043767   |   0.026439   |   1.655392 |    0.097845    |
+#
+# _Covariance estimator: robust_
+
 
 # %%
 # | label: fit‐variants
