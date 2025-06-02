@@ -162,11 +162,7 @@ window.Quarto = {
   <li><a href="#gjr-garch" id="toc-gjr-garch" class="nav-link" data-scroll-target="#gjr-garch">GJR-GARCH</a></li>
   </ul></li>
   <li><a href="#modern-market" id="toc-modern-market" class="nav-link" data-scroll-target="#modern-market">Modern Market</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a>
-  <ul class="collapse">
-  <li><a href="#parameter-comparison-table" id="toc-parameter-comparison-table" class="nav-link" data-scroll-target="#parameter-comparison-table">Parameter Comparison Table</a></li>
-  <li><a href="#overlay-of-conditional-volatilities" id="toc-overlay-of-conditional-volatilities" class="nav-link" data-scroll-target="#overlay-of-conditional-volatilities">Overlay of Conditional Volatilities</a></li>
-  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
 </div>
@@ -337,7 +333,7 @@ window.Quarto = {
 <p>For RATE we used a good proxy which we found here looks like a good proxy for TNX, we’ll use data we found <a href="https://fred.stlouisfed.org/data/DGS10">here</a></p>
 <section id="djia-data-retrieval" class="level4">
 <h4 class="anchored" data-anchor-id="djia-data-retrieval">DJIA data retrieval</h4>
-<div id="3a31ffbb" class="cell" data-execution_count="3">
+<div id="5992d6b1" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>djia_prices <span class="op">=</span> pd.read_csv(</span>
@@ -354,7 +350,7 @@ window.Quarto = {
 <section id="rate-data-retrieval" class="level4">
 <h4 class="anchored" data-anchor-id="rate-data-retrieval">RATE data retrieval</h4>
 <p>Data has been obtained from the hyperlink</p>
-<div id="407d4e79" class="cell" data-execution_count="4">
+<div id="04423743" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tnote_yield <span class="op">=</span> pd.read_csv(</span>
@@ -486,7 +482,7 @@ window.Quarto = {
 </details>
 </div>
 <p>We split the data and proceed with sample for period 1990-2000. In the original paper out of sample forecast has been produced, thus we need additional year of data to replicate this.</p>
-<div id="b78aeba5" class="cell" data-execution_count="6">
+<div id="a2945694" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># split the data</span></span>
@@ -497,7 +493,7 @@ window.Quarto = {
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> prices.loc[:<span class="st">'2000-03-23'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="b6157fd2" class="cell" data-execution_count="7">
+<div id="a2a3ffaa" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>returns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -705,7 +701,7 @@ Figure&nbsp;2: Sample: March 23, 1990 to March 23, 2000.
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>portfolio_stats <span class="op">=</span> calculate_portfolio_stats(returns)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>portfolio_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="tbl-portfolio-stats" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-execution_count="10">
+<div id="tbl-portfolio-stats" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="10" data-tbl-cap-location="top">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-portfolio-stats-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Portfolio Statistics
@@ -944,7 +940,7 @@ L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi \sigma_t^2}} \exp\left( -\frac{(r_
 <li><span class="math inline">\(\sigma_{t-1}^2\)</span> is the lagged conditional variance</li>
 </ul>
 <p>We apply procedure to estimate GARCH(1,1) parameters</p>
-<div id="8fe0a73f" class="cell" data-execution_count="12">
+<div id="ce6b334a" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define initial parameters</span></span>
@@ -974,7 +970,7 @@ L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi \sigma_t^2}} \exp\left( -\frac{(r_
 </details>
 </div>
 <p>We do not write our own optimizing function as it is out of the scope of this project. Instead we use existing implementation from scipy</p>
-<div id="e799905a" class="cell" data-execution_count="13">
+<div id="e9f000cc" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We want to maximize sum of log likelihoods</span></span>
@@ -1009,7 +1005,7 @@ Message: Optimization terminated successfully
 n iterations 54</code></pre>
 </div>
 </div>
-<div id="a17a2f75" class="cell" data-execution_count="14">
+<div id="39ed13ad" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tabulate <span class="im">import</span> tabulate</span>
@@ -1032,7 +1028,7 @@ alpha        0.102727
 beta         0.878127</code></pre>
 </div>
 </div>
-<div id="b64c3148" class="cell" data-execution_count="15">
+<div id="58c98d54" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Conditional volatility</span></span>
@@ -1097,7 +1093,7 @@ beta         0.878127</code></pre>
 <span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>model_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="tbl-garch-one-one" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-execution_count="16">
+<div id="tbl-garch-one-one" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="16" data-tbl-cap-location="top">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-garch-one-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;3: GARCH(1,1)
@@ -1395,7 +1391,7 @@ Figure&nbsp;4: Volatility Forecast
 </div>
 </div>
 <p>At this point we can also compare results from our implementation with those obtained using arch library implementation</p>
-<div id="4875f8c1" class="cell" data-execution_count="22">
+<div id="ce4536a7" class="cell" data-execution_count="22">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
@@ -1421,7 +1417,7 @@ Figure&nbsp;4: Volatility Forecast
 <h1>Value at Risk</h1>
 <p>Based on conditional volatility we calculate 1% value at risk. We assume initial portfolio value of 1 000 000$. We predict that 1 step ahead standard deviation will be 0.014772.</p>
 <p>First we assume normal distribution of returns. We obtain 1% quantile by multiplying predicted standard deviation by 2.327.</p>
-<div id="e448fc45" class="cell" data-execution_count="23">
+<div id="8e0fcd04" class="cell" data-execution_count="23">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>init_value <span class="op">=</span> <span class="dv">10</span><span class="op">**</span><span class="dv">6</span></span>
@@ -1433,7 +1429,7 @@ Figure&nbsp;4: Volatility Forecast
 </div>
 <p>The 1% Value at Risk asusming normal distribution of standardized residuals is 5786$. Note that as mean return is very close to 0 we can omit this value in our calculation. We basically calculated the 99% quantile, but with 0 mean it is symmetrical.</p>
 <p>We can also use empirical 1% quantile</p>
-<div id="f8feec15" class="cell" data-execution_count="24">
+<div id="04c7e1c1" class="cell" data-execution_count="24">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>emp_q <span class="op">=</span> np.quantile(results.resid<span class="op">/</span>results.conditional_volatility, <span class="fl">0.01</span>)</span>
@@ -1485,7 +1481,7 @@ Figure&nbsp;5: Portfolio loss in sample
 </div>
 </div>
 <p>We show also the number of exceedances. Good model should produce such VaR estimates that actual portfolio loss is greater than the estimated around 1% of time. We see that for our GARCH(1, 1) VaR estimates assuming normal distribution of standardized residuals is 1.49%.</p>
-<div id="447cf173" class="cell" data-execution_count="26">
+<div id="0e355ba2" class="cell" data-execution_count="26">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exceedances</span></span>
@@ -1508,7 +1504,7 @@ Percentge of exceedances: 2.06%</code></pre>
 <figcaption>oos-VaR</figcaption>
 </figure>
 </div>
-<div id="a1d48cfa" class="cell" data-execution_count="27">
+<div id="1129e456" class="cell" data-execution_count="27">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rolling forecast without reestimating parameters</span></span>
@@ -1538,7 +1534,7 @@ Percentge of exceedances: 2.06%</code></pre>
 </div>
 </div>
 </div>
-<div id="cce02163" class="cell" data-execution_count="28">
+<div id="80916c16" class="cell" data-execution_count="28">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Value at risk - portfolio value 1 000 000$ at each point in time</span></span>
@@ -1558,7 +1554,7 @@ Percentge of exceedances: 2.06%</code></pre>
 </div>
 </div>
 </div>
-<div id="9eee2de1" class="cell" data-execution_count="29">
+<div id="6751dfd3" class="cell" data-execution_count="29">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>n_exc, perc_exc <span class="op">=</span> count_exceedances(np.sqrt(sigma2) <span class="op">*</span> (<span class="op">-</span><span class="fl">2.327</span>)<span class="op">/</span><span class="dv">1000</span>, returns_oos[<span class="st">'portfolio'</span>].values, <span class="va">True</span>)</span>
@@ -1575,7 +1571,7 @@ Percentge of exceedances: 1.35%</code></pre>
 <h1>Extensions</h1>
 <section id="alternative-error-distributions" class="level2">
 <h2 class="anchored" data-anchor-id="alternative-error-distributions">Alternative Error Distributions</h2>
-<div id="59cacc30" class="cell" data-execution_count="30">
+<div id="f687bf39" class="cell" data-execution_count="30">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arch</span>
@@ -1602,7 +1598,7 @@ Percentge of exceedances: 1.35%</code></pre>
 <span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    alt_models[name] <span class="op">=</span> res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="224962fa" class="cell" data-execution_count="31">
+<div id="abcc1aca" class="cell" data-execution_count="31">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 6.2   Information-criterion comparison table</span></span>
@@ -1617,7 +1613,7 @@ Percentge of exceedances: 1.35%</code></pre>
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>logger.info(<span class="st">"</span><span class="ch">\n</span><span class="st">Error-Distribution Comparison:</span><span class="ch">\n</span><span class="sc">%s</span><span class="st">"</span>, comp.to_string(index<span class="op">=</span><span class="va">False</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div id="a2c6ee59" class="cell" data-execution_count="32">
+<div id="c9a650a7" class="cell" data-execution_count="32">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 6.3  Overlay conditional-volatility paths</span></span>
@@ -1650,7 +1646,7 @@ Percentge of exceedances: 1.35%</code></pre>
 </div>
 </div>
 </div>
-<div id="b786acf2" class="cell" data-execution_count="33">
+<div id="9f0ccc3c" class="cell" data-execution_count="33">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 6.4   Q-Q plots of standardized residuals</span></span>
@@ -1683,7 +1679,7 @@ Percentge of exceedances: 1.35%</code></pre>
 </section>
 <section id="e-garch" class="level2">
 <h2 class="anchored" data-anchor-id="e-garch">E-GARCH</h2>
-<div id="f7b1366a" class="cell" data-execution_count="34">
+<div id="d46c99cd" class="cell" data-execution_count="34">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>results_egarch <span class="op">=</span> fit_garch(returns[<span class="st">"portfolio"</span>]<span class="op">*</span><span class="dv">1000</span>, vol<span class="op">=</span><span class="st">"egarch"</span>, dist<span class="op">=</span><span class="st">"normal"</span>)</span>
@@ -1755,7 +1751,7 @@ Percentge of exceedances: 1.35%</code></pre>
 </div>
 </div>
 </div>
-<div id="1bd1d898" class="cell" data-execution_count="35">
+<div id="ceaa45ff" class="cell" data-execution_count="35">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>VaR_returns <span class="op">=</span> calculate_VaR_returns(returns[<span class="st">"portfolio"</span>], results_egarch.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, <span class="fl">2.327</span>)</span>
@@ -1780,7 +1776,7 @@ Percentge of exceedances: 1.35%</code></pre>
 </div>
 </div>
 </div>
-<div id="e32df87c" class="cell" data-execution_count="36">
+<div id="5a23a120" class="cell" data-execution_count="36">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exceedances</span></span>
@@ -1796,7 +1792,7 @@ Percentge of exceedances: 2.02%</code></pre>
 </section>
 <section id="gjr-garch" class="level2">
 <h2 class="anchored" data-anchor-id="gjr-garch">GJR-GARCH</h2>
-<div id="0f561b88" class="cell" data-execution_count="37">
+<div id="f32d9180" class="cell" data-execution_count="37">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>results_gjrgarch <span class="op">=</span> fit_garch(returns[<span class="st">"portfolio"</span>]<span class="op">*</span><span class="dv">1000</span>, o<span class="op">=</span><span class="dv">1</span>, dist<span class="op">=</span><span class="st">"normal"</span>)</span>
@@ -1875,7 +1871,7 @@ Percentge of exceedances: 2.02%</code></pre>
 </div>
 </div>
 </div>
-<div id="5a33ca60" class="cell" data-execution_count="38">
+<div id="c16aeab7" class="cell" data-execution_count="38">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>fitted <span class="op">=</span> {</span>
@@ -1898,7 +1894,7 @@ e-garch    0.6174  0.0874    0.2093   0.9800       NaN
 gjr-garch  0.4609  1.0923    0.0555   0.8888     0.078</code></pre>
 </div>
 </div>
-<div id="d1bcf456" class="cell" data-execution_count="39">
+<div id="618bc702" class="cell" data-execution_count="39">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>VaR_returns <span class="op">=</span> calculate_VaR_returns(returns[<span class="st">"portfolio"</span>], results_gjrgarch.conditional_volatility<span class="op">/</span><span class="dv">1000</span>, <span class="fl">2.327</span>)</span>
@@ -1923,7 +1919,7 @@ gjr-garch  0.4609  1.0923    0.0555   0.8888     0.078</code></pre>
 </div>
 </div>
 </div>
-<div id="543124c4" class="cell" data-execution_count="40">
+<div id="e8526ed9" class="cell" data-execution_count="40">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exceedances</span></span>
@@ -1936,7 +1932,7 @@ gjr-garch  0.4609  1.0923    0.0555   0.8888     0.078</code></pre>
 Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
-<div id="1f70992d" class="cell" data-execution_count="41">
+<div id="26b43e54" class="cell" data-execution_count="41">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">8</span>))</span>
@@ -1960,7 +1956,7 @@ Percentge of exceedances: 2.14%</code></pre>
 </section>
 <section id="modern-market" class="level1">
 <h1>Modern Market</h1>
-<div id="4e5c19b2" class="cell" data-execution_count="42">
+<div id="57a8a403" class="cell" data-execution_count="42">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>start_date <span class="op">=</span> datetime(<span class="dv">2015</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span>
@@ -2093,7 +2089,7 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
-<div id="ec9c1171" class="cell" data-execution_count="43">
+<div id="31d00107" class="cell" data-execution_count="43">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>garch_new <span class="op">=</span> results <span class="op">=</span> fit_garch(returns_new[<span class="st">"portfolio"</span>]<span class="op">*</span><span class="dv">1000</span>, vol<span class="op">=</span><span class="st">"Garch"</span>, dist<span class="op">=</span><span class="st">"normal"</span>)</span>
@@ -2163,7 +2159,7 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
-<div id="281968d4" class="cell" data-execution_count="44">
+<div id="273fd41b" class="cell" data-execution_count="44">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">14</span>, <span class="dv">8</span>))</span>
@@ -2181,7 +2177,7 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
-<div id="61ace674" class="cell" data-execution_count="45">
+<div id="079ec7d7" class="cell" data-execution_count="45">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Value at risk - portfolio value 1 000 000$ at each point in time</span></span>
@@ -2206,7 +2202,7 @@ Percentge of exceedances: 2.14%</code></pre>
 </div>
 </div>
 </div>
-<div id="89eafe90" class="cell" data-execution_count="46">
+<div id="67c91c92" class="cell" data-execution_count="46">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>n_exc, perc_exc <span class="op">=</span> count_exceedances(VaR_returns, returns_new[<span class="st">"portfolio"</span>], <span class="va">True</span>)</span>
@@ -2228,31 +2224,6 @@ Percentge of exceedances: 2.07%</code></pre>
 <li>Yahoo Finance. (2023). [Dataset]. Available at: https://finance.yahoo.com/quote/%5EIXIC/history?period1=631152000&amp;period2=1713878400&amp;interval=1d&amp;filter=history&amp;frequency=1d&amp;includeAdjustedClose=true</li>
 <li>GenAI used for proof checking and type hinting</li>
 </ul>
-<section id="parameter-comparison-table" class="level3">
-<h3 class="anchored" data-anchor-id="parameter-comparison-table">Parameter Comparison Table</h3>
-<p>The table below lines up the ω, ARCH and GARCH coefficients (and leverage term for GJR) for each model.</p>
-<div id="b67fe224" class="cell" data-execution_count="47">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>param_frames <span class="op">=</span> []</span>
-<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, res <span class="kw">in</span> fitted.items():</span>
-<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> res.params.rename(name).to_frame().T</span>
-<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>    param_frames.append(df)</span>
-<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>comparison <span class="op">=</span> pd.concat(param_frames)</span>
-<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(comparison.<span class="bu">round</span>(<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>               mu   omega  alpha[1]  beta[1]  gamma[1]
-garch      0.5969  1.1099    0.1030   0.8824       NaN
-e-garch    0.6174  0.0874    0.2093   0.9800       NaN
-gjr-garch  0.4609  1.0923    0.0555   0.8888     0.078</code></pre>
-</div>
-</div>
-</section>
-<section id="overlay-of-conditional-volatilities" class="level2">
-<h2 class="anchored" data-anchor-id="overlay-of-conditional-volatilities">Overlay of Conditional Volatilities</h2>
-<p>We compute the in‐sample conditional standard deviations for each model and plot them together to see how the different dynamics evolve over time.</p>
-</section>
 </section>
 
 

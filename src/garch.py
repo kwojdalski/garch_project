@@ -50,20 +50,19 @@
 # # Imports and Setup
 
 # %%
-# | label: setup for vscode/mac
+# | label: setup
 import logging
 import os
 from datetime import datetime
 import os, sys
 
-#for mac 
+#for mac
 root = os.path.abspath(os.path.join(os.getcwd(), ".."))
 if root not in sys.path:
     sys.path.insert(0, root)
 
 print("Import paths:", sys.path[:3])
 #####
-#%%
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-v0_8-darkgrid')
 plt.rcParams['axes.grid'] = True
@@ -141,11 +140,10 @@ weights = {
 # Fetch data using our implementation
 logger.info("Fetching data...")
 prices = fetch_stock_data(symbols, start_date, end_date)
-# Display the first few rows
-prices.dtypes
 
-file_path = "/Users/shah/garch_project/src/prices.pkl"
-prices.to_pickle(file_path)
+# Display the first few rows
+prices.tail()
+
 # Apparently, DJIA data is missing for 1990-1992, so we'll drop it
 prices = prices.drop(columns=["^DJI", "^TNX"])
 
@@ -544,7 +542,7 @@ plt.show()
 # | label: forecast
 # Generate forecasts
 logger.info("Generating volatility forecast...")
-forecast = garch_results.forecast(horizon=5)
+forecast = results.forecast(horizon=5)
 logger.info("\nVolatility Forecast:")
 logger.info(np.sqrt(forecast.variance.iloc[-1])/1000)
 
