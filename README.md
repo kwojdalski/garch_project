@@ -66,15 +66,6 @@ poetry run pre-commit install --all-files
 pipx install quarto-cli
 ```
 
-## [render_html]() Render HTML page
-
-Moreover it opens the rendered page.
-
-```bash
-quarto render notebooks/garch.qmd &&  open notebooks/garch.html
-```
-
-
 ## Usage
 
 ### Running the Analysis
@@ -93,14 +84,14 @@ The main analysis can be run in several ways:
 
 3. Using the Quarto document:
    ```bash
-   poetry run quarto render notebooks/garch.qmd
+   poetry run quarto render report/garch.qmd
    ```
 
 ### Using the Quarto Presentation
 
 1. Render the Quarto presentation:
    ```bash
-   poetry run quarto render notebooks/garch_presentation.qmd
+   poetry run quarto render presentation/garch_presentation.qmd
    ```
 2. Open the generated HTML file in your browser
 3. Use arrow keys or space to navigate through the slides
