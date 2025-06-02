@@ -10,6 +10,13 @@
           "isDefault": true
         },
         "problemMatcher": []
-      }
+      },
+      {
+        "label": "Fix Quarto Comments",
+        "type": "shell",
+        "command": "sed -i '' 's/# |/#|/g' ${file}",
+        "group": "build",
+        "problemMatcher": []
+    }
     ]
 }

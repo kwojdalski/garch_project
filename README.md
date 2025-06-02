@@ -2,68 +2,69 @@
 
 This project implements GARCH (Generalized Autoregressive Conditional Heteroskedasticity) models based on the paper "GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics" by Robert F. Engle.
 
-## Project Structure
-
-```
-.
-├── src/
-│   ├── __init__.py            # Package initialization
-│   ├── garch.py        # Main GARCH implementation and analysis
-│   └── utils.py               # Utility functions for data processing
-├── notebooks/
-│   ├── garch.qmd       # Quarto document with interactive analysis
-│   ├── garch.ipynb     # Jupyter notebook version of the analysis
-│   ├── garch_presentation.qmd # Quarto presentation on GARCH models
-│   ├── garch_presentation.html # Rendered presentation
-│   └── custom.css             # Custom CSS for the presentation
-├── data/                      # Directory for storing financial data
-├── papers/
-│   └── Engle-GARCH101Use-2001.pdf # The original research paper
-├── requirements.txt           # Project dependencies
-├── .pre-commit-config.yaml    # Pre-commit hooks configuration
-├── pyproject.toml            # Tool configuration
-├── .python-version           # Python version specification
-└── README.md                 # This file
-```
-
 ## Features
 
 - GARCH(1,1) model implementation using the ARCH package
 - Financial data fetching using Yahoo Finance
 - Volatility forecasting and analysis
 - Interactive analysis through Jupyter notebook and Quarto document
-- Educational presentation on GARCH models
+- Presentation on GARCH models
 - Code quality enforcement with pre-commit hooks
-- Comprehensive data processing utilities
-- Type hints and static type checking with mypy
+- Data processing utilities
+- Type hints and static type checking (with mypy)
 
 ## Requirements
 
 - Python 3.10+ (specified in .python-version)
-- Required packages listed in requirements.txt
-- Quarto (for rendering the Quarto document)
+- Poetry (for dependency management / setting up the environment)
+- Quarto (for rendering / converting the Quarto document)
 - pre-commit (for code quality checks)
+- easy-commit (optional, for writing more meaningful and easier commits)
+- vscode / jupyter notebook / jupyterlab (optional) - for features such as syncing up `.qmd` / `.md` / `.ipynb` / `.py` files)
+- [makedown](https://github.com/tzador/makedown) (optional) - for running this file as a script (`pip install --upgrade makedown`)
 
 ## Installation
 
 1. Clone this repository
-2. Create a virtual environment (recommended):
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Unix/macOS
-   # or
-   .\venv\Scripts\activate  # On Windows
+   git clone https://github.com/kwojdalski/garch_project/
+   ```
+2. Install Poetry if you haven't already:
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
    ```
 3. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   poetry install
    ```
 4. Install Quarto (optional, for rendering the Quarto document):
    - Download from [Quarto website](https://quarto.org/docs/get-started/)
 5. Set up pre-commit hooks:
    ```bash
-   pre-commit install
+   poetry run pre-commit install
    ```
+## Makedown
+
+This project uses [makedown](https://github.com/tzador/makedown) to run commands directly from the README.md file. This allows you to execute the installation and usage commands directly from this documentation.
+
+### Automated Installation with Makedown
+
+To install automatically, run `makedown function`. For instance:
+```bash
+makedown install
+```
+
+If you have makedown installed, you can run the following commands directly from this README:
+## [install]() Installation of the project
+
+It might take a while (few minutes) to install the whole project...
+
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install -v
+poetry run pre-commit install --all-files
+pipx install quarto-cli
+```
 
 ## Usage
 
@@ -73,24 +74,24 @@ The main analysis can be run in several ways:
 
 1. Using the Python script:
    ```bash
-   python src/garch_quarto.py
+   poetry run python src/garch.py
    ```
 
 2. Using the Jupyter Notebook:
    ```bash
-   jupyter notebook notebooks/garch_quarto.ipynb
+   poetry run jupyter notebook notebooks/garch.ipynb
    ```
 
 3. Using the Quarto document:
    ```bash
-   quarto render notebooks/garch_quarto.qmd
+   poetry run quarto render report/garch.qmd
    ```
 
 ### Using the Quarto Presentation
 
 1. Render the Quarto presentation:
    ```bash
-   quarto render notebooks/garch_presentation.qmd
+   poetry run quarto render presentation/garch_presentation.qmd
    ```
 2. Open the generated HTML file in your browser
 3. Use arrow keys or space to navigate through the slides
@@ -100,7 +101,7 @@ The main analysis can be run in several ways:
 This project uses pre-commit hooks to ensure code quality. The hooks are automatically run when you commit changes, but you can also run them manually:
 
 ```bash
-pre-commit run --all-files
+poetry run pre-commit run --all-files
 ```
 
 The following hooks are configured:
@@ -111,12 +112,12 @@ The following hooks are configured:
 - **isort**: Sorts Python imports
 - **flake8**: Lints Python code
 - **mypy**: Type checks Python code
-- **bandit**: Checks for security issues
+- ~~**bandit**: Checks for security issues~~
 
 For quick commits with automatic formatting, you can use [easy-commit](https://pypi.org/project/easy-commit/):
 
 ```bash
-easy-commit "Your commit message"
+poetry run easy-commit "Your commit message"
 ```
 
 ### VS Code Tasks
@@ -132,7 +133,8 @@ You can also use the keyboard shortcut `Cmd+Shift+B` (macOS) or `Ctrl+Shift+B` (
 
 ## Model Description
 
-The GARCH(1,1) model is specified as:
+The **GARCH(1,1)** model is specified as:
+
 $$\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
 
 where:
@@ -147,3 +149,12 @@ where:
 
 - Engle, R. F. (2001). GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics
 - Bollerslev, T. (1986). Generalized Autoregressive Conditional Heteroskedasticity
+
+## TODO
+
+- Implement more models to be checked against GARCH
+- Implement VaR framework in the same way as in the paper
+- Implement GARCH from scratch (at the moment it's based on `arch` package)
+- Extend the research for more recent data
+- Analysis of robustness of coefficients for the model
+- Restructure the repo so that rendered files are in sub-repo and don't collide with the main code

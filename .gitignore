@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.whl
 .Python
 build/
 develop-eggs/
@@ -19,15 +20,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-# Data files
-data/*.csv
-data/*.xls
-data/*.xlsx
-data/*.xlsm
-data/*.xlsb
-data/*.json
-data/*.parquet
-data/*.feather
+
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -83,7 +76,7 @@ coverage.xml
 .hypothesis/
 
 # Plotly
-*.html
+#*.html
 
 # R
 .Rproj.user

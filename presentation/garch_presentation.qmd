@@ -1,0 +1,223 @@
+---
+title: GARCH Models in Financial Econometrics
+subtitle: Based on Engle (2001)
+author: GARCH Project
+format:
+  revealjs:
+    theme: default
+    transition: slide
+    slide-number: true
+    controls: true
+    controls-tutorial: true
+    controls-back-arrows: visible
+    progress: true
+    center: true
+    navigation-mode: vertical
+    show-slide-number: all
+    show-notes: true
+    slide-level: 2
+    footer: GARCH Model Implementation
+    css: custom.css
+execute:
+  echo: false
+  warning: false
+jupyter: python3
+---
+
+# Introduction
+
+## What is GARCH?
+
+GARCH (Generalized Autoregressive Conditional Heteroskedasticity) models are statistical models used to analyze and forecast volatility in financial time series.
+
+- Developed by Robert F. Engle (ARCH, 1982) and Tim Bollerslev (GARCH, 1986)
+- Nobel Prize in Economics awarded to Engle in 2003
+- Widely used in financial econometrics and risk management
+
+## Why GARCH?
+
+Financial returns often exhibit:
+
+- **Volatility clustering**: Periods of high volatility followed by periods of low volatility
+- **Leverage effects**: Negative returns tend to increase volatility more than positive returns
+- **Mean reversion**: Volatility tends to revert to a long-run average
+
+::: {.notes}
+GARCH models capture these stylized facts of financial returns that traditional models cannot.
+:::
+
+# The GARCH(1,1) Model
+
+## Model Specification
+
+The GARCH(1,1) model is specified as:
+
+$$\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
+
+where:
+- $\sigma_t^2$ is the conditional variance
+- $\omega$ is the constant term
+- $\alpha_1$ is the ARCH effect
+- $\beta_1$ is the GARCH effect
+- $\varepsilon_{t-1}^2$ is the squared lagged returns
+- $\sigma_{t-1}^2$ is the lagged conditional variance
+
+## Interpretation
+
+- $\omega$: Long-run average volatility
+- $\alpha_1$: Impact of recent shocks on volatility
+- $\beta_1$: Persistence of volatility shocks
+- $\alpha_1 + \beta_1$: Measures the persistence of volatility
+
+::: {.notes}
+The sum of alpha and beta is typically close to 1, indicating high persistence in volatility.
+:::
+
+# Implementation
+
+## Data Preparation```{python}
+#| echo: true
+#| eval: false
+
+import numpy as np
+import pandas as pd
+import yfinance as yf
+from arch import arch_model
+from datetime import datetime, timedelta
+from plotnine import *
+
+# Fetch S&P 500 data
+symbol = "^GSPC"
+end_date = datetime.now()
+start_date = end_date - timedelta(days=365*2)
+stock = yf.Ticker(symbol)
+df = stock.history(start=start_date, end=end_date)
+prices = df['Close']
+
+# Calculate log returns
+returns = np.log(prices / prices.shift(1)).dropna()
+```
+
+## Model Estimation
+
+```{python}
+#| echo: true
+#| eval: false
+
+# Fit GARCH(1,1) model
+model = arch_model(returns, p=1, q=1, vol='Garch', dist='normal')
+results = model.fit(disp='off')
+
+# Display model parameters
+print(results.params)
+```
+
+# Visualizations
+
+## Price and Returns
+
+```{python}
+#| echo: true
+#| eval: false
+
+# Create dataframes for plotting
+price_df = pd.DataFrame({
+    'Date': prices.index,
+    'Price': prices.values
+})
+
+returns_df = pd.DataFrame({
+    'Date': returns.index,
+    'Return': returns.values
+})
+
+# Create price plot
+price_plot = (ggplot(price_df, aes(x='Date', y='Price')) +
+              geom_line(color='#3366CC') +
+              labs(title='S&P 500 Price',
+                   x='Date',
+                   y='Price')
+              )
+
+# Create returns plot
+returns_plot = (ggplot(returns_df, aes(x='Date', y='Return')) +
+                geom_line(color='#FF9900') +
+                labs(title='Log Returns',
+                     x='Date',
+                     y='Log Return')
+                )
+```
+
+## Conditional Volatility
+
+```{python}
+#| echo: true
+#| eval: false
+
+# Create dataframe for volatility
+volatility_df = pd.DataFrame({
+    'Date': returns.index,
+    'Volatility': np.sqrt(results.conditional_volatility)
+})
+
+# Create volatility plot
+volatility_plot = (ggplot(volatility_df, aes(x='Date', y='Volatility')) +
+                   geom_line(color='#3366CC') +
+                   labs(title='Conditional Volatility',
+                        x='Date',
+                        y='Volatility')
+                   )
+```
+
+# Applications
+
+## Volatility Forecasting
+
+GARCH models are widely used for:
+
+- Risk management
+- Value at Risk (VaR) calculation
+- Option pricing
+- Portfolio optimization
+
+## Example: 5-Day Volatility Forecast
+
+```{python}
+#| echo: true
+#| eval: false
+
+# Generate forecasts
+forecast = results.forecast(horizon=5)
+print("5-Day Volatility Forecast:")
+print(np.sqrt(forecast.variance.iloc[-1]))
+```
+
+# Extensions
+
+## Beyond GARCH(1,1)
+
+- **EGARCH**: Captures leverage effects
+- **GJR-GARCH**: Asymmetric response to positive/negative returns
+- **IGARCH**: Integrated GARCH for high persistence
+- **FIGARCH**: Fractionally integrated GARCH for long memory
+
+## Multivariate GARCH
+
+- **DCC-GARCH**: Dynamic Conditional Correlation
+- **BEKK-GARCH**: Multivariate volatility modeling
+- **VEC-GARCH**: Vector GARCH models
+
+# Conclusion
+
+## Key Takeaways
+
+- GARCH models capture volatility clustering in financial returns
+- They provide better forecasts than constant volatility models
+- They are essential tools for risk management
+- They have numerous extensions for different market conditions
+
+## References
+
+- Engle, R. F. (2001). GARCH 101: The Use of ARCH/GARCH Models in Applied Econometrics
+- Bollerslev, T. (1986). Generalized Autoregressive Conditional Heteroskedasticity
+- Tsay, R. S. (2010). Analysis of Financial Time Series
