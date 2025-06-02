@@ -516,7 +516,7 @@ plt.show()
 # %% [markdown]
 # ## Model Diagnostics
 #
-# Let's examine the model residuals using plotnine:
+# Let's examine the model residuals:
 
 # %%
 # | label: model-diagnostics
@@ -598,7 +598,7 @@ init_value = 10**6
 2.327*np.sqrt(forecast.variance['h.1'].iloc[-1])/1000 * init_value
 
 # %% [markdown]
-# The 1% Value at Risk asusming normal distribution of standardized residuals is 5786$. Note that as mean return is very close to 0 we can omit this value in our calculation. We basically calculated the 99% quantile, but with 0 mean it is symmetrical.
+# The 1% Value at Risk asusming normal distribution of standardized residuals is 34375$. Note that as mean return is very close to 0 we can omit this value in our calculation. We basically calculated the 99% quantile, but with 0 mean it is symmetrical.
 
 # %% [markdown]
 # We can also use empirical 1% quantile
@@ -637,7 +637,7 @@ plt.legend()
 plt.show()
 
 # %% [markdown]
-# We show also the number of exceedances. Good model should produce such VaR estimates that actual portfolio loss is greater than the estimated around 1% of time. We see that for our GARCH(1, 1) VaR estimates assuming normal distribution of standardized residuals is 1.49%.
+# We show also the number of exceedances. Good model should produce such VaR estimates that actual portfolio loss is greater than the estimated around 1% of time. We see that for our GARCH(1, 1) VaR estimates assuming normal distribution of standardized residuals is 2.06%.
 
 # %%
 # Exceedances
@@ -777,7 +777,28 @@ plt.show()
 
 
 # %% [markdown]
+# We extend our study with E-GARCH and GJR-GARCH models.
+
+# %% [markdown]
 # ## E-GARCH
+
+# %% [markdown]
+# GARCH model is obviously not perfect. One of the main drawdowns is that it assumes symmetrical volatility shocks, while in reality this assumption is usually not met. E-GARCH extends standard GARCH model and accounts for possible non-symetric volatility.
+#
+# The conditional variance equation is:
+#
+# $$
+# \ln(\sigma_t^2) = \omega + \beta \ln(\sigma_{t-1}^2) + \alpha \left| \frac{\varepsilon_{t-1}}{\sigma_{t-1}} \right| + \gamma \frac{\varepsilon_{t-1}}{\sigma_{t-1}}
+# $$
+#
+# Where:
+#
+# - $\sigma_t^2$: Conditional variance at time $t$  
+# - $\varepsilon_t$: Residuals (innovations)  
+# - $\omega: Constant term  
+# - $\beta$: Persistence parameter  
+# - $\alpha: Response to magnitude of shocks  
+# - $\gamma$: Captures **asymmetry** (leverage effect)
 
 # %%
 results_egarch = fit_garch(returns["portfolio"]*1000, vol="egarch", dist="normal")
@@ -823,6 +844,35 @@ print(f"Percentge of exceedances: {perc_exc*100:.2f}%")
 
 # %% [markdown]
 # ## GJR-GARCH
+
+# %% [markdown]
+# Another model loosing symmetric volatility shocks assumption is GJR-GARCH
+#
+# Let the return be defined as:
+#
+# $$
+# r_t = \mu + \varepsilon_t \\
+# \varepsilon_t = \sigma_t z_t
+# $$
+#
+# The conditional variance equation of GJR-GARCH(1,1,1) is:
+#
+# $$
+# \sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \gamma \varepsilon_{t-1}^2 \cdot I_{\{\varepsilon_{t-1} < 0\}} + \beta \sigma_{t-1}^2
+# $$
+#
+# Where:
+#
+# - $ r_t$: Return at time  $t$  
+# - $\varepsilon_t$: Innovation (shock)  
+# - $\sigma_t^2$: Conditional variance  
+# - $z_t \sim N(0,1)$: i.i.d. standard normal variable  
+# - $\omega > 0$: Constant term  
+# - $\alpha \geq 0$: ARCH coefficient  
+# - $\beta \geq 0$: GARCH coefficient  
+# - $\gamma \geq 0$: Leverage/asymmetry coefficient  
+# - $I_{\{\varepsilon_{t-1} < 0\}}$: Indicator function (1 if $\varepsilon_{t-1} < 0$, else 0)
+#
 
 # %%
 results_gjrgarch = fit_garch(returns["portfolio"]*1000, o=1, dist="normal")
@@ -891,7 +941,13 @@ plt.legend()
 plt.show()
 
 # %% [markdown]
+# The plot above shows that predicted in-sample volatility is similar for all three models. E-GARCH model gives least number of exceedances for in sample VaR.
+
+# %% [markdown]
 # # Modern Market
+
+# %% [markdown]
+# We check how GARCH(1,1) performs for more recent data, particularly 2015-2025 period
 
 # %%
 start_date = datetime(2015, 1, 1)
@@ -913,6 +969,9 @@ returns_new["portfolio"] = portfolio_returns_new
 
 acf_plot = calculate_acf_table(returns_new["portfolio"])
 acf_plot
+
+# %% [markdown]
+# This ACF table shows that squared returns correlations are much higher for current data than for data used in the original study.
 
 # %%
 garch_new = results = fit_garch(returns_new["portfolio"]*1000, vol="Garch", dist="normal")
@@ -940,6 +999,9 @@ plt.plot(garch_new.conditional_volatility/1000, color = 'red', lw = 1.1, label =
 plt.title("Volatility realized vs predicted")
 plt.legend()
 plt.show()
+
+# %% [markdown]
+# Conditional volatility looks well fitted, so we see that GARCH model performs quite well even nowadays. We note huge volatility spike during covid period. It is vastly underestimated by our model.
 
 # %%
 # Value at risk - portfolio value 1 000 000$ at each point in time
